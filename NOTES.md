@@ -116,9 +116,10 @@ In the `\else` branch of the anonymization switch:
 - affiliation, city, country for authors 1 and 3 (Munif Gebara Junior, Yandre) and author 2
   (Ángel Sánchez Calle)
 - e-mail addresses; ORCIDs if `\orcidAuthor{}` is used as in the template
-- **the third author's full name** — the draft has only "Yandre". The SBES 2026 camera-ready in
-  the project folder suggests *Yandre M. G. Costa*, but this was not confirmed, so it was left
-  rather than guessed.
+- ~~the third author's full name~~ — **resolved**: Yandre Maldonado e Gomes da Costa. Note that
+  `refs.bib` deliberately keeps the abbreviated published byline *Yandre M. G. Costa* for the two
+  self-citations, because that is the form printed on those papers; expanding it would also break
+  BibTeX name parsing, since it would read the compound surname as `Costa` alone.
 - Acknowledgements bullets: funding, contributions, repository URL, AI-tools declaration.
 
 ## 6. Double-blind checklist
