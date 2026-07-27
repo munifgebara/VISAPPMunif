@@ -60,21 +60,21 @@ Pen Dynamics Carries Most of the Classification Signal}
 \keywords{Handwriting Analysis, Visual Signatures, Signal-to-Image Encoding, Pseudo-Dynamic
 Minimaps, Representation Learning, Online Handwriting, Parkinson's Disease.}
 
-\abstract{Online handwriting acquired with a digitizing tablet carries dynamic information ---
-pen pressure, altitude, azimuth, instantaneous speed and pen-up trajectories --- that is
-lost when the signal is rasterized into a conventional binary image. Recovering it usually
-requires handcrafted kinematic descriptors or sequence models, neither of which lets the
-computer vision toolchain be used as is. We propose \emph{Pseudodynamic Handwriting Minimap
-Signatures}, an encoding that maps an online handwriting signal onto a single static RGB raster
-whose colour channels carry pen attributes and whose stroke width varies with writing speed.
-The encoding is deterministic, versioned, equivalent across CPU and GPU implementations, and
-normalized per task without reference to class labels. We evaluate it on 597 minimaps from the
-75 subjects of the PaHaW database under repeated subject-grouped cross-validation. A
-$2\times2$ factorial ablation isolates how much the pseudo-dynamic content contributes: the
-full encoding reaches 0.7321 macro F1 against 0.5597 for a position-only rendering, a paired
-subject-level gain of 0.1725 that survives Holm correction. A fine-tuned ResNet-18 performed
-worse than standard texture descriptors on this cohort. This is exploratory research software
-for computational handwriting analysis, not a diagnostic system.}
+\abstract{Online handwriting from a digitizing tablet carries dynamic information --- pen
+pressure, altitude, azimuth, speed and pen-up trajectories --- lost when the signal is
+rasterized into a binary image. Recovering it usually needs handcrafted kinematic descriptors or
+sequence models, neither of which lets the computer vision toolchain be used as is. We propose
+\emph{Pseudodynamic Handwriting Minimap Signatures}, an encoding that maps the signal onto a
+single static RGB raster whose colour channels carry pen attributes and whose stroke width
+varies with writing speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per
+task without reference to class labels. We evaluate it on 597 minimaps from the 75 PaHaW
+subjects under repeated subject-grouped cross-validation. A $2\times2$ factorial ablation
+isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321 macro F1 against
+0.5597 for a position-only rendering, a paired subject-level gain of 0.1725 surviving Holm
+correction. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
+representation stays below published handcrafted-descriptor pipelines on this database; we
+discuss what it buys in exchange: ablatability, device portability, and spatially and physically
+interpretable attribution. This is exploratory research software, not a diagnostic system.}
 
 \onecolumn \maketitle \normalsize \setcounter{footnote}{0} \vfill
 
@@ -681,6 +681,7 @@ texture descriptors extract the pseudo-dynamic content of the minimaps better th
 fine-tuning does.
 
 \subsection{Channel Attribution}
+\label{sec:xai}
 \noindent
 Gradient-based attribution over the convolutional model, aggregated per semantic channel, gives
 a mean relative importance of 0.406 to green (altitude), 0.352 to red (pressure) and 0.243 to
@@ -747,6 +748,46 @@ lifts, restarts and letter shapes introduce variance the representation does not
 The fusion result puts this bluntly, since the ensemble does not beat task 1 alone ($p = 1.0$).
 Reporting the ensemble as the headline would overstate what multi-task fusion contributes; its
 real value is insurance against a task like 7, which is at chance.
+
+\textbf{What the representation costs, and what it buys.} On this same database, Drot\'{a}r et
+al. report 81.3\% accuracy, 87.4\% sensitivity and 80.9\% specificity from handcrafted kinematic
+and pressure descriptors computed over all eight tasks \cite{Drotar2016}. Our best subject-level
+figure is 0.7326 balanced accuracy. The numbers are not directly comparable --- a different
+metric, three tasks instead of eight, a different evaluation protocol --- but the direction is
+not in doubt and should be stated rather than left for the reader to find: on PaHaW, reading
+pixels currently costs accuracy relative to reading the signal.
+
+What that buys is a pipeline that never opens the \texttt{.svc} file after generation. No
+kinematic descriptor is designed, no pressure statistic is chosen, no covariate is admitted.
+Everything downstream operates on an ordinary PNG, which is what makes the tooling argument of
+Section~\ref{sec:introduction} concrete: the classifiers used here are stock texture descriptors
+and a stock ResNet, and the ablation of Section~\ref{sec:ablation} was possible only because the
+representation, not the feature set, is the object under test. A feature-engineered pipeline
+cannot be ablated this way, since removing a pressure descriptor removes a number rather than a
+property of the input.
+
+Explanation is where the difference is sharpest. Attribution over a handcrafted vector points at
+a coordinate of that vector; over an abstract signal-to-image encoding such as a recurrence plot
+it points at a cell of a matrix with no physical referent. On a minimap it points at a place on
+the page and, because each channel is bound to exactly one named attribute, at a specific
+property of the pen. Intensity in the red channel is pressure and nothing else. The channel
+attribution of Section~\ref{sec:xai} is a first and deliberately modest use of that
+property; the same mechanism supports stroke-level saliency, per-task heat maps and
+side-by-side visual comparison against a clinician's own reading of the trace, none of which a
+descriptor vector admits.
+
+Two further consequences follow from working on pixels. A representation defined at the raster
+level does not have to be redesigned when the tablet, the sampling rate or the task inventory
+changes, whereas a kinematic descriptor set generally does. And minimaps can be generated in
+quantity from unlabelled handwriting, which places the sample-size limitation identified above
+within reach of self-supervised pretraining --- a route unavailable to a pipeline whose input is
+a fixed-length vector of designed features.
+
+The gap to 81.3\% should therefore be read as a measurement taken at the least favourable point
+of this representation's development. It was obtained with an off-the-shelf texture descriptor,
+an untuned linear classifier, no pretraining, no architecture search and an augmentation policy
+restricted to integer translation. Whether the gap closes is an empirical question that this
+paper does not settle.
 
 \textbf{Threats to validity.} Tasks 1, 3 and 7 were preselected during exploratory analysis
 \emph{on this same corpus}, so the fixed-descriptor results carry an optimistic bias the nested
