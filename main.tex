@@ -1,0 +1,867 @@
+\documentclass[a4paper,twoside]{article}
+
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{calc}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{multicol}
+\usepackage{pslatex}
+\usepackage{apalike}
+\usepackage{algorithm2e}
+\usepackage[bottom]{footmisc}
+\usepackage{xcolor}
+\usepackage{SCITEPRESS}
+
+% ---------------------------------------------------------------------------
+% Draft markers. Both MUST be unused before submission.
+%   \needcite{...}  a claim that still requires a verified bibliographic source
+%   \todonum{...}   a number that must be read from a result file
+% Set \draftmarkersfalse to make them invisible for a clean read-through.
+% ---------------------------------------------------------------------------
+\newif\ifdraftmarkers
+\draftmarkerstrue
+\ifdraftmarkers
+  \newcommand{\needcite}[1]{\textcolor{red}{[NEEDCITE: #1]}}
+  \newcommand{\todonum}[1]{\textcolor{red}{[TODO: #1]}}
+\else
+  \newcommand{\needcite}[1]{}
+  \newcommand{\todonum}[1]{--}
+\fi
+
+% ---------------------------------------------------------------------------
+% Double-blind switch. \anonymoustrue for the VISAPP submission,
+% \anonymousfalse for the camera-ready.
+% ---------------------------------------------------------------------------
+\newif\ifanonymous
+\anonymoustrue
+
+\begin{document}
+
+\title{Pseudodynamic Handwriting Minimap Signatures: Colour and Stroke-Width Encoding of
+Pen Dynamics Carries Most of the Classification Signal}
+
+\ifanonymous
+\author{\authorname{Anonymous Authors}
+\affiliation{Anonymous Institution}
+\email{anonymous@anonymous.org}
+}
+\else
+\author{\authorname{Munif Gebara Junior\sup{1}, \'{A}ngel S\'{a}nchez Calle\sup{2} and Yandre\sup{1}}
+\affiliation{\sup{1}TODO: department, institution, city, country}
+\affiliation{\sup{2}TODO: department, institution, city, country}
+\email{TODO: e-mail addresses}
+}
+\fi
+
+\keywords{Handwriting Analysis, Visual Signatures, Signal-to-Image Encoding, Pseudo-Dynamic
+Minimaps, Representation Learning, Online Handwriting, Parkinson's Disease.}
+
+\abstract{Online handwriting acquired with a digitizing tablet carries dynamic information ---
+pen pressure, altitude, azimuth, instantaneous speed and pen-up trajectories --- that is
+discarded when the signal is rendered as a conventional binary image. Exploiting it normally
+requires handcrafted kinematic descriptors or sequence models, both of which prevent direct
+reuse of the computer vision toolchain. This paper proposes \emph{Pseudodynamic Handwriting
+Minimap Signatures}, a formally specified encoding that maps an online handwriting signal onto a
+single static RGB raster in which colour channels carry pen attributes and stroke width varies
+with writing speed. The encoding is deterministic, versioned, CPU/GPU-equivalent, and
+normalized per task in a label-agnostic way. It is evaluated on 597 minimaps from the 75
+subjects of the PaHaW database under repeated subject-grouped cross-validation. A $2\times2$
+factorial ablation isolates the contribution of the pseudo-dynamic content: the full encoding
+reaches 0.7321 macro F1 against 0.5597 for a position-only rendering, a paired subject-level
+gain of 0.1725 that survives Holm correction. A fine-tuned ResNet-18 performed significantly
+worse than standard texture descriptors on this cohort. This is exploratory research software
+for computational handwriting analysis and is not a diagnostic system.}
+
+\onecolumn \maketitle \normalsize \setcounter{footnote}{0} \vfill
+
+% ===========================================================================
+\section{\uppercase{Introduction}}
+\label{sec:introduction}
+\noindent
+Handwriting is acquired in two fundamentally different regimes. \emph{Offline} acquisition
+produces a static image: a scanned page, a photograph, a binary raster of ink. \emph{Online}
+acquisition, performed with a digitizing tablet or an instrumented pen, produces a time-ordered
+sequence of samples in which each point carries not only its planar coordinates but also the
+pressure exerted on the surface, the inclination and rotation of the pen, and an implicit
+velocity derived from consecutive timestamps. The online signal is strictly richer, and the
+additional channels are precisely the ones that encode motor control rather than orthography.
+
+This richness creates a representation problem. A computer vision pipeline expects an image. An
+online handwriting signal is a multivariate time series. Reconciling the two has historically
+been done in one of two ways, and both have costs. The first is to discard the temporal
+dimension and rasterize the trajectory into a binary image, which throws away exactly the
+attributes that motivated online acquisition. The second is to summarize the signal into a
+vector of handcrafted kinematic and pressure descriptors --- stroke duration, number of changes
+in velocity, pressure statistics --- and feed that vector to a conventional classifier
+\cite{Drotar2016,Impedovo2019}. This second route retains dynamic information but replaces
+representation learning with feature engineering: the descriptors must be designed, justified,
+and re-designed for every new task or acquisition device.
+
+A third route is possible: re-encode the dynamic signal \emph{into} the image, so that the image
+itself becomes the carrier of the dynamics. This is the idea behind \emph{pseudo\-dynamic}
+representations, and it is the subject of this paper. The proposed encoding, called a
+\emph{Pseudodynamic Handwriting Minimap Signature}, renders an online handwriting task as a
+single static RGB raster in which the three colour channels transport pen pressure, pen altitude
+and pen azimuth, and the stroke width varies with the instantaneous writing speed.
+Pen-up movements, which are invisible in a conventional rasterized sample and are known to be
+informative \cite{Diaz2019}, are rendered as dashed light-gray segments. The output is an
+ordinary image file. Any classifier that accepts images --- texture descriptors followed by a
+linear model \cite{Cortes1995}, or a convolutional network \cite{LeCun1998,He2016} --- can
+consume it directly.
+
+Reducing the problem to an image classification problem is not merely a matter of convenience.
+Four practical advantages follow directly. First, \emph{tooling reuse}: decades of texture
+descriptors, convolutional architectures, attribution methods, data-loading infrastructure and
+evaluation practice apply unchanged, without a single line of signal-specific code. Second,
+\emph{transferability}: a representation defined at the level of pixels does not need to be
+redesigned when the acquisition device, the sampling rate or the task inventory changes, whereas
+a kinematic descriptor set generally does. Third, \emph{transfer learning}: models pretrained on
+large natural-image corpora, and the self-supervised objectives developed for them, become
+available to a domain in which labelled data is scarce and expensive to collect. Fourth,
+\emph{visual auditability}: unlike a feature vector, an image can be inspected. A clinician or a
+reviewer can look at the representation the model consumed, compare two subjects side by side,
+and form an opinion about whether the encoding is capturing motor behaviour or an artifact ---
+a property this paper exploits in Section~\ref{sec:tool}.
+
+The term \emph{minimap} is borrowed from a line of work in which the same principle was applied
+to a very different domain. Gebara Jr. et al. showed that the zoomed-out visual rendering of a
+source file behaves as a machine-readable signature from which software properties can be
+predicted \cite{Gebara2025}, and subsequently deployed this idea as a multi-IDE analysis
+infrastructure \cite{Gebara2026}. Those minimaps are grayscale renderings of static text
+artifacts. The present work extends the minimap principle in two directions simultaneously: the
+source is a temporally sampled signal rather than a static artifact, and the encoding is
+multi-channel and semantic rather than grayscale, with each channel assigned to a named physical
+attribute of the pen.
+
+The central hypothesis under test is the following:
+
+\begin{quote}
+Pseudodynamic Handwriting Minimap Signatures are a valid representation of online handwriting for
+computer vision classifiers.
+\end{quote}
+
+\noindent Validity is understood here in a deliberately modest sense. The claim is not that the
+encoding is optimal, nor that it is lossless in an information-theoretic sense. The claim is
+that the pseudo-dynamic content survives the transformation and is measurably exploited by
+generic image classifiers. That claim is directly falsifiable, and this paper tests it with a
+$2\times2$ factorial ablation that switches the semantic colour channels and the speed-driven
+stroke width on and off independently while holding the descriptor, the classifier, the
+cross-validation splits and the decision threshold fixed.
+
+The contributions of this paper are:
+
+\begin{enumerate}
+\item A formal, versioned and reproducible encoding, Minimap Encoding V2, that maps an online
+      handwriting signal to a static RGB image using label-agnostic per-task robust
+      normalization (Section~\ref{sec:minimaps}).
+\item A validation protocol establishing that the encoding is deterministic and numerically
+      equivalent across CPU and GPU implementations (Section~\ref{sec:validation}).
+\item A factorial ablation quantifying how much of the classification signal is attributable to
+      the pseudo-dynamic content rather than to trajectory geometry
+      (Section~\ref{sec:ablation}).
+\item An interactive visualization tool that replays the original task execution and exposes its
+      mapping to the minimap, including synchronized side-by-side comparison of two subjects on
+      the same task (Section~\ref{sec:tool}).
+\item An honest comparison between standard texture descriptors and a fine-tuned convolutional
+      network on this representation, including a negative result for the latter
+      (Section~\ref{sec:results}).
+\end{enumerate}
+
+Section~\ref{sec:related} positions the work. Section~\ref{sec:minimaps} specifies the encoding
+and the inspection tool. Section~\ref{sec:setup} describes the experimental protocol,
+Section~\ref{sec:results} reports results, Section~\ref{sec:discussion} discusses them, and
+Section~\ref{sec:conclusion} concludes.
+
+% ===========================================================================
+\section{\uppercase{Related Work}}
+\label{sec:related}
+
+\subsection{Minimaps as Visual Signatures}
+\noindent
+The immediate precedent for this work treats a rendered artifact not as a visualization intended
+for a human reader but as a machine-readable signature intended for a model. Gebara Jr. et al.
+generated minimaps of source files --- compact, zoomed-out, essentially illegible renderings of
+the text --- and showed that convolutional models applied to those images can detect software
+features without tokenization or syntactic parsing \cite{Gebara2025}. The follow-up work
+packaged the approach as an ecosystem of IDE plugins backed by a decoupled inference service,
+generating anonymized $128 \times 128$ grayscale minimaps per source file and validating three
+prediction targets --- artifact type, project and author --- as feasibility benchmarks
+\cite{Gebara2026}.
+
+The same conviction underlies CV4Code \cite{Shi2022}, which encodes a code snippet as a
+two-dimensional ASCII codepoint image and learns directly from it, explicitly avoiding lexical
+and syntactic analysis and thereby becoming language-agnostic. What these works establish is
+that a visual signature can be an adequate substrate for classification even when the source
+domain is not visual at all.
+
+Two properties of that prior art matter here. First, the source artifacts are \emph{static}: a
+source file has no temporal ordering to preserve. Second, the encodings are \emph{grayscale}:
+one intensity dimension, carrying essentially a density or codepoint value. Online handwriting
+violates the first property, since the signal is a time series, and offers an opportunity to
+relax the second, since several physically distinct attributes are measured simultaneously and
+can be assigned to separate colour channels. The encoding proposed here addresses both points.
+
+\subsection{Handwriting Analysis for Neurodegenerative Disease}
+\noindent
+Handwriting has been extensively studied as a behavioural marker of neurodegenerative
+conditions, and Parkinson's disease in particular, because bradykinesia, rigidity and tremor
+manifest directly in the fine motor control of the pen. Impedovo and Pirlo survey the field from
+a pattern recognition standpoint and organize the literature around the dynamic descriptors
+extracted from online acquisitions \cite{Impedovo2019}.
+
+The PaHaW database \cite{Drotar2016} is the reference resource in this line. Its authors
+extracted conventional kinematic descriptors together with newly proposed pressure descriptors
+and compared $k$-nearest neighbours, AdaBoost and support vector machines, with the support
+vector machine performing best. The relevant observation for the present work is that the
+pipeline is entirely feature-engineered: performance depends on which descriptors were designed,
+not on what a model extracted from the signal.
+
+Learned representations have also been applied. Pereira et al. used convolutional networks over
+signals captured by an instrumented pen, reporting that learned features outperformed the raw
+signals \cite{Pereira2016}. Moetesum et al. moved in the opposite direction, quantifying the
+discriminative power of \emph{visual} attributes of graphomotor samples with convolutional
+feature extractors \cite{Moetesum2019}.
+
+The closest work to the present proposal is that of Diaz et al., who introduced
+\emph{dynamically enhanced} static handwriting images \cite{Diaz2019}. Their representation
+retains temporal and velocity information by drawing sample points rather than linking them, and
+by adding pen-up strokes, and it outperformed both purely static and purely dynamic baselines on
+PaHaW. The encoding proposed in this paper shares that motivation but differs in mechanism: it
+does not rely on point density as an implicit velocity proxy, it assigns each pen attribute to
+an explicitly named channel with a documented scaling rule, and it renders speed through a
+bounded stroke-width function rather than through sample sparsity. That difference is what makes
+the factorial ablation of Section~\ref{sec:ablation} possible: each encoded attribute can be
+switched off independently.
+
+\subsection{Signal-to-Image Encodings}
+\noindent
+Outside handwriting, converting a time series into an image in order to apply convolutional
+models is an established strategy. Recurrence plots, introduced by Eckmann et al. to visualize
+the recurrence structure of dynamical systems \cite{Eckmann1987}, were later used directly as
+classifier inputs \cite{Hatami2018}. Wang and Oates proposed Gramian angular fields and Markov
+transition fields, encoding temporal correlation and transition dynamics as image texture, and
+showed competitive results across standard benchmarks \cite{Wang2015}.
+
+These encodings are \emph{abstract}: the resulting image is a matrix of pairwise relations with
+no spatial correspondence to the phenomenon that produced the signal. A recurrence plot of a
+handwriting task does not look like handwriting. The minimap encoding takes the opposite stance.
+It preserves the planar geometry of the trace, so the image remains recognizable as handwriting,
+and it uses the remaining degrees of freedom --- colour and stroke width --- to carry the
+non-spatial attributes. This retains a property the abstract encodings lose: a human expert can
+inspect the representation and reason about it, which matters when the encoding must be trusted
+in a sensitive application domain.
+
+\subsection{Positioning}
+\noindent
+Summarizing, minimaps have been validated as visual signatures for static, textual artifacts
+under a grayscale encoding. Signal-to-image methods have been validated for time series under
+encodings that discard spatial correspondence. Handwriting-specific pseudo-dynamic images have
+been validated under encodings that embed dynamics implicitly. What has not been tested is a
+representation that is simultaneously spatially faithful, multi-attribute, semantically explicit
+and formally specified, applied to a temporally sampled signal --- nor has the contribution of
+each encoded attribute been isolated experimentally. That is the gap this paper addresses.
+
+% ===========================================================================
+\section{\uppercase{Pseudodynamic Minimap Signatures}}
+\label{sec:minimaps}
+
+\subsection{Input Signal}
+\noindent
+The input is an online handwriting task recorded as a sequence of $N$ samples
+$p_i = (x_i, y_i, t_i, s_i, \alpha_i, \beta_i, \pi_i)$, $i = 1 \ldots N$, where $(x_i, y_i)$ are
+planar coordinates, $t_i$ is a timestamp in milliseconds, $s_i \in \{0,1\}$ indicates whether
+the pen is on the surface, $\alpha_i$ is the azimuth, $\beta_i$ is the altitude and $\pi_i$ is
+the pressure. Consecutive samples define segments; the encoding is defined per segment.
+
+\subsection{Design Rationale}
+\noindent
+Four requirements drove the design. First, \emph{spatial fidelity}: the rendered trace must
+remain geometrically faithful to the original trajectory, so that the image is still
+recognizable as handwriting and remains interpretable by a human. Second, \emph{channel
+disjointness}: each measured attribute is assigned to exactly one visual dimension, and no
+visual dimension carries two attributes. This is what makes the encoding auditable --- an
+anomaly observed in the red channel can only originate from pressure --- and it is also what
+makes the ablation of Section~\ref{sec:ablation} interpretable. Third, \emph{separability from
+the background}: no semantic value may be confused with the empty canvas. Fourth, \emph{label
+independence}: no quantity used to build the image may depend on the class label of any sample,
+otherwise the representation itself leaks supervision into the downstream evaluation.
+
+The resulting assignment is summarized in Table~\ref{tab:encoding}. It is worth stating what the
+encoding deliberately does \emph{not} do. Velocity is not written into any colour channel, and
+pressure does not modulate stroke width. Earlier iterations of the design conflated these, which
+made channel-level attribution impossible.
+
+\begin{table}[h]
+\caption{Minimap Encoding V2: assignment of pen attributes to visual dimensions.}
+\label{tab:encoding} \centering
+\begin{tabular}{|l|l|}
+  \hline
+  Visual element & Encoded attribute \\
+  \hline
+  Red channel & Pressure \\
+  Green channel & Altitude \\
+  Blue channel & Azimuth \\
+  Stroke width & Writing speed (Eq.~\\ref{eq:width}) \\
+  Width range & 1--8 px \\
+  Background & White, RGB (255, 255, 255) \\
+  Pen-up segments & Light-gray dashed line \\
+  \hline
+\end{tabular}
+\end{table}
+
+\subsection{Semantic Range}
+\noindent
+All three semantic channels are mapped into the interval $[30, 220]$ rather than the full
+$[0,255]$ range. The background remains pure white, $(255,255,255)$. This guarantees that a
+semantic pixel is never numerically confused with the canvas, and that the extreme values of an
+attribute do not saturate into either the background or pure black. The cost is a reduction of
+the usable dynamic range by roughly one quarter, which is acceptable given that the source
+attributes are quantized far more coarsely than 190 levels.
+
+\subsection{Speed to Stroke Width}
+\noindent
+For a segment between samples $i$ and $i+1$, the instantaneous speed is
+
+\begin{equation}\label{eq:speed}
+v_i = \frac{\sqrt{(x_{i+1}-x_i)^2 + (y_{i+1}-y_i)^2}}{t_{i+1}-t_i} ,
+\end{equation}
+
+\noindent which is compressed logarithmically as $\tilde{v}_i = \log(1+v_i)$. Only strictly
+positive time differences are used. Invalid, repeated or non-monotonic timestamps occur in real
+acquisitions and are handled by a deterministic fallback: the segment inherits the previous
+valid speed, or, when no previous valid speed exists, the median valid speed of the file. This
+rule is fixed and stateless with respect to input order, which is what makes the whole pipeline
+reproducible.
+
+Normalization is computed per task over all selected files, and never per class:
+
+\begin{equation}\label{eq:speednorm}
+\hat{v}_i = \mathrm{clip}\!\left(\frac{\tilde{v}_i - q_{5}}{\max(q_{95} - q_{5}, \epsilon)},\, 0,\, 1\right),
+\end{equation}
+
+\noindent where $q_{5}$ and $q_{95}$ are the $5$th and $95$th percentiles of $\tilde{v}$ over the
+task. The stroke width in pixels is then
+
+\begin{equation}\label{eq:width}
+w_i = \mathrm{clip}\!\left(\mathrm{round}\!\left(8 - 7\hat{v}_i\right),\, 1,\, 8\right).
+\end{equation}
+
+\noindent Equation~\ref{eq:width} is a monotonically decreasing function of the normalized
+writing speed $\hat{v}_i$: the width is driven by speed, and it shrinks as the pen moves faster.
+Speeds at or below the $5$th percentile render at 8 px, speeds at or above the $95$th percentile
+render at 1 px, a zero speed renders at 8 px after clipping, and intermediate speeds occupy the
+range 2--7 px. Slow movement therefore appears as a thick stroke, which matches the intuition of
+a hesitant or effortful trace and keeps the representation legible to a human inspector.
+
+\subsection{Pressure, Altitude and Azimuth}
+\noindent
+Pressure is scaled per task using pen-down samples only, since pressure recorded while the pen
+is in the air carries no meaning:
+
+\begin{equation}\label{eq:red}
+R_i = \mathrm{round}\!\left(30 + 190\,\mathrm{clip}\!\left(\frac{\pi_i - \pi_{q5}}{\max(\pi_{q95}-\pi_{q5}, \epsilon)},0,1\right)\right).
+\end{equation}
+
+\noindent Altitude and azimuth are mapped to the green and blue channels respectively under the
+same task-level robust percentile scaling and into the same $[30,220]$ interval. Invalid values
+are excluded when the scaling profile is computed and clipped at render time, so a corrupt
+sample can distort at most a single segment and never the profile of an entire task.
+
+\subsection{Pen-Up Segments}
+\noindent
+Segments recorded with $s_i = 0$ correspond to movements executed above the surface. They are
+rendered as light-gray dashed lines. Their pressure is not interpreted, since it is not
+meaningful, but their width still follows the speed rule of Equation~\ref{eq:width}, so
+the temporal structure of the aerial movement remains visible. Retaining pen-up trajectories
+follows the finding that they carry discriminative content \cite{Diaz2019}.
+
+\subsection{Rendering Procedure}
+\noindent
+Algorithm~\ref{alg:render} states the procedure. The two-pass structure --- profile computation
+followed by rendering --- is what enforces label independence: the profile is a function of the
+task, not of the labels.
+
+\begin{algorithm}[!h]
+ \caption{Minimap Encoding V2 rendering.}
+ \label{alg:render}
+ \KwData{Samples $p_1 \ldots p_N$ of a task; task-level profile $P$}
+ \KwResult{RGB minimap $M$}
+ initialize $M$ to white RGB (255,255,255)\;
+ \For{$i \leftarrow 1$ \KwTo $N-1$}{
+   compute $v_i$ by Eq.~\ref{eq:speed}, applying the fallback rule if $t_{i+1} \le t_i$\;
+   $w_i \leftarrow$ width by Eq.~\ref{eq:speednorm}--\ref{eq:width} using $P$\;
+   \eIf{$s_i = 1$}{
+     $R_i \leftarrow$ Eq.~\ref{eq:red}; $G_i, B_i \leftarrow$ altitude, azimuth scaled by $P$\;
+     draw solid segment $(x_i,y_i)\!\rightarrow\!(x_{i+1},y_{i+1})$ with colour $(R_i,G_i,B_i)$ and width $w_i$\;
+   }{
+     draw dashed light-gray segment with width $w_i$\;
+   }
+ }
+ \Return $M$\;
+\end{algorithm}
+
+\subsection{Determinism and Numerical Validation}
+\label{sec:validation}
+\noindent
+Because the encoding is intended to be a specification rather than an implementation detail, it
+is stored as a versioned machine-readable configuration and every generated minimap is
+accompanied by a manifest recording the configuration version, the source file and a SHA-256
+checksum of the output.
+
+The generation of the 597 minimaps used in this work (Section~\ref{sec:setup}) was validated
+automatically. All 597 images passed the structural audit: no broken file, no residual reference
+to a previous encoding version, and observed stroke widths spanning exactly the specified range
+of 1 to 8 pixels. CPU and CUDA implementations were compared segment by segment on 80 task files
+covering 8 tasks. The maximum absolute difference in rendered RGB values was exactly $0$, the
+maximum absolute difference in normalized speed was $2.22 \times 10^{-16}$ --- one unit in the
+last place of double precision --- and stroke widths matched on every segment. Equivalence
+therefore holds at the level of the rendered pixels, which is the level that matters, since the
+classifiers never see the intermediate floating-point values.
+
+\subsection{Visual Inspection Tool}
+\label{sec:tool}
+\noindent
+An encoding is only useful if it can be trusted, and a static specification is difficult to
+audit. A web-based viewer was therefore built as part of this work, and it is what allowed the
+encoding to be designed, debugged and sanity-checked in the first place.
+
+Figure~\ref{fig:animated} shows the single-subject mode. A subject is selected, and the tool
+replays each task of that subject as it was originally executed, incrementally rendering the
+trace at $1\times$, $2\times$, $4\times$ or $8\times$ playback speed while displaying the point
+count and the duration of each task. A pen-orientation indicator shows altitude and azimuth as
+they evolve, which makes it possible to confirm visually that the green and blue channels track
+the physical inclination of the pen rather than an artifact of the scaling.
+
+Figure~\ref{fig:sidebyside} shows the comparison mode, in which two subjects performing the
+\emph{same} task are replayed synchronously. This is the mode in which the discriminative
+content of the representation becomes apparent to a human observer: the Archimedean spiral of
+the two subjects shown differs in trace regularity and in the speed profile revealed by the
+colour gradient, even though both traces are geometrically similar.
+
+The viewer displays subject metadata --- age, sex, dominant hand, and clinical descriptors such
+as the UPDRS-V score, the levodopa equivalent dose and the disease duration. It must be stated
+explicitly that this metadata is shown for human inspection and dataset auditing only. It is
+never provided to any model. As stated in Section~\ref{sec:setup}, the classifiers consume
+minimap images, subject identifiers, task identifiers and labels, and nothing else.
+
+The tool is a research and inspection instrument. It is not a clinical interface and is not
+intended for use in patient assessment.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.94\textwidth]{figures/viewer-animated.png}
+  \caption{Single-subject mode of the inspection viewer. The tool replays the original execution
+  of each task at selectable speed, reporting point count and duration, and exposes the pen
+  attributes that the minimap encoding transports into colour channels. Subject metadata is
+  displayed for auditing purposes only and is never used by any classifier.}
+  \label{fig:animated}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.82\textwidth]{figures/viewer-side-by-side.png}
+  \caption{Comparison mode of the inspection viewer. Two subjects performing the same task are
+  replayed synchronously under an identical colour scheme, which allows differences in trace
+  regularity and speed profile to be assessed directly rather than inferred from a metric.}
+  \label{fig:sidebyside}
+\end{figure*}
+
+% ===========================================================================
+\section{\uppercase{Experimental Setup}}
+\label{sec:setup}
+
+\subsection{Database and Generated Corpus}
+\noindent
+Experiments use the PaHaW database \cite{Drotar2016}, which contains online handwriting from 75
+subjects --- 37 diagnosed with Parkinson's disease and 38 healthy controls --- each performing
+eight tasks on a digitizing tablet. The tasks comprise an Archimedean spiral, repeated writing
+of orthographically simple syllables and words, and the writing of a sentence. Access to PaHaW
+requires a signed licence agreement; no data is redistributed with this work.
+
+Each task is stored as an \texttt{.svc} file whose first line is the sample count and whose
+remaining lines contain seven columns in the order
+
+\begin{small}
+\begin{verbatim}
+ y  x  timestamp  state  azimuth  altitude
+ pressure
+\end{verbatim}
+\end{small}
+
+\noindent with \texttt{state} equal to 1 for pen-on-surface and 0 for pen-in-air. Note that the
+$y$ coordinate precedes $x$; this ordering is unusual and is a recurrent source of reproduction
+errors when the format is read under the more common $(x,y)$ assumption.
+
+Generation under encoding version 2.0 produced \textbf{597 minimaps} of $512 \times 512$ pixels
+in RGB, with no file skipped and no failure. Coverage is complete for tasks 2 to 8, at 75 images
+each; task 1 yields 72 images because three subjects have no usable recording for it.
+
+\subsection{Information Available to the Classifiers}
+\noindent
+The \texttt{.svc} files are used exclusively to render minimaps. After generation, every
+classifier and every analysis in this work consumes only four things: the minimap image, the
+subject identifier used for grouping, the task identifier used for organization, and the
+H/PD label used as the target. No handcrafted kinematic or pressure descriptor is extracted from
+the raw signal, no demographic or clinical covariate is used, and no fusion of dynamic and
+visual modalities is performed. This restriction is deliberate: it is what makes the experiment
+a test of the \emph{representation} rather than of a pipeline built around it.
+
+\subsection{Evaluation Protocol}
+\noindent
+All splits are subject-independent. Outer evaluation uses stratified group $k$-fold with 5 folds
+repeated 5 times, grouped by subject identifier, so no subject ever appears simultaneously in
+training and evaluation. Model, descriptor and fusion decisions are taken inside 3 inner grouped
+folds, never using outer-test subjects. The random seed is 42 and the decision threshold is
+fixed at 0.50. Confidence intervals are percentile bootstrap over 10,000 subject-level
+resamplings, and paired comparisons use paired subject bootstrap, paired permutation tests,
+exact McNemar tests and Holm--Bonferroni correction. The frozen split checksum is
+\texttt{ca8d48f4\ldots a6bf5dcf}.
+
+The primary metric is macro F1, reported with balanced accuracy, per-class recall, Matthews
+correlation coefficient and ROC AUC. Because the cohort is almost perfectly balanced, a
+classifier that always predicts the majority class attains a balanced accuracy of exactly 0.500
+by construction; that value is the reference against which all results below should be read.
+
+\subsection{Evaluated Pipelines}
+\noindent
+Three pipelines were evaluated, all consuming only minimap pixels.
+
+\textbf{Texture-descriptor screening.} A nested evaluation over all eight tasks explored ten
+descriptor families --- grayscale LBP, RGB semantic-channel LBP, opponent LBP, LPQ,
+GLCM/Haralick, Gabor, HOG, wavelet texture, semantic channel statistics, and raster-derived
+stroke-width texture --- against logistic regression, linear and RBF support vector machines
+\cite{Cortes1995}, random forests and extra trees. Descriptor, classifier and task-fusion
+settings were chosen inside inner folds only.
+
+\textbf{Fixed descriptor with reliability-weighted fusion.} The configuration retained from
+screening, denoted \texttt{lpq\_rgb\_visual\_geometry\_width}, concatenates LPQ computed
+independently on the R, G and B channels (768 features, window size 5, Hellinger-transformed
+histograms, after fixed foreground crop, 5\% margin, white padding and $64 \times 64$ bilinear
+resize) with 44 visual geometry and stroke-width features computed on the unresized PNG, for 812
+features in total. The classifier is a fixed pipeline of median imputation, standardization and
+logistic regression with $C = 0.1$, L2 penalty, balanced class weights and the liblinear solver.
+Per-task predictions for tasks 1, 3 and 7 are fused with reliability weights
+$\max(\text{inner macro F1} - 0.5,\, 0.01)$, renormalized over the tasks available for each
+subject.
+
+\textbf{Direct convolutional classification.} A ResNet-18 \cite{He2016} is fine-tuned on the raw
+minimap pixels under identical splits, class weighting, threshold and fusion rule. Because the
+RGB channels are semantic, the augmentations normally used for natural images --- rotation,
+scaling, blur, colour jitter, crops, flips, erasing, MixUp, CutMix --- would corrupt the encoded
+attributes and are excluded. The only train-time augmentation is a safe canvas translation
+applied on the $512 \times 512$ raster before resizing: integer-pixel copy with white fill, no
+interpolation, maximum shift of 16 pixels on each axis, probability 0.80, with foreground
+clipping forbidden. An audit of 1046 training-time transformations recorded 851 translated and
+195 identity samples, with zero clipped samples and zero foreground-preservation failures.
+
+\subsection{Factorial Ablation}
+\label{sec:ablation-setup}
+\noindent
+To isolate the contribution of the pseudo-dynamic content, four rendering variants were
+generated from the same signals in a $2\times2$ factorial design crossing semantic colour with
+speed-driven stroke width. \textsc{Mono\_Fixed} keeps only position, trajectory and pen contact,
+as a monochrome fixed-width line; \textsc{Rgb\_Fixed} adds the semantic colour channels;
+\textsc{Mono\_Speed} adds speed-driven stroke width; and \textsc{Rgb\_Speed\_V2} is the
+complete encoding. Descriptor, classifier, splits and threshold are held fixed across all four,
+so any difference is attributable to the representation alone. Pen-contact information is
+present in every variant, including the minimal one.
+
+% ===========================================================================
+\section{\uppercase{Results}}
+\label{sec:results}
+
+\subsection{Texture Descriptors across All Eight Tasks}
+\noindent
+Table~\ref{tab:screening} reports the nested screening over the eight PaHaW tasks. Individually,
+most tasks carry weak signal: seven of the eight sit between 0.525 and 0.556 macro F1, with
+confidence intervals comfortably covering chance. Task 8 is the exception at 0.6682, and it is
+also the only task for which the selected descriptor combines RGB LBP with stroke-width texture
+--- that is, the only task where the selection procedure preferred a descriptor that reads the
+pseudo-dynamic channels. Fusing all eight tasks with reliability weights raises macro F1 to
+0.6925 (95\% CI [0.5840, 0.7928], balanced accuracy 0.6927, MCC 0.3871).
+
+\begin{table}[h]
+\caption{Nested descriptor and classifier screening per task, all eight PaHaW tasks.
+Macro F1 with 95\% bootstrap confidence interval.}
+\label{tab:screening} \centering \small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{|c|l|c|c|}
+  \hline
+  Task & Descriptor & Macro F1 & 95\% CI \\
+  \hline
+  1 & gray LBP & 0.5277 & [.479,.575] \\
+  2 & HOG & 0.5360 & [.491,.580] \\
+  3 & LPQ & 0.5397 & [.493,.586] \\
+  4 & gray LBP & 0.5254 & [.479,.572] \\
+  5 & gray LBP & 0.5311 & [.484,.576] \\
+  6 & HOG & 0.5555 & [.509,.600] \\
+  7 & gray LBP & 0.5355 & [.488,.582] \\
+  8 & RGB LBP+w & \textbf{0.6682} & [.624,.711] \\
+  \hline
+\end{tabular}
+\end{table}
+
+\subsection{Fixed Descriptor and Subject-Level Fusion}
+\noindent
+Table~\ref{tab:ensemble} reports the fixed-descriptor pipeline on tasks 1, 3 and 7. Task 1, the
+Archimedean spiral, carries most of the signal at 0.7336 macro F1 and 0.7855 ROC AUC. Task 3 is
+weak and task 7 is indistinguishable from chance, with a negative MCC. The reliability-weighted
+ensemble reaches 0.7321 macro F1 (95\% CI [0.6250, 0.8265]), balanced accuracy 0.7326, PD recall
+0.6757, H recall 0.7895, MCC 0.4685 and ROC AUC 0.7575.
+
+\begin{table}[h]
+\vspace{-0.2cm}
+\caption{Fixed descriptor (RGB LPQ with visual geometry and stroke-width features) and
+logistic regression, per task and after reliability-weighted subject-level fusion.}
+\label{tab:ensemble} \centering \small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{|l|c|c|c|c|}
+  \hline
+  Method & Macro F1 & Bal. acc. & MCC & AUC \\
+  \hline
+  Task 1 & 0.7336 & 0.7361 & 0.4814 & 0.7855 \\
+  Task 3 & 0.5864 & 0.5864 & 0.1730 & 0.5782 \\
+  Task 7 & 0.4800 & 0.4801 & $-$0.0398 & 0.4780 \\
+  Ensemble & 0.7321 & 0.7326 & 0.4685 & 0.7575 \\
+  \hline
+\end{tabular}
+\end{table}
+
+Paired subject-level tests show that fusion beats the weakest task by a wide margin
+($\Delta = 0.2521$ over task 7, 95\% CI [0.1178, 0.3916], Holm-adjusted $p = 0.006$) but does
+\emph{not} beat task 1 alone ($\Delta = 0.0012$, 95\% CI [$-0.053$, $0.056$], Holm-adjusted
+$p = 1.0$). The ensemble therefore buys robustness against a poor task rather than accuracy: it
+is worth reporting precisely because it does not improve on the spiral.
+
+\subsection{Factorial Ablation of the Pseudo-Dynamic Content}
+\label{sec:ablation}
+\noindent
+Table~\ref{tab:ablation} and Figure~\ref{fig:ablation} report the $2\times2$ design. The
+ordering is monotone in the expected direction. Removing both pseudo-dynamic dimensions and keeping only trajectory and pen contact
+costs 0.1725 macro F1, from 0.7321 down to 0.5597 --- a representation barely above chance.
+Adding either dimension alone recovers part of the gap, and adding both recovers all of it.
+
+\begin{table}[h]
+\vspace{-0.2cm}
+\caption{Factorial ablation. Subject-level ensemble results for the four rendering variants under
+an identical descriptor, classifier, split and threshold.}
+\label{tab:ablation} \centering \small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{|l|c|c|c|c|}
+  \hline
+  Variant & Macro F1 & Bal. acc. & MCC & AUC \\
+  \hline
+  \textsc{Mono/Fix} & 0.5597 & 0.5597 & 0.1196 & 0.5761 \\
+  \textsc{Rgb/Fix} & 0.5994 & 0.5996 & 0.1996 & 0.6529 \\
+  \textsc{Mono/Spd} & 0.6397 & 0.6398 & 0.2797 & 0.7347 \\
+  \textsc{Rgb/Spd} v2 & \textbf{0.7321} & 0.7326 & 0.4685 & 0.7575 \\
+  \hline
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:contrasts} reports the paired contrasts. Only one survives Holm correction: the
+complete encoding against the minimal one, $\Delta = 0.1725$ (95\% CI [0.0589, 0.2868],
+Holm-adjusted $p = 0.031$). No individual main effect is statistically supported on its own.
+Both single-factor contrasts are larger in the presence of the other factor than in its absence
+--- colour is worth $+0.040$ at fixed width but $+0.092$ at speed-driven width, and width is
+worth $+0.080$ in monochrome but $+0.133$ with colour --- which is the signature of a positive
+interaction, though the cohort is too small to establish it independently.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/ablation-2x2.png}
+  \caption{Overview of the $2\times2$ factorial ablation. Top: the four rendering variants
+  generated from the same signals. Bottom: subject-level ensemble performance, metric table and
+  factorial layout. The ordering shown is descriptive; of the individual contrasts, only the
+  complete encoding against the minimal one is statistically supported after Holm correction
+  (Table~\ref{tab:contrasts}).}
+  \label{fig:ablation}
+\end{figure*}
+
+\begin{table}[h]
+\vspace{-0.2cm}
+\caption{Paired subject-level contrasts on macro F1, with Holm-adjusted $p$-values.}
+\label{tab:contrasts} \centering \small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{|l|c|c|c|}
+  \hline
+  Contrast & $\Delta$ F1 & 95\% CI & Holm $p$ \\
+  \hline
+  Colour, fixed width & 0.0397 & [$-$.068,.149] & 0.544 \\
+  Colour, speed width & 0.0924 & [.012,.177] & 0.184 \\
+  Width, monochrome & 0.0801 & [$-$.037,.197] & 0.399 \\
+  Width, with colour & 0.1328 & [.013,.254] & 0.184 \\
+  Full V2 vs. minimal & \textbf{0.1725} & [.059,.287] & \textbf{0.031} \\
+  \hline
+\end{tabular}
+\end{table}
+
+\subsection{Convolutional Network on the Same Representation}
+\noindent
+The fine-tuned ResNet-18 with safe translation reaches 0.5601 macro F1 at the ensemble level
+(95\% CI [0.4444, 0.6701]), balanced accuracy 0.5711, PD recall 0.4054, MCC 0.1509 and ROC AUC
+0.6024. On task 1 it reaches 0.5625 macro F1 with a strongly asymmetric operating point: H
+recall 0.9444 against PD recall 0.2778.
+
+Paired against the texture pipeline on the same subjects and splits, the convolutional model is
+\emph{worse}, not better: $\Delta = -0.1720$ at the ensemble level (95\% CI [$-0.294$,
+$-0.054$], permutation $p = 0.010$, exact McNemar $p = 0.017$, Holm-adjusted $p = 0.040$). The
+gap is also significant on task 1 before correction ($\Delta = -0.1711$, permutation
+$p = 0.033$) and not significant on tasks 3 and 7. This is a negative result and is reported as
+such: on a cohort of this size, standard texture descriptors extract the pseudo-dynamic content
+of the minimaps more effectively than end-to-end fine-tuning does.
+
+\subsection{Channel Attribution}
+\noindent
+Gradient-based attribution over the convolutional model, aggregated per semantic channel,
+assigns a mean relative importance of 0.406 to the green channel (altitude), 0.352 to the red
+channel (pressure) and 0.243 to the blue channel (azimuth); the bootstrap interval for the red
+channel is [0.335, 0.368]. The ordering is stable across tasks 1, 3 and 7. Attribution is higher
+on green and lower on blue for PD subjects (0.423 and 0.232) than for controls (0.389 and
+0.253). These figures are exploratory: they describe where a weaker model looked, not which
+attribute carries the discriminative signal, and no causal reading is intended.
+
+\subsection{Relation to a Clipping-Based Pipeline}
+\noindent
+For context, a convolutional pipeline that operates on binary stroke clippings rather than on a
+pseudo-dynamic encoding \needcite{the clipping-based CNN baseline; it currently exists only as an
+unpublished undergraduate thesis and an accompanying public repository, so an appropriate
+citable form must be decided} reports 69.23\% task-level accuracy and 66.67\% F1 on PaHaW task 2
+with 62 training and 13 test subjects. That pipeline extracts one square clipping per coordinate
+point --- roughly 83{,}955 clippings for the task --- and aggregates clipping-level predictions
+upward into stroke-, letter- and task-level decisions.
+
+The two numbers must not be placed in the same table. The protocols differ in task, in metric,
+in split design and, decisively, in test-set size: a single held-out split of 13 subjects moves
+by 7.7 accuracy points per subject, whereas the results above use 25 subject-grouped evaluation
+rounds with bootstrap intervals. The clipping pipeline is cited here to characterize the
+regime, not to be outranked. One property of it is worth recording, however: its clipping-level
+test accuracy stayed in the 50--52\% band throughout training while training accuracy reached
+96.8\%, the expected consequence of treating tens of thousands of overlapping crops from a few
+dozen writers as independent samples.
+
+% ===========================================================================
+\section{\uppercase{Discussion}}
+\label{sec:discussion}
+
+\noindent
+\textbf{The hypothesis survives its own falsification test.} The ablation was designed so that
+the encoding could fail: if the colour channels and the speed-driven width carried nothing, the
+minimal position-only rendering would have matched the full one. It did not. \textsc{Mono\_Fixed}
+sits at 0.5597 macro F1, barely above the 0.500 balanced accuracy of a trivial classifier, and
+the complete encoding sits at 0.7321. The gain is paired at the subject level, survives Holm
+correction, and its confidence interval excludes zero. Since descriptor, classifier, splits and
+threshold were frozen across the four variants, the difference is attributable to the
+representation and to nothing else. That is the central empirical claim of this paper.
+
+\textbf{Neither factor is sufficient alone.} No individual main effect reached significance
+after correction, yet their combination did. Read together with the observation that each factor
+is worth roughly twice as much in the presence of the other, the most plausible account is that
+the two dimensions are complementary rather than redundant: stroke width localizes \emph{where}
+the movement slowed, and the colour channels describe \emph{how the pen was held and pressed}
+while it slowed. Neither alone reconstructs the motor event. This reading is consistent with the
+descriptor screening, where the only task whose selected descriptor combined colour and
+stroke-width texture is also the only task that clearly exceeded chance individually.
+
+\textbf{Why the convolutional model lost.} The negative CNN result is not evidence against the
+representation --- both pipelines consume the same pixels. It is evidence about sample size.
+With 597 images from 75 subjects, and with the semantic RGB channels forbidding every standard
+photometric and geometric augmentation, a fine-tuned ResNet-18 has orders of magnitude more
+parameters than the cohort can constrain. Its operating point on task 1 makes the failure mode
+explicit: 0.944 recall on controls against 0.278 on patients, a model that has learned to
+predict the majority side of its decision boundary. The augmentation designed for this setting
+was deliberately conservative --- integer translation only, audited for foreground preservation
+--- precisely because anything stronger would have destroyed the encoded attributes. That
+constraint is intrinsic to semantic channel encodings and deserves to be stated as a design
+cost: the richer the semantics of the channels, the smaller the space of admissible
+augmentations.
+
+\textbf{Task heterogeneity.} Task 1, the Archimedean spiral, dominates. It is a continuous
+ballistic movement with no orthographic content, executed against a fixed template, which makes
+speed and pressure irregularities directly comparable across subjects. Tasks with repeated
+lifts, restarts and letter shapes introduce variance that the representation does not normalize
+away. The fusion result quantifies this bluntly: the ensemble does not beat task 1 alone
+($p = 1.0$). Reporting the ensemble as the headline number would therefore overstate what
+multi-task fusion contributes; its actual value is insurance against a task like 7, which is at
+chance.
+
+\textbf{Threats to validity.} Five should be stated plainly. First, tasks 1, 3 and 7 were
+preselected during exploratory analysis \emph{on this same corpus}, so the fixed-descriptor
+results carry an optimistic bias that the nested outer folds do not remove; the screening in
+Table~\ref{tab:screening}, which covers all eight tasks without preselection, is the more
+conservative estimate. Second, the automated reproduction check of the screening stage returned
+\texttt{outside\_descriptive\_tolerance}, meaning the fixed configuration did not exactly
+reproduce the exploratory reference metrics; the outer-fold results were not tuned to close that
+gap, but the discrepancy is unexplained and should be resolved. Third, the cohort is small and
+single-source: 75 subjects, one database, one acquisition protocol, so device- and
+population-specific effects cannot be separated from the phenomenon, and no external validation
+was performed. Fourth, the per-task scaling profiles are computed over all files of a task;
+although label-agnostic, and therefore free of supervision leakage, they make the encoding of a
+sample depend weakly on the composition of the task set, and a strictly training-fold-only
+variant remains to be quantified. Fifth, and most importantly, a cross-validated macro F1 on a
+research database says nothing about clinical utility. This work is exploratory research
+software for computational handwriting analysis. It is not a diagnostic system, it has not been
+validated for clinical use, and it must not be read as a substitute for clinical assessment.
+
+% ===========================================================================
+\section{\uppercase{Conclusions and Future Work}}
+\label{sec:conclusion}
+
+\noindent
+This paper proposed Pseudodynamic Handwriting Minimap Signatures, a formally specified encoding
+that renders an online handwriting task as a single static RGB image in which colour channels
+carry pen pressure, altitude and azimuth, and stroke width varies with writing speed. The
+encoding is deterministic, versioned, numerically equivalent across CPU and GPU implementations
+down to the rendered pixel, and normalized per task in a label-agnostic manner.
+
+Regarding the hypothesis under test, the evidence supports it in the form in which it was
+stated. Under a frozen descriptor, classifier, split and threshold, the complete encoding
+reaches 0.7321 macro F1 against 0.5597 for a rendering that keeps only trajectory and pen
+contact, a paired subject-level gain of 0.1725 (95\% CI [0.059, 0.287]) that survives
+Holm--Bonferroni correction. The pseudo-dynamic content is therefore not decorative: it is the
+larger part of what the classifier uses. The evidence does not support stronger claims. Neither
+encoded dimension is individually significant on this cohort, the tasks contribute very
+unevenly, three of the eight tasks were preselected on the same corpus, and no external
+validation was performed.
+
+A secondary finding is worth carrying forward. On this representation and this cohort, standard
+texture descriptors followed by a linear model significantly outperformed a fine-tuned
+ResNet-18 ($\Delta = -0.172$, Holm-adjusted $p = 0.040$). Semantic channel encodings and
+end-to-end deep learning are in tension: the semantics that make the representation auditable
+also forbid most of the augmentation that deep models need at this sample size.
+
+Four directions follow. Evaluating the encoding on additional online handwriting databases would
+separate the representation from the idiosyncrasies of PaHaW and would remove the preselection
+bias, since task selection could then be transferred rather than repeated. A third encoding
+iteration should be driven by the interaction observed here rather than by intuition, testing
+alternative channel assignments and stroke-width functions under the same factorial protocol.
+Because minimaps are ordinary images and can be generated in quantity from unlabelled
+handwriting, self-supervised pretraining addresses the sample-size limitation directly and is
+the most promising route to making convolutional models competitive on this representation.
+Finally, the explicit semantics of the channels make attribution unusually interpretable: a
+saliency map over the red channel is a statement about pressure, not about an anonymous feature.
+Turning the exploratory channel attribution reported here into a validated instrument, on a
+model strong enough to be worth interrogating, is the natural continuation.
+
+\ifanonymous
+\else
+\section*{\uppercase{Acknowledgements}}
+
+\begin{itemize}
+  \item \textbf{Conflicts of Interest:} The authors have no conflicts of interest or competing
+        interests to declare in the context of this paper.
+  \item \textbf{Financial and other Support:} TODO: state funding or declare none.
+  \item \textbf{Author Contributions:} TODO: state contributions.
+  \item \textbf{Data Sharing:} The PaHaW database is available from its original authors under a
+        licence agreement and is not redistributed. The generation code, the encoding
+        specification and the experiment manifests are available at TODO: repository URL.
+  \item \textbf{AI Tools:} TODO: declare the use of AI tools in accordance with the conference
+        policy.
+\end{itemize}
+\fi
+
+\bibliographystyle{apalike}
+{\small
+\bibliography{refs}}
+
+\end{document}
