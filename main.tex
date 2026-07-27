@@ -750,12 +750,21 @@ Reporting the ensemble as the headline would overstate what multi-task fusion co
 real value is insurance against a task like 7, which is at chance.
 
 \textbf{What the representation costs, and what it buys.} On this same database, Drot\'{a}r et
-al. report 81.3\% accuracy, 87.4\% sensitivity and 80.9\% specificity from handcrafted kinematic
-and pressure descriptors computed over all eight tasks \cite{Drotar2016}. Our best subject-level
-figure is 0.7326 balanced accuracy. The numbers are not directly comparable --- a different
-metric, three tasks instead of eight, a different evaluation protocol --- but the direction is
-not in doubt and should be stated rather than left for the reader to find: on PaHaW, reading
-pixels currently costs accuracy relative to reading the signal.
+al. report 81.3\% accuracy, 87.4\% sensitivity and 80.9\% specificity with a support vector
+machine over handcrafted kinematic and pressure descriptors \cite{Drotar2016}. Our best
+subject-level figure is 0.7326 balanced accuracy. Reading pixels currently costs accuracy
+relative to reading the signal, and the gap should be stated rather than left for the reader to
+find.
+
+Two properties of that comparison are worth making explicit. Neither work uses demographic or
+clinical covariates: sex, age, disease duration, UPDRS-V and levodopa equivalent dose appear in
+\cite{Drotar2016} as cohort description, and the twenty most relevant features listed there are
+all derived from the handwriting itself. On that axis the comparison is fair. The evaluation
+protocols, however, are not equally conservative. Features in \cite{Drotar2016} were retained by
+a Mann--Whitney $U$ filter computed between the PD and control groups, applied to the labelled
+corpus and not, as described, recomputed inside each cross-validation fold; the reported figure
+therefore carries a selection bias that nested inner-fold selection is designed to avoid. We
+raise this to calibrate the gap, not to dispute the finding.
 
 What that buys is a pipeline that never opens the \texttt{.svc} file after generation. No
 kinematic descriptor is designed, no pressure statistic is chosen, no covariate is admitted.
@@ -765,6 +774,13 @@ and a stock ResNet, and the ablation of Section~\ref{sec:ablation} was possible 
 representation, not the feature set, is the object under test. A feature-engineered pipeline
 cannot be ablated this way, since removing a pressure descriptor removes a number rather than a
 property of the input.
+
+Task 1 illustrates the practical consequence. Drot\'{a}r et al. found no statistically
+significant kinematic feature for the Archimedean spiral and excluded it from their fused model,
+attributing this to the absence of spiral-specific features in their set \cite{Drotar2016}. The
+same task is the strongest single source of signal in our evaluation, at 0.7336 macro F1 and
+0.7855 ROC AUC (Table~\ref{tab:ensemble}). A descriptor set has to be designed for the task it
+will meet; a representation does not.
 
 Explanation is where the difference is sharpest. Attribution over a handcrafted vector points at
 a coordinate of that vector; over an abstract signal-to-image encoding such as a recurrence plot
@@ -783,11 +799,11 @@ quantity from unlabelled handwriting, which places the sample-size limitation id
 within reach of self-supervised pretraining --- a route unavailable to a pipeline whose input is
 a fixed-length vector of designed features.
 
-The gap to 81.3\% should therefore be read as a measurement taken at the least favourable point
-of this representation's development. It was obtained with an off-the-shelf texture descriptor,
-an untuned linear classifier, no pretraining, no architecture search and an augmentation policy
-restricted to integer translation. Whether the gap closes is an empirical question that this
-paper does not settle.
+The gap to 81.3\% is therefore a measurement taken at the least favourable point of this
+representation's development, against a figure obtained under a less conservative protocol. It
+was reached with an off-the-shelf texture descriptor, an untuned linear classifier, no
+pretraining, no architecture search and augmentation restricted to integer translation. Whether
+it closes is an empirical question this paper does not settle.
 
 \textbf{Threats to validity.} Tasks 1, 3 and 7 were preselected during exploratory analysis
 \emph{on this same corpus}, so the fixed-descriptor results carry an optimistic bias the nested

@@ -96,6 +96,37 @@ Nothing was estimated or invented.
   (Δ = −0.1720, Holm *p* = 0.040). Reported as a finding about sample size and about the
   augmentation constraint that semantic channels impose, not as a flaw in the representation.
 
+## 3b. The Drotar comparison — what was verified in the source
+
+The full text of Drotar et al. (2016) was read (arXiv 2411.03044, mirror of Artif. Intell. Med.
+67:39-46). Four facts anchor the Discussion paragraph; all are quoted or paraphrased from that
+paper, none inferred:
+
+1. **81.3% accuracy, 87.4% sensitivity, 80.9% specificity**, SVM, merged tasks 2-8.
+2. **No demographic or clinical covariate is used as a model input.** Sex, age, disease duration,
+   UPDRS-V and levodopa equivalent dose appear only in Table 1 and Appendix A as cohort
+   description, plus a balance check ("No significant differences related to gender or age were
+   found between the PD and healthy control groups"). The twenty most relevant features in their
+   Table 3 are all handwriting-derived. The comparison is fair on this axis.
+3. **Feature selection was done on the full labelled corpus.** Section 3.3: "From all computed
+   features we kept only those that passed the Mann-Whitney U test, i.e. those that showed a
+   statistically significant (p < 0.05) difference between the PD and control groups." It is
+   described before the cross-validation results, with no indication of being recomputed per
+   fold. Validation was "stratified 10-fold cross-validation", repeated 10 times.
+4. **Task 1 was excluded from their fused model.** "We did not find any statistically significant
+   kinematic features for the tasks 1 and 4"; "Task 1 contained data from only 69 subjects and
+   did not show any significant discrimination potential, therefore we did not include this
+   task." Their own explanation: "we did not utilise any spiral specific features."
+
+Point 4 is the strongest argument in the paper's favour and is now stated in the Discussion: the
+spiral, which their descriptor set could not exploit, is our best single task (0.7336 macro F1,
+0.7855 ROC AUC).
+
+Point 3 is phrased carefully in the paper — "not, as described, recomputed inside each
+cross-validation fold" and "We raise this to calibrate the gap, not to dispute the finding".
+**Do not sharpen this into an accusation.** It was ordinary practice in 2016, and the wording as
+it stands is defensible against a reviewer who knows the paper.
+
 ## 4. Caveats the draft states explicitly — verify you are comfortable with each
 
 1. **Preselection bias.** Tasks 1, 3 and 7 were chosen in exploratory analysis on this same
