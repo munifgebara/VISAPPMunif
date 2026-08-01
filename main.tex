@@ -62,20 +62,20 @@ Minimaps, Representation Learning, Online Handwriting, Parkinson's Disease.}
 
 \abstract{Online handwriting from a digitizing tablet carries dynamic information --- pen
 pressure, altitude, azimuth, speed and pen-up trajectories --- that a binary rasterization
-discards. Recovering it usually needs handcrafted kinematic descriptors or
-sequence models, neither of which lets the computer vision toolchain be used as is. We propose
-\emph{Pseudodynamic Handwriting Minimap Signatures}, an encoding that maps the signal onto a
-single static RGB raster whose colour channels carry pen attributes and whose stroke width
-varies with writing speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per
-task without reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and evaluate
-them under repeated subject-grouped cross-validation. On three tasks, a $2\times2$
-factorial ablation isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321
-macro F1 against 0.5597 for a position-only rendering, a paired subject-level gain of 0.1725
-surviving Holm correction. The four variants share the task selection, so it does not inflate
-the contrast. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
-representation stays below the handcrafted kinematic and pressure pipeline reported for this
-database, in exchange for ablatability, device portability and spatially interpretable
-attribution. This is exploratory research software, not a diagnostic system.}
+discards. Recovering it usually needs handcrafted kinematic descriptors or sequence models,
+neither of which lets the computer vision toolchain be reused. We propose \emph{Pseudodynamic
+Handwriting Minimap Signatures}, an encoding that maps the signal onto a single static RGB
+raster whose colour channels carry pen attributes and whose stroke width varies with writing
+speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per task without
+reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and evaluate them
+under repeated subject-grouped cross-validation. On three tasks, a $2\times2$ factorial ablation
+isolates the pseudo-dynamic contribution: the full encoding averages 0.6901 subject-level macro
+F1 over repeats, 0.7321 pooled, against 0.5597 for a position-only rendering. The paired gain of
+0.1725 survives Holm correction, and the four variants share the task selection, so it does not
+inflate the contrast. A fine-tuned ResNet-18 performed worse than standard texture descriptors.
+The representation stays below the handcrafted pipeline reported for this database, in exchange
+for ablatability, device portability and interpretable attribution. This is exploratory research
+software, not a diagnostic system.}
 
 \onecolumn \maketitle \normalsize \setcounter{footnote}{0} \vfill
 
@@ -241,9 +241,9 @@ trusted in a sensitive domain.
 Minimaps, then, have been validated as visual signatures for static textual artifacts under a
 grayscale encoding; signal-to-image methods for time series under encodings that discard spatial
 correspondence; handwriting-specific pseudo-dynamic images under encodings that embed dynamics
-implicitly. We are not aware of a representation that is at once spatially faithful, multi-attribute,
-semantically explicit and formally specified, applied to a temporally sampled signal, nor of a
-study isolating the contribution of each encoded attribute experimentally.
+implicitly. We are not aware of a representation that is at once spatially faithful,
+multi-attribute, semantically explicit and formally specified, nor of a study isolating each
+encoded attribute experimentally.
 
 % ===========================================================================
 \section{\uppercase{Pseudodynamic Minimap Signatures}}
@@ -294,7 +294,7 @@ impossible: writing speed into a colour channel, and letting pressure modulate s
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.80\textwidth]{figures/minimap-examples.png}
+  \includegraphics[width=0.74\textwidth]{figures/minimap-examples.png}
   \caption{Minimap Encoding V2 applied to the Archimedean spiral of two PaHaW subjects, one
   control and one patient. Colour carries pen pressure, altitude and azimuth; stroke width
   varies with writing speed. The two traces are geometrically similar and differ in regularity
@@ -433,7 +433,7 @@ assessment.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.84\textwidth]{figures/viewer-animated.png}
+  \includegraphics[width=0.78\textwidth]{figures/viewer-animated.png}
   \caption{Single-subject mode of the inspection viewer. The tool replays the original execution
   of each task at selectable speed, reporting point count and duration, and exposes the pen
   attributes that the minimap encoding transports into colour channels. Subject metadata is
@@ -443,7 +443,7 @@ assessment.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.76\textwidth]{figures/viewer-side-by-side.png}
+  \includegraphics[width=0.70\textwidth]{figures/viewer-side-by-side.png}
   \caption{Comparison mode of the inspection viewer. Two subjects performing the same task are
   replayed synchronously under an identical colour scheme, which allows differences in trace
   regularity and speed profile to be assessed directly rather than inferred from a metric.}
@@ -604,8 +604,9 @@ selection.
 
 \begin{table}[h]
 \vspace{-0.2cm}
-\caption{Fixed descriptor (RGB LPQ with visual geometry and stroke-width features) and
-logistic regression, per task and after reliability-weighted subject-level fusion.}
+\caption{Fixed descriptor (RGB LPQ with visual geometry and stroke-width features) and logistic
+regression, per task and after reliability-weighted subject-level fusion. Figures are pooled over
+the five repeats; the per-repeat mean for the ensemble is 0.6901 (sd 0.0454).}
 \label{tab:ensemble} \centering \small\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{|l|c|c|c|c|}
   \hline
@@ -672,7 +673,7 @@ cohort is too small to establish one.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.66\textwidth]{figures/ablation-2x2.png}
+  \includegraphics[width=0.62\textwidth]{figures/ablation-2x2.png}
   \caption{Overview of the $2\times2$ factorial ablation. Top: the four rendering variants
   generated from the same signals. Bottom: subject-level ensemble performance, metric table and
   factorial layout. The ordering shown is descriptive; of the individual contrasts, only the
@@ -733,13 +734,13 @@ with 62 training and 13 test subjects. That pipeline extracts one square clippin
 point --- roughly 83{,}955 clippings for the task --- and aggregates clipping-level predictions
 upward into stroke-, letter- and task-level decisions.
 
-The two sets of figures are not directly comparable. The protocols differ in task, metric, split
-design and, decisively, test-set size: one held-out split of 13 subjects moves by 7.7
-accuracy points per subject, against 25 subject-grouped evaluation rounds with bootstrap
-intervals here. We cite the clipping pipeline to characterize the regime, not to outrank it.
-One property of it does bear recording: clipping-level test accuracy stayed in the 50--52\% band
-throughout training while training accuracy reached 96.8\%, the expected consequence of treating
-tens of thousands of overlapping crops from a few dozen writers as independent samples.
+The two sets of figures are not directly comparable: the protocols differ in task, metric and
+split design, and one held-out split of 13 subjects moves by 7.7 accuracy points per subject
+against 25 subject-grouped rounds here. We cite that pipeline to characterize the regime, not to
+outrank it. One property does bear recording: its clipping-level test accuracy stayed in the
+50--52\% band throughout training while training accuracy reached 96.8\%, the expected
+consequence of treating tens of thousands of overlapping crops from a few dozen writers as
+independent samples.
 
 % ===========================================================================
 \section{\uppercase{Discussion}}
@@ -785,10 +786,16 @@ real value is insurance against a task like 7, which is at chance.
 
 \textbf{What the representation costs, and what it buys.} On this same database, Drot\'{a}r et
 al. report 81.3\% accuracy, 87.4\% sensitivity and 80.9\% specificity with a support vector
-machine over handcrafted kinematic and pressure descriptors \cite{Drotar2016}. Our best
-subject-level figure is 0.7326 balanced accuracy. Reading pixels currently costs accuracy
-relative to reading the signal, and the gap should be stated rather than left for the reader to
-find.
+machine over handcrafted kinematic and pressure descriptors \cite{Drotar2016}. Our subject-level figures
+range from 0.6901 macro F1 averaged over repeats to 0.7321 pooled. Reading pixels currently
+costs accuracy relative to reading the signal, and the gap should be stated rather than left for
+the reader to find.
+
+Its size depends on which figure is compared: about eight points against our pooled 0.7321,
+about twelve against the per-repeat average. It may be narrower than either, since the reference
+is itself the product of a less conservative protocol, as noted below, and carries no reported
+confidence interval. The comparison places the two approaches in the same range rather than
+separating them by a measured amount.
 
 Two properties of that comparison are worth making explicit. Neither work uses demographic or
 clinical covariates: sex, age, disease duration, UPDRS-V and levodopa equivalent dose appear in
@@ -819,18 +826,16 @@ Explanation is where the difference is sharpest. Attribution over a handcrafted 
 a coordinate of that vector; over an abstract signal-to-image encoding such as a recurrence plot
 it points at a cell of a matrix with no physical referent. On a minimap it points at a place on
 the page and, because each channel is bound to exactly one named attribute, at a specific
-property of the pen. Intensity in the red channel is pressure and nothing else. The channel
-attribution of Section~\ref{sec:xai} is a first and deliberately modest use of that
-property; the same mechanism supports stroke-level saliency, per-task heat maps and
-side-by-side visual comparison against a clinician's own reading of the trace, none of which a
-descriptor vector admits.
+property of the pen: intensity in the red channel is pressure and nothing else. The channel
+attribution of Section~\ref{sec:xai} is a first and modest use of that property; the same
+mechanism supports stroke-level saliency and per-task heat maps, which a descriptor vector does
+not admit.
 
 Two further consequences follow from working on pixels. A raster-level representation does not
 have to be redesigned when the tablet, the sampling rate or the task inventory changes, whereas
 a kinematic descriptor set generally does. And minimaps can be generated in quantity from
 unlabelled handwriting, placing the sample-size limitation within reach of self-supervised
-pretraining, a route unavailable to a pipeline whose input is a fixed-length vector of designed
-features.
+pretraining, which a fixed-length vector of designed features does not allow.
 
 The gap to 81.3\% is therefore a measurement taken at the least favourable point of this
 representation's development, against a figure obtained under a less conservative protocol. It
@@ -871,9 +876,10 @@ numerically equivalent across CPU and GPU implementations down to the rendered p
 normalized per task without reference to labels.
 
 The evidence supports the hypothesis in the form in which it was stated. Under a frozen
-descriptor, classifier, split and threshold, the complete encoding reaches 0.7321 macro F1
-against 0.5597 for a rendering that keeps only trajectory and pen contact, a paired
-subject-level gain of 0.1725 (95\% CI [0.059, 0.287]) surviving Holm--Bonferroni correction. The
+descriptor, classifier, split and threshold, the complete encoding averages 0.6901 macro F1 over
+repeats and reaches 0.7321 pooled, against 0.5597 for a rendering that keeps only trajectory and
+pen contact; the paired subject-level gain of 0.1725 (95\% CI [0.059, 0.287]) survives
+Holm--Bonferroni correction. The
 pseudo-dynamic content accounts for most of the margin above chance in this evaluation.
 Stronger claims are not supported. Neither encoded dimension is individually significant on this
 cohort, the tasks contribute very unevenly, three of the eight were preselected on the same
