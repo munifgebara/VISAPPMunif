@@ -61,21 +61,21 @@ Pen Dynamics Carries Most of the Classification Signal}
 Minimaps, Representation Learning, Online Handwriting, Parkinson's Disease.}
 
 \abstract{Online handwriting from a digitizing tablet carries dynamic information --- pen
-pressure, altitude, azimuth, speed and pen-up trajectories --- lost when the signal is
-rasterized into a binary image. Recovering it usually needs handcrafted kinematic descriptors or
+pressure, altitude, azimuth, speed and pen-up trajectories --- that a binary rasterization
+discards. Recovering it usually needs handcrafted kinematic descriptors or
 sequence models, neither of which lets the computer vision toolchain be used as is. We propose
 \emph{Pseudodynamic Handwriting Minimap Signatures}, an encoding that maps the signal onto a
 single static RGB raster whose colour channels carry pen attributes and whose stroke width
 varies with writing speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per
-task without reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and
-evaluate them under repeated subject-grouped cross-validation. On three tasks, a $2\times2$
+task without reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and evaluate
+them under repeated subject-grouped cross-validation. On three tasks, a $2\times2$
 factorial ablation isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321
 macro F1 against 0.5597 for a position-only rendering, a paired subject-level gain of 0.1725
-surviving Holm correction. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
+surviving Holm correction. The four variants share the task selection, so it does not inflate
+the contrast. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
 representation stays below the handcrafted kinematic and pressure pipeline reported for this
-database; we
-discuss what it buys in exchange: ablatability, device portability, and spatially and physically
-interpretable attribution. This is exploratory research software, not a diagnostic system.}
+database, in exchange for ablatability, device portability and spatially interpretable
+attribution. This is exploratory research software, not a diagnostic system.}
 
 \onecolumn \maketitle \normalsize \setcounter{footnote}{0} \vfill
 
@@ -297,7 +297,7 @@ impossible: writing speed into a colour channel, and letting pressure modulate s
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.90\textwidth]{figures/minimap-examples.png}
+  \includegraphics[width=0.84\textwidth]{figures/minimap-examples.png}
   \caption{Minimap Encoding V2 applied to the Archimedean spiral of two PaHaW subjects, one
   control and one patient. Colour carries pen pressure, altitude and azimuth; stroke width
   varies with writing speed. The two traces are geometrically similar and differ in regularity
@@ -436,7 +436,7 @@ assessment.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.94\textwidth]{figures/viewer-animated.png}
+  \includegraphics[width=0.88\textwidth]{figures/viewer-animated.png}
   \caption{Single-subject mode of the inspection viewer. The tool replays the original execution
   of each task at selectable speed, reporting point count and duration, and exposes the pen
   attributes that the minimap encoding transports into colour channels. Subject metadata is
@@ -598,7 +598,9 @@ Table~\ref{tab:ensemble} reports the fixed-descriptor pipeline on tasks 1, 3 and
 Archimedean spiral, carries most of the signal at 0.7336 macro F1 and 0.7855 ROC AUC. Task 3 is
 weak and task 7 is indistinguishable from chance, with a negative MCC. The reliability-weighted
 ensemble reaches 0.7321 macro F1 (95\% CI [0.6250, 0.8265]), balanced accuracy 0.7326, PD recall
-0.6757, H recall 0.7895, MCC 0.4685 and ROC AUC 0.7575.
+0.6757, H recall 0.7895, MCC 0.4685 and ROC AUC 0.7575. These three tasks were selected in an
+earlier exploratory analysis of this corpus, so the absolute level is optimistic; the eight-task
+screening of Table~\ref{tab:screening} carries no such selection.
 
 \begin{table}[h]
 \vspace{-0.2cm}
@@ -662,7 +664,7 @@ cohort is too small to establish one.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.78\textwidth]{figures/ablation-2x2.png}
+  \includegraphics[width=0.72\textwidth]{figures/ablation-2x2.png}
   \caption{Overview of the $2\times2$ factorial ablation. Top: the four rendering variants
   generated from the same signals. Bottom: subject-level ensemble performance, metric table and
   factorial layout. The ordering shown is descriptive; of the individual contrasts, only the
@@ -708,11 +710,10 @@ fine-tuning does.
 \noindent
 Gradient-based attribution over the convolutional model, aggregated per semantic channel, gives
 a mean relative importance of 0.406 to green (altitude), 0.352 to red (pressure) and 0.243 to
-blue (azimuth), with a bootstrap interval of [0.335, 0.368] for red. The ordering is stable
-across tasks 1, 3 and 7. For PD subjects attribution is higher on green and lower on blue (0.423
-and 0.232) than for controls (0.389 and 0.253). These numbers are exploratory. They describe
-where a weaker model looked, not which attribute carries the discriminative signal, and should
-not be read causally.
+blue (azimuth), with a bootstrap interval of [0.335, 0.368] for red, and the ordering is stable
+across tasks 1, 3 and 7. These numbers are exploratory in a specific sense: they were computed
+on the weaker of the two pipelines, so they describe where that model looked rather than which
+attribute carries the discriminative signal, and should not be read causally.
 
 \subsection{Relation to a Clipping-Based Pipeline}
 \noindent
@@ -791,14 +792,13 @@ corpus and not, as described, recomputed inside each cross-validation fold; the 
 then carry the selection bias that nested inner-fold selection is designed to avoid. We raise
 this to calibrate the gap, not to dispute the finding.
 
-What that buys is a pipeline that never opens the \texttt{.svc} file after generation. No
-kinematic descriptor is designed, no pressure statistic is chosen, no covariate is admitted.
-Everything downstream operates on an ordinary PNG, which is what makes the tooling argument of
-Section~\ref{sec:introduction} concrete: the classifiers used here are stock texture descriptors
-and a stock ResNet, and the ablation of Section~\ref{sec:ablation} was possible only because the
-representation, not the feature set, is the object under test. A feature-engineered pipeline
-cannot be ablated this way, since removing a pressure descriptor removes a number rather than a
-property of the input.
+What that buys is a pipeline that never opens the \texttt{.svc} file after generation: no
+kinematic descriptor designed, no pressure statistic chosen, no covariate admitted. Everything
+downstream operates on an ordinary PNG, and the classifiers used here are a stock texture
+descriptor and a stock ResNet. The ablation of Section~\ref{sec:ablation} was possible only
+because the representation, not the feature set, is the object under test; a feature-engineered
+pipeline cannot be ablated this way, since removing a pressure descriptor removes a number
+rather than a property of the input.
 
 Task 1 illustrates the practical consequence. Drot\'{a}r et al. found no statistically
 significant kinematic feature for the Archimedean spiral and excluded it from their fused model,
@@ -817,12 +817,12 @@ property; the same mechanism supports stroke-level saliency, per-task heat maps 
 side-by-side visual comparison against a clinician's own reading of the trace, none of which a
 descriptor vector admits.
 
-Two further consequences follow from working on pixels. A representation defined at the raster
-level does not have to be redesigned when the tablet, the sampling rate or the task inventory
-changes, whereas a kinematic descriptor set generally does. And minimaps can be generated in
-quantity from unlabelled handwriting, which places the sample-size limitation identified above
-within reach of self-supervised pretraining --- a route unavailable to a pipeline whose input is
-a fixed-length vector of designed features.
+Two further consequences follow from working on pixels. A raster-level representation does not
+have to be redesigned when the tablet, the sampling rate or the task inventory changes, whereas
+a kinematic descriptor set generally does. And minimaps can be generated in quantity from
+unlabelled handwriting, placing the sample-size limitation within reach of self-supervised
+pretraining, a route unavailable to a pipeline whose input is a fixed-length vector of designed
+features.
 
 The gap to 81.3\% is therefore a measurement taken at the least favourable point of this
 representation's development, against a figure obtained under a less conservative protocol. It
@@ -835,9 +835,11 @@ it closes is an empirical question this paper does not settle.
 outer folds do not remove; the screening in Table~\ref{tab:screening}, covering all eight tasks
 without preselection, is the more conservative estimate. The ablation contrast is not affected:
 its four variants share that preselection, so the bias moves them together. The automated reproduction check of the
-screening stage returned \texttt{outside\_descriptive\_tolerance}: the fixed configuration did
-not exactly reproduce the exploratory reference metrics. We did not tune the outer-fold results
-to close that gap, but the discrepancy remains unexplained. The cohort is also small and
+screening stage returned \texttt{outside\_descriptive\_tolerance}: under the frozen protocol the
+fixed configuration reached 0.7062 macro F1 against the 0.7452 recorded during exploratory
+screening, a shortfall of 0.0388. The source of the divergence has not been isolated. It runs
+\emph{below} the reference rather than above it, so the reported figures are the more
+conservative of the two, and the reference values were not used for tuning. The cohort is also small and
 single-source --- 75 subjects, one database, one acquisition protocol --- so device- and
 population-specific effects cannot be separated from the phenomenon, and there is no external
 validation. Per-task scaling profiles are computed over all files of a task; being
