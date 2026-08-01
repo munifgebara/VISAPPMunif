@@ -111,15 +111,13 @@ image file, readable by texture descriptors feeding a linear model \cite{Cortes1
 convolutional network \cite{LeCun1998,He2016} without further preparation.
 
 Posing the task as image classification buys more than convenience. Decades of texture
-descriptors, convolutional architectures, attribution methods, data loaders and evaluation
-practice become usable without a line of signal-specific code. A representation defined on
-pixels also survives changes of acquisition device, sampling rate or task inventory, which a
-kinematic descriptor set typically does not. Models pretrained on large natural-image corpora,
-and the self-supervised objectives built around them, become available in a domain where
-labelled data is scarce. Finally, an image can be looked at, and a feature vector cannot: a
-clinician or a reviewer can inspect exactly what the model consumed and judge whether the
-encoding is tracking motor behaviour or an artifact. Section~\ref{sec:tool} builds on that
-last property.
+descriptors, convolutional architectures, attribution methods and evaluation practice become
+usable without a line of signal-specific code. A representation defined on pixels also survives
+changes of acquisition device, sampling rate or task inventory, which a kinematic descriptor set
+typically does not, and it opens the door to models pretrained on large natural-image corpora.
+Finally, an image can be looked at, and a feature vector cannot: a clinician or a reviewer can
+inspect exactly what the model consumed and judge whether the encoding is tracking motor
+behaviour or an artifact. Section~\ref{sec:tool} builds on that last property.
 
 The term \emph{minimap} comes from work applying the same principle in a very different domain.
 Gebara Jr. et al. showed that the zoomed-out rendering of a source file behaves as a
@@ -181,10 +179,9 @@ inference service, generating anonymized $128 \times 128$ grayscale minimaps per
 validating artifact type, project and author as feasibility benchmarks \cite{Gebara2026}.
 
 CV4Code \cite{Shi2022} rests on the same conviction, encoding a code snippet as a
-two-dimensional ASCII codepoint image and learning from it directly, which avoids lexical and
-syntactic analysis and makes the method language-agnostic. A visual signature, these works
-suggest, can be an adequate substrate for classification even when the source domain is not
-visual at all.
+two-dimensional ASCII codepoint image and learning from it directly, which makes the method
+language-agnostic. A visual signature, these works suggest, can be an adequate substrate for
+classification even when the source domain is not visual at all.
 
 Two properties of that prior art matter here. The source artifacts are \emph{static}: a source
 file has no temporal ordering to preserve. And the encodings are \emph{grayscale}, a single
@@ -297,7 +294,7 @@ impossible: writing speed into a colour channel, and letting pressure modulate s
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.84\textwidth]{figures/minimap-examples.png}
+  \includegraphics[width=0.80\textwidth]{figures/minimap-examples.png}
   \caption{Minimap Encoding V2 applied to the Archimedean spiral of two PaHaW subjects, one
   control and one patient. Colour carries pen pressure, altitude and azimuth; stroke width
   varies with writing speed. The two traces are geometrically similar and differ in regularity
@@ -436,7 +433,7 @@ assessment.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.88\textwidth]{figures/viewer-animated.png}
+  \includegraphics[width=0.84\textwidth]{figures/viewer-animated.png}
   \caption{Single-subject mode of the inspection viewer. The tool replays the original execution
   of each task at selectable speed, reporting point count and duration, and exposes the pen
   attributes that the minimap encoding transports into colour channels. Subject metadata is
@@ -446,7 +443,7 @@ assessment.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.82\textwidth]{figures/viewer-side-by-side.png}
+  \includegraphics[width=0.76\textwidth]{figures/viewer-side-by-side.png}
   \caption{Comparison mode of the inspection viewer. Two subjects performing the same task are
   replayed synchronously under an identical colour scheme, which allows differences in trace
   regularity and speed profile to be assessed directly rather than inferred from a metric.}
@@ -598,9 +595,12 @@ Table~\ref{tab:ensemble} reports the fixed-descriptor pipeline on tasks 1, 3 and
 Archimedean spiral, carries most of the signal at 0.7336 macro F1 and 0.7855 ROC AUC. Task 3 is
 weak and task 7 is indistinguishable from chance, with a negative MCC. The reliability-weighted
 ensemble reaches 0.7321 macro F1 (95\% CI [0.6250, 0.8265]), balanced accuracy 0.7326, PD recall
-0.6757, H recall 0.7895, MCC 0.4685 and ROC AUC 0.7575. These three tasks were selected in an
-earlier exploratory analysis of this corpus, so the absolute level is optimistic; the eight-task
-screening of Table~\ref{tab:screening} carries no such selection.
+0.6757, H recall 0.7895, MCC 0.4685 and ROC AUC 0.7575. That figure averages subject
+probabilities over the five repeats and thresholds once; scoring each repeat separately and
+averaging gives 0.6901 (sd 0.0454), below four of the five repeats. The three tasks were also
+selected in an earlier exploratory analysis of this corpus, so the level is optimistic in a
+second, independent way; the eight-task screening of Table~\ref{tab:screening} carries no such
+selection.
 
 \begin{table}[h]
 \vspace{-0.2cm}
@@ -654,6 +654,14 @@ All four variants are built from the same three tasks and evaluated on the same 
 task preselection discussed in Section~\ref{sec:discussion} shifts the absolute level of every
 row in Table~\ref{tab:ablation} alike and does not inflate the differences between them.
 
+The size of that shift can be estimated. In an auxiliary reimplementation of the same descriptor
+and classifier extended to all eight tasks, selecting tasks inside the training folds instead of
+fixing them lowers subject-level macro F1 from 0.7062 to 0.6261, a gap of 0.0801 (paired subject
+bootstrap 95\% CI [$-0.011$, $+0.173$]). The interval includes zero, so the optimism is estimated
+rather than established. Two details of that selection matter: task 1 is chosen in all 25 outer
+folds, so the spiral's standing does not depend on the preselection, whereas task 7 is chosen in
+one fold out of 25.
+
 Table~\ref{tab:contrasts} reports the paired contrasts. One survives Holm correction: the
 complete encoding against the minimal one, $\Delta = 0.1725$ (95\% CI [0.0589, 0.2868],
 Holm-adjusted $p = 0.031$). No main effect is supported on its own. Each single-factor contrast
@@ -664,7 +672,7 @@ cohort is too small to establish one.
 
 \begin{figure*}[!t]
   \centering
-  \includegraphics[width=0.72\textwidth]{figures/ablation-2x2.png}
+  \includegraphics[width=0.66\textwidth]{figures/ablation-2x2.png}
   \caption{Overview of the $2\times2$ factorial ablation. Top: the four rendering variants
   generated from the same signals. Bottom: subject-level ensemble performance, metric table and
   factorial layout. The ordering shown is descriptive; of the individual contrasts, only the
@@ -725,8 +733,8 @@ with 62 training and 13 test subjects. That pipeline extracts one square clippin
 point --- roughly 83{,}955 clippings for the task --- and aggregates clipping-level predictions
 upward into stroke-, letter- and task-level decisions.
 
-The two sets of figures are not directly comparable. The protocols differ in task, in metric, in
-split design and, decisively, in test-set size: one held-out split of 13 subjects moves by 7.7
+The two sets of figures are not directly comparable. The protocols differ in task, metric, split
+design and, decisively, test-set size: one held-out split of 13 subjects moves by 7.7
 accuracy points per subject, against 25 subject-grouped evaluation rounds with bootstrap
 intervals here. We cite the clipping pipeline to characterize the regime, not to outrank it.
 One property of it does bear recording: clipping-level test accuracy stayed in the 50--52\% band
@@ -832,9 +840,10 @@ it closes is an empirical question this paper does not settle.
 
 \textbf{Threats to validity.} Tasks 1, 3 and 7 were preselected during exploratory analysis
 \emph{on this same corpus}, so the fixed-descriptor results carry an optimistic bias the nested
-outer folds do not remove; the screening in Table~\ref{tab:screening}, covering all eight tasks
-without preselection, is the more conservative estimate. The ablation contrast is not affected:
-its four variants share that preselection, so the bias moves them together. The automated reproduction check of the
+outer folds do not remove. Section~\ref{sec:ablation} puts that bias at roughly 0.08 macro F1,
+and the screening in Table~\ref{tab:screening}, covering all eight tasks without preselection,
+is the more conservative estimate. The ablation contrast is not affected: its four variants share
+the preselection, so the bias moves them together. The automated reproduction check of the
 screening stage returned \texttt{outside\_descriptive\_tolerance}: under the frozen protocol the
 fixed configuration reached 0.7062 macro F1 against the 0.7452 recorded during exploratory
 screening, a shortfall of 0.0388. The source of the divergence has not been isolated. It runs
@@ -870,11 +879,11 @@ Stronger claims are not supported. Neither encoded dimension is individually sig
 cohort, the tasks contribute very unevenly, three of the eight were preselected on the same
 corpus, and no external validation was performed.
 
-One secondary finding is worth carrying forward. On this representation and this cohort,
-standard texture descriptors followed by a linear model outperformed a fine-tuned ResNet-18
-($\Delta = -0.172$, Holm-adjusted $p = 0.040$). Semantic channel encodings and end-to-end deep
-learning sit in tension: the semantics that make the representation auditable also forbid most
-of the augmentation deep models need at this sample size.
+One secondary finding is worth carrying forward. On this cohort, standard texture descriptors
+followed by a linear model outperformed a fine-tuned ResNet-18 ($\Delta = -0.172$, Holm-adjusted
+$p = 0.040$). Semantic channel encodings and end-to-end deep learning sit in tension: the
+semantics that make the representation auditable also forbid most of the augmentation deep
+models need at this sample size.
 
 Several directions follow. Additional online handwriting databases would separate the
 representation from the idiosyncrasies of PaHaW and would remove the preselection bias, since

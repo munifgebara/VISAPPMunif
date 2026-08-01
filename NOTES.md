@@ -127,6 +127,37 @@ cross-validation fold" and "We raise this to calibrate the gap, not to dispute t
 **Do not sharpen this into an accusation.** It was ordinary practice in 2016, and the wording as
 it stands is defensible against a reviewer who knows the paper.
 
+## 3c. Task-preselection experiment (2026-08-01)
+
+Two independent sources of optimism in the 0.7321 headline were quantified. Scripts and full
+output: `task-selection-experiment/` in the project folder.
+
+**1. Aggregation, from the authors' own files.** `repeated_metrics.csv` shows the weighted
+ensemble at 0.7333 / 0.6528 / 0.6528 / 0.7450 / 0.6664 across the five repeats, `repeat_mean`
+0.6901 (sd 0.0454), and `subject_aggregated` 0.7321. Averaging probabilities across repeats and
+thresholding once yields a figure above four of the five repeats. Section 5.2 now reports both.
+
+**2. Task preselection, measured.** The fixed descriptor and classifier were reimplemented and
+extended to all eight tasks (features re-extracted with the project's own `lpq_rgb.py` and
+`visual_stroke_geometry.py`; 597 x 812 matrix). Replacing the fixed {1,3,7} by selection inside
+the training folds of each outer fold:
+
+| protocol | subject-level macro F1 |
+|---|---|
+| fixed {1,3,7} (paper protocol, reimplemented) | 0.7062 |
+| nested top-3 (selection inside train folds) | 0.6261 |
+| gap | +0.0801, paired subject bootstrap 95% CI [-0.011, +0.173] |
+
+The CI includes zero, so the paper says "estimated rather than established". Two selection
+frequencies are reported and both matter: **task 1 is chosen in 25/25 outer folds**, so the
+spiral's standing is not an artefact of preselection, while **task 7 is chosen in 1/25**.
+The set {1,3,7} is never chosen by the unbiased procedure.
+
+Note: the reimplementation of the fixed protocol lands on 0.7062, which is exactly the
+`reproduced` value in `screening_reproduction.json`. That is independent corroboration that
+0.7062 is what the frozen protocol yields, and it explains the `outside_descriptive_tolerance`
+status: the 0.7452 reference is the exploratory value.
+
 ## 4. Caveats the draft states explicitly — verify you are comfortable with each
 
 1. **Preselection bias.** Tasks 1, 3 and 7 were chosen in exploratory analysis on this same
