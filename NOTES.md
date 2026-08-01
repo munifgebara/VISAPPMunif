@@ -204,6 +204,36 @@ columns — effective resolution around 240 dpi, below the 300 dpi the template 
 smallest interface labels are near the limit of legibility in print. Before the camera-ready,
 recapture at a higher device pixel ratio or crop to the informative region.
 
+## 10b. Reviewer pass of 2026-07-27 — what was found and fixed
+
+Every number in the paper was cross-checked against the result files; all 27 matched. Four
+problems were found and fixed, one of them a factual error.
+
+1. **Factual error, Section 5.1 (fixed).** The paper claimed task 8 was "the only one where the
+   selection procedure preferred a descriptor that reads the pseudo-dynamic channels". False.
+   `lpq_features` in `src/pdhms/features/minimap_v2_texture_descriptors.py` computes histograms
+   over luminance **and** R, G, B at three window sizes (4 x 3 x 256 = 3072, matching the cached
+   `n_features`), and `D4_lpq` is the descriptor selected for task 3. Grayscale blocks are not
+   clean either: stroke width survives luminance conversion as geometry. The claim is now
+   narrowed to "the only task whose selected descriptor combines the semantic RGB channels with
+   an explicit stroke-width descriptor", followed by the observation that descriptor selection
+   shows a preference, not an isolation.
+2. **Scale inconsistency (fixed).** The abstract said "We evaluate it on 597 minimaps" two
+   sentences before the ablation result, but the fixed-descriptor pipeline and the ablation use
+   tasks 1/3/7 only: **222 images per variant, 888 across the four ablation variants**. Verified
+   in the `input_table.csv` of each run. Each figure is now stated where it belongs.
+3. **CPU/GPU sample (fixed).** "80 task files covering 8 tasks" is 10 subjects x 8 tasks; the
+   subject count is now stated.
+4. **Missing defence (added).** The four ablation variants share the same three preselected
+   tasks, so the preselection bias moves them together and does not inflate the paired contrast.
+   This is the strongest available answer to the paper's own biggest weakness and was absent.
+   Now stated in both Section 5.3 and the Threats paragraph.
+
+A figure of the minimaps themselves was also added (Figure 1): the Archimedean spiral of one
+control and one patient, with a colour and stroke-width legend, built from
+`dataset/minimaps_v2/task_01/`. The subjects are the same pair shown in the side-by-side viewer
+(Figure 3), which keeps the two figures consistent.
+
 ## 11. The ablation figure — what was changed and why
 
 `figures/ablation-2x2.png` is the supplied infographic with the **"Main findings" box removed**.

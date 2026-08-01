@@ -67,11 +67,11 @@ sequence models, neither of which lets the computer vision toolchain be used as 
 \emph{Pseudodynamic Handwriting Minimap Signatures}, an encoding that maps the signal onto a
 single static RGB raster whose colour channels carry pen attributes and whose stroke width
 varies with writing speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per
-task without reference to class labels. We evaluate it on 597 minimaps from the 75 PaHaW
-subjects under repeated subject-grouped cross-validation. A $2\times2$ factorial ablation
-isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321 macro F1 against
-0.5597 for a position-only rendering, a paired subject-level gain of 0.1725 surviving Holm
-correction. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
+task without reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and
+evaluate them under repeated subject-grouped cross-validation. On three tasks, a $2\times2$
+factorial ablation isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321
+macro F1 against 0.5597 for a position-only rendering, a paired subject-level gain of 0.1725
+surviving Holm correction. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
 representation stays below published handcrafted-descriptor pipelines on this database; we
 discuss what it buys in exchange: ablatability, device portability, and spatially and physically
 interpretable attribution. This is exploratory research software, not a diagnostic system.}
@@ -271,7 +271,8 @@ semantic value may be confused with the empty canvas. \emph{Label independence}:
 build the image may depend on the class label of any sample, or the representation leaks
 supervision into the evaluation downstream.
 
-Table~\ref{tab:encoding} summarizes the assignment. Two things the encoding deliberately avoids
+Table~\ref{tab:encoding} summarizes the assignment, and Figure~\ref{fig:minimaps} shows the
+result on one control and one patient performing the same task. Two things the encoding deliberately avoids
 are worth naming, since earlier iterations did both and made channel-level attribution
 impossible: writing speed into a colour channel, and letting pressure modulate stroke width.
 
@@ -292,6 +293,17 @@ impossible: writing speed into a colour channel, and letting pressure modulate s
   \hline
 \end{tabular}
 \end{table}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.90\textwidth]{figures/minimap-examples.png}
+  \caption{Minimap Encoding V2 applied to the Archimedean spiral of two PaHaW subjects, one
+  control and one patient. Colour carries pen pressure, altitude and azimuth; stroke width
+  varies with writing speed. The two traces are geometrically similar and differ in regularity
+  and in the speed and inclination profiles that the encoding exposes. Both images are inputs to
+  the classifiers exactly as shown.}
+  \label{fig:minimaps}
+\end{figure*}
 
 \subsection{Semantic Range}
 \noindent
@@ -390,8 +402,8 @@ the configuration version, the source file and a SHA-256 checksum of the output.
 Generation of the 597 minimaps used here (Section~\ref{sec:setup}) was validated automatically.
 All 597 images passed the structural audit: no broken file, no residual reference to an earlier
 encoding version, and stroke widths spanning exactly the specified 1 to 8 pixels. CPU and CUDA
-implementations were compared segment by segment on 80 task files covering 8 tasks. Rendered RGB
-values differed by exactly $0$, normalized speeds by at most $2.22 \times 10^{-16}$, one unit in
+implementations were compared segment by segment on 80 task files, covering all eight tasks for
+ten subjects. Rendered RGB values differed by exactly $0$, normalized speeds by at most $2.22 \times 10^{-16}$, one unit in
 the last place of double precision, and stroke widths matched on every segment. Equivalence holds
 at the level of the rendered pixels, which is the level the classifiers see.
 
@@ -531,8 +543,9 @@ identity samples, zero clipped and zero foreground-preservation failures.
 \subsection{Factorial Ablation}
 \label{sec:ablation-setup}
 \noindent
-Four rendering variants were generated from the same signals in a $2\times2$ design crossing
-semantic colour with speed-driven stroke width. \textsc{Mono\_Fixed} keeps position, trajectory
+Four rendering variants were generated from the same signals of tasks 1, 3 and 7 in a
+$2\times2$ design crossing semantic colour with speed-driven stroke width, giving 222 images per
+variant and 888 in total. \textsc{Mono\_Fixed} keeps position, trajectory
 and pen contact as a monochrome fixed-width line; \textsc{Rgb\_Fixed} adds the semantic colour
 channels; \textsc{Mono\_Speed} adds speed-driven stroke width; \textsc{Rgb\_Speed\_V2} is the
 complete encoding. Descriptor, classifier, splits and threshold stay fixed across all four, so
@@ -548,9 +561,13 @@ variant, the minimal one included.
 Table~\ref{tab:screening} reports the nested screening over the eight PaHaW tasks. Taken
 individually most tasks carry weak signal: seven of the eight fall between 0.525 and 0.556 macro
 F1, their confidence intervals comfortably covering chance. Task 8 is the exception at 0.6682,
-and it is also the only task whose selected descriptor combines RGB LBP with stroke-width
-texture --- the only one, in other words, where the selection procedure preferred a descriptor
-that reads the pseudo-dynamic channels. Fusing all eight with reliability weights raises macro
+and it is the only task whose selected descriptor combines the semantic RGB channels with an
+explicit stroke-width descriptor. Descriptor selection is a weak instrument here, however: no
+descriptor in the inventory is blind to the pseudo-dynamic content. The LPQ block selected for
+task 3 is computed over the luminance channel \emph{and} over R, G and B, and even the grayscale
+blocks retain stroke width, which survives luminance conversion as geometry. What descriptor
+selection can show is a preference, not an isolation; the isolation is what
+Section~\ref{sec:ablation} provides. Fusing all eight tasks with reliability weights raises macro
 F1 to 0.6925 (95\% CI [0.5840, 0.7928], balanced accuracy 0.6927, MCC 0.3871).
 
 \begin{table}[h]
@@ -575,7 +592,8 @@ Macro F1 with 95\% bootstrap confidence interval.}
 
 \subsection{Fixed Descriptor and Subject-Level Fusion}
 \noindent
-Table~\ref{tab:ensemble} reports the fixed-descriptor pipeline on tasks 1, 3 and 7. Task 1, the
+Table~\ref{tab:ensemble} reports the fixed-descriptor pipeline on tasks 1, 3 and 7, that is on
+222 of the 597 generated minimaps. Task 1, the
 Archimedean spiral, carries most of the signal at 0.7336 macro F1 and 0.7855 ROC AUC. Task 3 is
 weak and task 7 is indistinguishable from chance, with a negative MCC. The reliability-weighted
 ensemble reaches 0.7321 macro F1 (95\% CI [0.6250, 0.8265]), balanced accuracy 0.7326, PD recall
@@ -628,6 +646,10 @@ an identical descriptor, classifier, split and threshold.}
   \hline
 \end{tabular}
 \end{table}
+
+All four variants are built from the same three tasks and evaluated on the same folds, so the
+task preselection discussed in Section~\ref{sec:discussion} shifts the absolute level of every
+row in Table~\ref{tab:ablation} alike and does not inflate the differences between them.
 
 Table~\ref{tab:contrasts} reports the paired contrasts. One survives Holm correction: the
 complete encoding against the minimal one, $\Delta = 0.1725$ (95\% CI [0.0589, 0.2868],
@@ -808,7 +830,8 @@ it closes is an empirical question this paper does not settle.
 \textbf{Threats to validity.} Tasks 1, 3 and 7 were preselected during exploratory analysis
 \emph{on this same corpus}, so the fixed-descriptor results carry an optimistic bias the nested
 outer folds do not remove; the screening in Table~\ref{tab:screening}, covering all eight tasks
-without preselection, is the more conservative estimate. The automated reproduction check of the
+without preselection, is the more conservative estimate. The ablation contrast is not affected:
+its four variants share that preselection, so the bias moves them together. The automated reproduction check of the
 screening stage returned \texttt{outside\_descriptive\_tolerance}: the fixed configuration did
 not exactly reproduce the exploratory reference metrics. We did not tune the outer-fold results
 to close that gap, but the discrepancy remains unexplained. The cohort is also small and
