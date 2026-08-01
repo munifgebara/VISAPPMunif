@@ -158,6 +158,16 @@ Note: the reimplementation of the fixed protocol lands on 0.7062, which is exact
 0.7062 is what the frozen protocol yields, and it explains the `outside_descriptive_tolerance`
 status: the 0.7452 reference is the exploratory value.
 
+## 3d. Channel Attribution subsection removed (2026-08-01)
+
+Section 5.5 was deleted. Three independent analyses showed that gradient attribution over the
+convolutional model told an incomplete story: coefficient aggregation on the texture pipeline is
+degenerate (R/G/B come out at 0.346/0.334/0.320, essentially uniform); block ablation shows that
+**removing the azimuth channel improves** macro F1 on all three tasks; and occlusion analysis
+shows a strong class asymmetry that a sum-to-one relative importance cannot express. Keeping a
+result the authors know to be contradicted by a stronger pipeline was the larger risk. Material
+is preserved in `xai-level1/` and `xai-level2/` for the next paper.
+
 ## 4. Caveats the draft states explicitly — verify you are comfortable with each
 
 1. **Preselection bias.** Tasks 1, 3 and 7 were chosen in exploratory analysis on this same
@@ -178,6 +188,11 @@ In the `\else` branch of the anonymization switch:
 - affiliation, city, country for authors 1 and 3 (Munif Gebara Junior, Yandre) and author 2
   (Ángel Sánchez Calle)
 - e-mail addresses; ORCIDs if `\orcidAuthor{}` is used as in the template
+- ~~affiliations, e-mails~~ — **resolved 2026-08-01**: authors 1 and 3 at Departamento de
+  Informatica, Universidade Estadual de Maringa, Maringa, Brazil; author 2 at Escuela Tecnica
+  Superior de Ingenieria Informatica, Universidad Rey Juan Carlos, Mostoles, Madrid, Spain.
+  Verified against the UEM Informatics department page and the URJC staff directory. ORCIDs are
+  still missing if `\orcidAuthor{}` is to be used.
 - ~~the third author's full name~~ — **resolved**: Yandre Maldonado e Gomes da Costa. Note that
   `refs.bib` deliberately keeps the abbreviated published byline *Yandre M. G. Costa* for the two
   self-citations, because that is the form printed on those papers; expanding it would also break
