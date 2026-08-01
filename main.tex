@@ -66,16 +66,16 @@ discards. Recovering it usually needs handcrafted kinematic descriptors or seque
 neither of which lets the computer vision toolchain be reused. We propose \emph{Pseudodynamic
 Handwriting Minimap Signatures}, an encoding that maps the signal onto a single static RGB
 raster whose colour channels carry pen attributes and whose stroke width varies with writing
-speed. It is deterministic, versioned, CPU/GPU-equivalent and normalized per task without
-reference to class labels. We generate 597 minimaps from the 75 PaHaW subjects and evaluate them
-under repeated subject-grouped cross-validation. On three tasks, a $2\times2$ factorial ablation
+speed. It is deterministic, versioned and normalized per task without reference to
+class labels. We generate 597 minimaps from the 75 PaHaW subjects and evaluate them under
+repeated subject-grouped cross-validation. On three tasks, a $2\times2$ factorial ablation
 isolates the pseudo-dynamic contribution: the full encoding averages 0.6901 subject-level macro
 F1 over repeats, 0.7321 pooled, against 0.5597 for a position-only rendering. The paired gain of
-0.1725 survives Holm correction, and the four variants share the task selection, so it does not
-inflate the contrast. A fine-tuned ResNet-18 performed worse than standard texture descriptors.
-The representation stays below the handcrafted pipeline reported for this database, in exchange
-for ablatability, device portability and interpretable attribution. This is exploratory research
-software, not a diagnostic system.}
+0.1725 survives Holm correction. A fine-tuned ResNet-18 performed worse than standard texture
+descriptors. Overall the representation stays below the handcrafted kinematic and pressure
+pipeline reported for this database, but on the Archimedean spiral, the one task for which that
+pipeline reports no significant kinematic feature, it reaches 0.719 balanced accuracy against
+62.8\%. This is exploratory research software, not a diagnostic system.}
 
 \onecolumn \maketitle \normalsize \setcounter{footnote}{0} \vfill
 
@@ -784,8 +784,18 @@ the reader to find.
 Its size depends on which figure is compared: about eight points against our pooled 0.7321,
 about twelve against the per-repeat average. It may be narrower than either, since the reference
 is itself the product of a less conservative protocol, as noted below, and carries no reported
-confidence interval. The comparison places the two approaches in the same range rather than
-separating them by a measured amount.
+confidence interval.
+
+The aggregate comparison also hides a reversal. Per task, \cite{Drotar2016} report 62.8\%
+accuracy on the Archimedean spiral, obtained from pressure features alone because no kinematic
+feature reached significance on that task. Our figure for the same task on the same database is
+0.7194 balanced accuracy averaged over repeats, 0.7361 pooled, about nine points above. The
+comparison is closer to like-for-like than the aggregate one: same task, same cohort, single
+task on both sides, and neither figure benefits from task fusion. Two differences still favour
+us and should be noted, namely that their task-1 subset has 69 subjects against our 72, and that
+their filter was computed on the labelled corpus. The nested selection of
+Section~\ref{sec:ablation} adds that the spiral is chosen in all 25 outer folds, so its standing
+here is not an artefact of preselection.
 
 Two properties of that comparison are worth making explicit. Neither work uses demographic or
 clinical covariates: sex, age, disease duration, UPDRS-V and levodopa equivalent dose appear in
