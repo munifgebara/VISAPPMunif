@@ -72,7 +72,8 @@ evaluate them under repeated subject-grouped cross-validation. On three tasks, a
 factorial ablation isolates the pseudo-dynamic contribution: the full encoding reaches 0.7321
 macro F1 against 0.5597 for a position-only rendering, a paired subject-level gain of 0.1725
 surviving Holm correction. A fine-tuned ResNet-18 performed worse than standard texture descriptors. The
-representation stays below published handcrafted-descriptor pipelines on this database; we
+representation stays below the handcrafted kinematic and pressure pipeline reported for this
+database; we
 discuss what it buys in exchange: ablatability, device portability, and spatially and physically
 interpretable attribution. This is exploratory research software, not a diagnostic system.}
 
@@ -243,9 +244,9 @@ trusted in a sensitive domain.
 Minimaps, then, have been validated as visual signatures for static textual artifacts under a
 grayscale encoding; signal-to-image methods for time series under encodings that discard spatial
 correspondence; handwriting-specific pseudo-dynamic images under encodings that embed dynamics
-implicitly. Untested is a representation that is at once spatially faithful, multi-attribute,
-semantically explicit and formally specified, applied to a temporally sampled signal. Nor has
-the contribution of each encoded attribute been isolated experimentally.
+implicitly. We are not aware of a representation that is at once spatially faithful, multi-attribute,
+semantically explicit and formally specified, applied to a temporally sampled signal, nor of a
+study isolating the contribution of each encoded attribute experimentally.
 
 % ===========================================================================
 \section{\uppercase{Pseudodynamic Minimap Signatures}}
@@ -548,8 +549,8 @@ $2\times2$ design crossing semantic colour with speed-driven stroke width, givin
 variant and 888 in total. \textsc{Mono\_Fixed} keeps position, trajectory
 and pen contact as a monochrome fixed-width line; \textsc{Rgb\_Fixed} adds the semantic colour
 channels; \textsc{Mono\_Speed} adds speed-driven stroke width; \textsc{Rgb\_Speed\_V2} is the
-complete encoding. Descriptor, classifier, splits and threshold stay fixed across all four, so
-differences are attributable to the representation alone. Pen contact is present in every
+complete encoding. Descriptor, classifier, splits and threshold stay fixed across all four, so any difference
+between variants is attributable to the rendering. Pen contact is present in every
 variant, the minimal one included.
 
 % ===========================================================================
@@ -723,8 +724,8 @@ with 62 training and 13 test subjects. That pipeline extracts one square clippin
 point --- roughly 83{,}955 clippings for the task --- and aggregates clipping-level predictions
 upward into stroke-, letter- and task-level decisions.
 
-Those numbers do not belong in the same table as ours. The protocols differ in task, in metric,
-in split design and, decisively, in test-set size: one held-out split of 13 subjects moves by 7.7
+The two sets of figures are not directly comparable. The protocols differ in task, in metric, in
+split design and, decisively, in test-set size: one held-out split of 13 subjects moves by 7.7
 accuracy points per subject, against 25 subject-grouped evaluation rounds with bootstrap
 intervals here. We cite the clipping pipeline to characterize the regime, not to outrank it.
 One property of it does bear recording: clipping-level test accuracy stayed in the 50--52\% band
@@ -746,11 +747,13 @@ leaves the representation as the only source of the difference.
 
 \textbf{Neither factor is sufficient alone.} No main effect reached significance after
 correction, yet the combination did, and each factor is worth roughly twice as much in the
-presence of the other. The two dimensions appear to be complementary rather than redundant.
-Stroke width localizes \emph{where} the movement slowed; the colour channels describe \emph{how
-the pen was held and pressed} while it slowed. The descriptor screening points the same way: the
-only task whose selected descriptor combined colour with stroke-width texture is also the only
-task that clearly exceeded chance on its own.
+presence of the other. The pattern is consistent with the two dimensions being
+complementary rather than redundant. One reading, which these data support but do not establish,
+is that stroke width localizes \emph{where} the movement slowed while the colour channels
+describe \emph{how the pen was held and pressed} while it slowed. The descriptor screening is
+weakly consistent with this: the only task whose selected descriptor combined colour with an
+explicit stroke-width block is also the only task that exceeded chance on its own. Descriptor
+selection is not evidence of isolation, so the observation carries little weight by itself.
 
 \textbf{Why the convolutional model lost.} Both pipelines consume the same pixels, so the
 negative CNN result says nothing against the representation. It says something about sample
@@ -784,9 +787,9 @@ clinical covariates: sex, age, disease duration, UPDRS-V and levodopa equivalent
 all derived from the handwriting itself. On that axis the comparison is fair. The evaluation
 protocols, however, are not equally conservative. Features in \cite{Drotar2016} were retained by
 a Mann--Whitney $U$ filter computed between the PD and control groups, applied to the labelled
-corpus and not, as described, recomputed inside each cross-validation fold; the reported figure
-therefore carries a selection bias that nested inner-fold selection is designed to avoid. We
-raise this to calibrate the gap, not to dispute the finding.
+corpus and not, as described, recomputed inside each cross-validation fold; the reported figure would
+then carry the selection bias that nested inner-fold selection is designed to avoid. We raise
+this to calibrate the gap, not to dispute the finding.
 
 What that buys is a pipeline that never opens the \texttt{.svc} file after generation. No
 kinematic descriptor is designed, no pressure statistic is chosen, no covariate is admitted.
@@ -860,7 +863,7 @@ The evidence supports the hypothesis in the form in which it was stated. Under a
 descriptor, classifier, split and threshold, the complete encoding reaches 0.7321 macro F1
 against 0.5597 for a rendering that keeps only trajectory and pen contact, a paired
 subject-level gain of 0.1725 (95\% CI [0.059, 0.287]) surviving Holm--Bonferroni correction. The
-pseudo-dynamic content is not decorative; it is the larger part of what the classifier uses.
+pseudo-dynamic content accounts for most of the margin above chance in this evaluation.
 Stronger claims are not supported. Neither encoded dimension is individually significant on this
 cohort, the tasks contribute very unevenly, three of the eight were preselected on the same
 corpus, and no external validation was performed.
@@ -876,9 +879,9 @@ representation from the idiosyncrasies of PaHaW and would remove the preselectio
 task selection could then be transferred rather than repeated. A third encoding iteration should
 be driven by the interaction observed here rather than by intuition, testing alternative channel
 assignments and stroke-width functions under the same factorial protocol. Minimaps are ordinary
-images and can be generated in quantity from unlabelled handwriting, which makes self-supervised
-pretraining the most direct answer to the sample-size limitation and the likeliest route to a
-competitive convolutional model. The explicit channel semantics also make attribution unusually
+images and can be generated in quantity from unlabelled handwriting, so self-supervised
+pretraining is a direct way to address the sample-size limitation identified here, and worth
+testing before concluding that convolutional models are unsuited to this representation. The explicit channel semantics also make attribution unusually
 interpretable, since a saliency map over the red channel is a statement about pressure rather
 than about an anonymous feature; turning the exploratory attribution reported here into a
 validated instrument, on a model strong enough to be worth interrogating, is the natural
