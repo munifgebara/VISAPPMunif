@@ -1,6 +1,9 @@
 \section{\uppercase{From Texture to Learned Features}}
 \label{sec:classifiers}
 
+\noindent
+The encoding comparison leads to a second question: how does the selected representation interact with the classifier? Keeping $SAZ$ and the participant partitions fixed, we compare models fitted to LPQ features with a CNN that learns directly from pixels.
+
 \subsection{Linear and Tree-Based Alternatives}
 \noindent
 With the $SAZ$ image fixed, we compare SVM with regularized logistic regression and Random Forest. All three consume the same 768 LPQ attributes. Logistic regression is a useful linear reference because it can succeed without fitting a nonlinear decision boundary. We search $L_1$ and $L_2$ penalties with $C\in\{0.001,0.01,0.1,1,10,100\}$, using the liblinear solver and inverse-frequency class weights. Standardization remains inside the training pipeline.

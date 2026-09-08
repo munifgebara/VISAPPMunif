@@ -1,6 +1,9 @@
 \section{\uppercase{What Does the CNN Use?}}
 \label{sec:xai}
 
+\noindent
+The preceding classification scores leave open how the CNN uses the encoded images. We examine whether its predictions depend on the handwriting region or on image placement and background, then compare spatial explanations and responses to perturbations.
+
 \subsection{Explanations of Held-Out Predictions}
 \begin{figure*}[t]
 \centering
@@ -9,7 +12,7 @@
 \label{fig:xai-examples}
 \end{figure*}
 \noindent
-The CNN's weak classification result raises a specific question: do its predictions depend on the handwriting region, or on artefacts of image placement and background? We apply XAI after freezing all outer checkpoints. Each image is explained by the exact checkpoint that produced its held-out prediction, rather than by a model fitted later to the entire cohort.
+We apply XAI after freezing all outer checkpoints. Each image is explained by the exact checkpoint that produced its held-out prediction, rather than by a model fitted later to the entire cohort.
 
 Grad-CAM weights convolutional activation maps with gradients of a target score \cite{Selvaraju2017}. We target the originally predicted class and use the last ReLU before the fourth pooling layer. At this point the spatial map is $16\times16$ for a $128\times128$ input. For activation map $A^k$ and predicted-class logit $g_c$, the attribution is
 \begin{equation}
