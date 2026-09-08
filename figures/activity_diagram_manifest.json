@@ -1,0 +1,46 @@
+{
+  "status": "approved_by_user_for_manuscript_insertion",
+  "generator": "scripts/generate_activity_diagram.py",
+  "date": "2026-09-08",
+  "raster_size": [
+    2400,
+    2848
+  ],
+  "dpi": 300,
+  "height_mm_at_158mm_width": 187.51439999999997,
+  "minimum_text_pt_at_158mm_width": 7.464566929133858,
+  "caption": "Illustrated activity diagram of the incremental study. The tablet contains a reconstructed PaHaW spiral; its outline and stylus are schematic. The loop evaluates static geometry, four single-signal encodings and all four three-signal RGB combinations with LPQ and SVM. Participant-separated outer assignments are shared across tasks and methods. Selecting SAZ from the outer scores is exploratory. Independent classifier branches reuse those assignments; SVM predictions are retained from the encoding experiment. The CNN selects epochs on the first inner holdout. Task scores and participant voting are distinct endpoints. XAI uses only the CNN checkpoints responsible for the held-out predictions. The final illustrations show the SVM task-vote confusion matrix (row-normalized within each repetition, then averaged) and the previously selected median-confidence correctly classified PD case on task 4, with its original Grad-CAM. These two illustrations summarize different analyses and are not a matched case pair.",
+  "source_sha256": {
+    "experiments/2026-09-restart/runs/static-svm-v1/metrics/image_manifest.csv": "8433fb71fbccd1b20c2725eb832023ada801e95c0e40ef233205f998d6c70380",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/metrics/image_manifest.csv": "19bf6a18e783553174b31ff91b66dc2a8bd3c3ee6a4f2e988e9c0d1e728b030c",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/figure_example_selection.csv": "dcc6ee71c8a2109ecba607b4a65739635819630588a0ab926ed789500d99cedc",
+    "experiments/2026-09-restart/runs/cnn-v1/metrics/fused_majority_predictions.csv": "6c14ba833852d5905e5a89a4ba10690cca22138d313a4084ae3826e09e6ebbcc",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_01/subject_00026_task_01_static.png": "4e758f086963da34fc115b4dcfff0cf49adabdb3504cca98ab08a44656492d23",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00019_task_04_speed_altitude_azimuth.png": "710118b3d296e8042f08fd1ae51a75cc75298f6ca02e341ad91195702959b5b8",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/maps/spatial_maps.npz": "ae1991b7dca49836c3e3cb8b591ece2ed297ca5840f93739ab4e8d9a0e071e29"
+  },
+  "illustrations": {
+    "input_spiral_subject_id": "00026",
+    "xai_prediction_index": 523,
+    "xai_task_id": 4,
+    "xai_subject_id": "00019",
+    "xai_probability_pd": 0.5636729001998901,
+    "svm_row_normalized_confusion_mean": [
+      [
+        0.5894736842105263,
+        0.41052631578947363
+      ],
+      [
+        0.2864864864864865,
+        0.7135135135135136
+      ]
+    ]
+  },
+  "uml": {
+    "initial_final_nodes": true,
+    "loop": "Merge before rendering; decision after SVM evaluation, yes/no guards.",
+    "fork_join": "Independent classical and CNN analysis branches; shared participant folds."
+  },
+  "draft_page_policy": "Page limit may be exceeded for advisor review; cuts deferred to Yandre and Angel.",
+  "approved_date": "2026-09-08"
+}

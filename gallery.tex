@@ -1,5 +1,7 @@
 % Editable figure-selection gallery. Compile separately from main.tex.
-% The 12 manuscript pages precede this gallery in the editorial PDF.
+% The current main manuscript precedes this gallery in the editorial PDF.
+% build_paper.py updates gallery_start.tex after compiling main.tex; the same
+% file is included in the Overleaf package for standalone gallery compilation.
 \documentclass[11pt,a4paper]{article}
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
@@ -13,6 +15,7 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0pt}
 \pagestyle{plain}
+\input{gallery_start.tex}
 
 % One non-floating panel per page. The image always retains its aspect ratio.
 % Arguments: identifier/title, PDF basename, scientific caption, editorial option.
@@ -31,7 +34,7 @@
 }
 
 \begin{document}
-\setcounter{page}{13}
+\setcounter{page}{\galleryfirstpage}
 
 \gallerypage{A1. Isolated dynamic signals}{single_signals}
 {The same spiral recordings rendered with speed, pressure, altitude or azimuth in the red channel; green and blue remain at 30. The two participants were chosen by a fixed identifier rule, without reference to prediction quality. Scaling uses within-recording fifth and ninety-fifth percentiles of surface-segment values; speed is log-transformed and azimuth is circularly centred.}

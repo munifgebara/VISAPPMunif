@@ -1,5 +1,9 @@
 # Entrega da reescrita integral
 
+Atualização de 8 de setembro de 2026: diagrama de atividade aprovado e incluído
+como Figura 1, na página 2. O rascunho ampliado é destinado à discussão dos cortes
+com os orientadores Yandre e Ángel, conforme autorização do usuário.
+
 O artigo foi refeito em inglês no template SCITEPRESS, partindo da geometria estática
 e avançando para sinais isolados, combinações RGB, LPQ com SVM, outros classificadores,
 fusão de tarefas e XAI da CNN. O experimento de largura do traço foi excluído do texto
@@ -9,15 +13,16 @@ e da galeria. A espessura constante aparece apenas como parâmetro de renderiza�
 
 | Arquivo | Conteúdo |
 |---|---|
-| `output/pdf/manuscript.pdf` | 12 páginas; 7 figuras principais, 3 tabelas e 12 referências citadas |
-| `output/pdf/manuscript_with_figure_alternatives.pdf` | O mesmo artigo, seguido de 12 figuras alternativas nas páginas 13–24 |
-| `output/pdf/manuscript_overleaf.zip` | Fontes LaTeX, bibliografia, template, figuras PDF/PNG e registros de revisão |
+| `output/pdf/manuscript.pdf` | 13 páginas; 8 figuras principais, 3 tabelas e 12 referências citadas |
+| `output/pdf/manuscript_with_figure_alternatives.pdf` | O mesmo artigo, seguido de 12 figuras alternativas nas páginas 14–25 |
+| `output/pdf/manuscript_overleaf.zip` | Fontes LaTeX, bibliografia, template, figuras PDF/PNG, SVG do diagrama, fontes dos geradores e registros de revisão |
 
-O resumo tem 171 palavras. A extração do PDF principal contabiliza 36.933 caracteres
-sem espaços, incluindo texto extraível de tabelas, gráficos e referências. O log final
+O resumo tem 171 palavras. A contagem atual de caracteres está no manifesto de build,
+incluindo texto extraível de tabelas, gráficos e referências. O log final
 não contém referências indefinidas, caracteres ausentes ou caixas transbordando.
-As 24 páginas foram renderizadas e abertas individualmente; os relatórios finais
-de QA estão nesta pasta. O manifesto de build registra os hashes dos arquivos.
+Os relatórios `activity_insertion_main_qa.md` e `activity_insertion_gallery_qa.md`
+registram a inspeção do rascunho ampliado. O manifesto de build registra os hashes
+dos arquivos. A galeria é renumerada automaticamente após o corpo completo.
 
 ## Revisão realizada e incorporada
 
@@ -27,7 +32,9 @@ revisão editorial examinou estrutura, precisão das referências e apresentaç�
 Foram removidas duas tabelas que repetiam gráficos, corrigidas atribuições
 bibliográficas, explicitados os limites da seleção da codificação, detalhados os
 alvos de Grad-CAM e melhorados os rótulos das figuras. O conteúdo foi reduzido de
-15 para 12 páginas sem diminuir fontes ou margens do template.
+15 para 12 páginas sem diminuir fontes ou margens do template na primeira entrega.
+O diagrama aprovado acrescenta uma página ao rascunho atual; os oito painéis
+principais permanecem no artigo, sem cortes para retornar ao limite anterior.
 
 Os critérios de qualidade vieram de três artigos VISAPP, identificados com DOI em
 `bibliography_audit.md`: definição explícita do método, figuras que respondem ao
@@ -48,6 +55,7 @@ permanecem condicionais: SAZ não mostrou vantagem estatística clara sobre est�
 e o ranking após fusão não demonstrou diferença entre os classificadores.
 
 Esta é a versão revisada para leitura dos autores e escolha das figuras. A galeria
-permite trocar as ilustrações sem ampliar o corpo de 12 páginas. O registro sobre a
+permite comparar alternativas enquanto os orientadores discutem o rascunho ampliado.
+O registro sobre a
 declaração de assistência por IA está em `ai_disclosure.md`; a submissão não foi
 realizada nem aprovada em nome dos autores.

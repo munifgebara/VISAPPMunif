@@ -1,5 +1,11 @@
 \section{\uppercase{Introduction}}
 \label{sec:introduction}
+\begin{figure*}[p]
+\centering
+\includegraphics[width=\textwidth]{activity_diagram.pdf}
+\caption{Illustrated activity diagram of the incremental study. Nine encodings are evaluated with LPQ and SVM using participant-separated outer folds. Selecting $SAZ$ from the outer scores is exploratory. The classifier branches reuse the participant assignments; LR denotes logistic regression and RF random forest. Task scores and participant voting are distinct endpoints. XAI uses the CNN checkpoints responsible for the held-out predictions. The final illustrations show an aggregate SVM confusion matrix and one previously selected CNN explanation, from different analyses. The tablet and stylus are schematic; the handwriting and results are from the recorded experiments.}
+\label{fig:activity}
+\end{figure*}
 \noindent
 A handwritten line shows where the pen travelled. It does not show how quickly the pen moved, how firmly it pressed, or how its inclination changed. A digitizing tablet records these quantities together with the planar trajectory. The representation problem is to make them available to an image classifier without losing the recognizable structure of the writing.
 
@@ -13,4 +19,10 @@ Handwriting classification has often used explicitly designed kinematic and pres
 
 The closest representation precedent is the dynamically enhanced handwriting of Diaz et al. \cite{Diaz2019}. Their images encode movement through acquired points and pen-up trajectories. Our experiment instead assigns named signals to colour channels while holding the visible trajectory fixed. This gives each added measurement a defined spatial and chromatic role that can be tested against the same static reconstruction.
 
-Our contribution is an incremental evaluation of explicit colour encoding: a static baseline, four isolated signals and four RGB combinations under identical participant splits, followed by classifier comparison, task fusion and CNN explanation. The colour encoding carried forward was selected from its cross-validated results on this cohort. The downstream comparison is consequently exploratory, with no independent test of representation selection.
+Our contribution is an incremental evaluation of explicit colour encoding: a static baseline, four isolated signals and four RGB combinations under identical participant splits, followed by classifier comparison, task fusion and CNN explanation.
+
+\begin{samepage}
+The colour encoding carried forward was selected from its cross-validated results on this cohort. The downstream comparison is consequently exploratory, with no independent test of representation selection.
+\end{samepage}
+
+Figure~\ref{fig:activity} connects the representation experiments to the classifier and XAI analyses. The loop isolates the encoding comparison; the two later branches reuse its participant partitions.

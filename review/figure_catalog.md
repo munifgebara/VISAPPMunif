@@ -4,6 +4,12 @@ All charts derive from frozen experiment outputs. The excluded experiment is abs
 
 ## Figure selection
 
+### activity_diagram
+
+Suggested placement: **main**. PNG: 2400 × 2848 px. Files: `paper/figures/activity_diagram.pdf` and `.png`.
+
+Illustrated activity diagram of the incremental study. The tablet contains a reconstructed PaHaW spiral; its outline and stylus are schematic. The loop evaluates static geometry, four single-signal encodings and all four three-signal RGB combinations with LPQ and SVM. Participant-separated outer assignments are shared across tasks and methods. Selecting SAZ from the outer scores is exploratory. Independent classifier branches reuse those assignments; SVM predictions are retained from the encoding experiment. The CNN selects epochs on the first inner holdout. Task scores and participant voting are distinct endpoints. XAI uses only the CNN checkpoints responsible for the held-out predictions. The final illustrations show the SVM task-vote confusion matrix (row-normalized within each repetition, then averaged) and the previously selected median-confidence correctly classified PD case on task 4, with its original Grad-CAM. These two illustrations summarize different analyses and are not a matched case pair.
+
 ### progressive_encoding
 
 Suggested placement: **main**. PNG: 1819 × 805 px. Files: `paper/figures/progressive_encoding.pdf` and `.png`.
