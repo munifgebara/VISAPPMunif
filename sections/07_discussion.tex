@@ -2,25 +2,31 @@
 \label{sec:discussion}
 
 \noindent
-The observed encoding gains vary across tasks, while LPQ-based models outperform the tested CNN on the selected encoding. We interpret these findings in terms of the information retained by the representation, compare them with earlier PaHaW studies, and examine the limits of the evaluation and attribution analyses.
+The controlled extensions show how the evidence depends on the encoding, task set and classification endpoint. We examine selection within training, spatially aligned signals and competitive models before relating the findings to earlier handwriting studies.
 
-\subsection{What the Incremental Comparison Establishes}
+\subsection{Encoding and Spatial Organization}
 \noindent
-$SAZ$ improves observed macro F1 on four tasks, with an increase of 0.0802 on the spiral. Gains and losses across tasks produce a smaller mean increase of 0.0109, whose interval includes zero. The result is a task-dependent response to the tested colour encoding and LPQ descriptor, with insufficient evidence for overall superiority.
+The initial incremental screen found gains on four tasks for $SAZ$, including a 0.0802 increase in spiral macro F1. Its task mean of 0.5752, compared with 0.5643 for static, motivated further evaluation. When encoding selection is confined to training, the nine-encoding procedure achieves 0.5618 and the dynamic-only procedure 0.5643, against 0.5620 for static. None of these paired differences survives Holm correction. These estimates concern adaptive procedures; changes to the inner partitions also distinguish them from the original fixed-$SAZ$ screen.
 
-The renderer removes absolute size and signal levels, LPQ discards the location of each phase code, and the image omits in-air movement. These choices may discard useful information alongside nuisance variation. The present experiment cannot separate their effects.
+The encoding choices are unstable: $SAZ$ is selected in four of the 25 outer training sets in the dynamic-only search, and no encoding predominates. With fusion rules selected internally for both policies, nine-encoding selection scores 0.5991 against 0.6171 for static. This compares encoding policies under the same fusion-selection procedure; it does not isolate the benefit of selecting a fusion rule. The experiments provide limited support for a generally preferred dynamic encoding on this cohort.
 
-Task dependence remains substantial: T4 is strongest for static SVM and $SAZ$ Random Forest, whereas the spiral is strongest for $SAZ$ SVM. The task average captures this variation, while fusion asks whether combining their predictions is useful for a participant-level decision.
+Aligned dynamics score numerically above circular displacement and joint permutation by 0.0082 and 0.0201 in task-mean macro F1. The latter contrast has a positive pointwise interval but an adjusted $p=0.1848$; neither survives the declared correction. The controls preserve trajectory geometry and joint signal vectors within strokes. Permutation also disrupts local continuity and image texture, so the observed difference cannot identify a physiological mechanism.
+
+\subsection{Task Subsets and Competitive Models}
+\noindent
+With T2/T3/T4 fixed from the literature and majority voting fixed in advance, the selected-encoding LPQ pipeline achieves participant macro F1 of 0.6449, compared with 0.6143 for static. The paired increase is 0.0307, with a 95\% interval of $[-0.0107,0.0748]$. This is the largest observed primary-endpoint score among the four pipelines, although none of the six primary contrasts survives Holm correction.
+
+The three-task LPQ fusion exceeds its eight-task counterpart by 0.0283, but the interval includes zero. Reducing the task set also helps the kinematic baseline numerically and lowers the static and transfer scores; none of these changes survives correction. Using three tasks reduces the number of exercises; a reduction in total assessment time or clinical burden was not evaluated. Task means over three and eight exercises describe different evaluation scopes.
+
+Model rankings depend on the endpoint. Kinematics has the highest observed three-task mean, whereas ResNet18 transfer leads the eight-task mean at 0.5813 against 0.5618 for selected LPQ, without a supported difference. The earlier result for a CNN trained from scratch offers no basis for a general claim that CNNs are weaker. The transfer experiment evaluates a frozen ImageNet backbone with a trained linear head; architecture, resolution and search budget differ across pipelines.
 
 \subsection{Comparison with Handwriting Studies}
 \noindent
-Casademunt Gonz\'alez~\cite{Casademunt2023} evaluates CNNs on PaHaW crops of size 111 for T2, T3 and T4. The code separates 62 training and 13 test participants before producing crops. Its F1 concerns the positive PD class, rather than macro F1.
-
-Table~\ref{tab:literature} compares reported accuracy with the task set identified. Casademunt's T2/T3/T4 accuracies exceed our $SAZ$ SVM values of 51.20/58.13/64.00\% and CNN values of 55.20/52.00/53.60\%. This is not a paired comparison: the splits, number of training crops and selection procedures differ, and the thesis compares crop sizes using the designated test group.
+The reference thesis~\cite{Casademunt2023} develops a crop-based CNN on T2 and extends it to T3/T4. Participants are separated into 62 for training and 13 for testing before crops are generated. The reported F1 concerns the PD class. Table~\ref{tab:literature} therefore compares accuracy with each evaluation scope stated.
 
 \begin{table*}[t]
 \centering\small
-\caption{Contextual comparison on PaHaW. All values in this table are accuracy, not macro F1. Published results are transcribed from the cited works; none was rerun under our partitions. Different task sets and selection procedures prevent a direct superiority test.}
+\caption{Contextual PaHaW accuracy comparison. Published values retain their original protocols. Present rows use $5\times5$ participant CV and fixed majority fusion of T2/T3/T4; encoding and model choices use training data. Different inputs, selection procedures and task sets prevent a direct superiority test.}
 \label{tab:literature}
 \begin{tabular}{@{}p{2.6cm}p{3.9cm}p{4.2cm}p{3.6cm}@{}}
 \toprule
@@ -28,36 +34,32 @@ Study & Input and classifier & Evaluation scope & Accuracy (\%)\\
 \midrule
 Casademunt Gonz\'alez (2023) & CNN, handwriting crops & T2 / T3 / T4; 62 train, 13 test & 69.23 / 61.54 / 69.23\\
 Drot\'ar et al. (2016) & Kinematics + pressure, SVM & T2--T8; repeated ten-fold CV & 81.30\\
-Diaz et al. (2019) & Enhanced images and task ensemble & Ten-fold CV; five selected tasks & 86.67\\
-Present experiment & $SAZ$ + LPQ + SVM & T1--T8; $5\times5$ participant CV; majority fusion & 65.07\\
-Present experiment & $SAZ$ + LPQ + logistic regression & T1--T8; $5\times5$ participant CV; majority fusion & 65.07\\
+Diaz et al. (2019) & Enhanced images and ensemble & Ten-fold CV; T1/T4/T5/T7/T8 selected & 86.67\\
+Present experiment & Static LPQ + SVM & T2/T3/T4 majority fusion & 61.60\\
+Present experiment & Selected encoding + LPQ + SVM & T2/T3/T4 majority fusion & 64.80\\
+Present experiment & Kinematics + pressure, SVM & T2/T3/T4 majority fusion & 62.93\\
+Present experiment & ResNet18 transfer + linear head & T2/T3/T4 majority fusion & 60.27\\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-Drot\'ar et al. report 81.3\% accuracy for kinematic and pressure features from T2--T8 \cite{Drotar2016}. Their descriptors can retain physical information removed by our normalization. They repeat ten-fold validation ten times and screen features statistically; the description does not fully establish whether screening is nested in each split.
+Our selected LPQ accuracies on T2/T3/T4 individually are 54.67/56.00/63.20\%, below the corresponding thesis values. Its single holdout, crop sampling and crop-size exploration on the designated test group differ from our repeated evaluation. Our three-task fusion is an additional experiment, not a result reported in the thesis.
 
-Diaz et al. report 86.67\% accuracy for their enhanced representation and ensemble, versus 72.50\% for its static counterpart \cite{Diaz2019}. The enhancement includes in-air movement, and their pipeline uses pretrained CNN features and five selected tasks. It preserves and models different information from our contact-only colour images with LPQ. These protocol differences preclude a controlled cross-paper ranking.
+Drot\'ar et al. combine T2--T8 and report 81.3\% accuracy with kinematic and pressure features~\cite{Drotar2016}. Their validation repeats ten-fold splitting ten times; the description does not fully establish whether statistical feature screening is repeated within training. Diaz et al. report 86.67\% with enhanced images, pretrained features and five selected tasks~\cite{Diaz2019}. Their feature selection is explicitly restricted to training, while the same restriction is not established for task selection.
 
-Our participant-level accuracy is lower than the published combined-task results of Drot\'ar and Diaz. The present study does not determine how much of this gap arises from representation, classifier or evaluation choices.
+Our accuracies remain below those published combined-task results. The kinematic baseline retains native signal levels, timing and in-air motion, whereas minimaps normalize size and signal levels and retain contact trajectories. LPQ summarizes local phase without retaining its absolute spatial location. Representation, available information, classifier and evaluation procedure vary together; the comparisons do not isolate the source of the performance gap.
 
-\subsection{Limits of Complexity and Explanation}
+\subsection{Explanation and Generalization}
 \noindent
-Each task provides approximately 60 outer-training participants for learning filters from scratch; augmented images remain correlated views of those records. The observed LPQ advantage is conditional on this cohort and the selected representation. Differences in input resolution and model-selection procedures also prevent attributing it solely to network architecture.
+The XAI analysis concerns only the earlier CNN trained from scratch. Its near-zero Grad-CAM--occlusion correlation limits the consistency of the spatial interpretation. Visually plausible maps establish neither disease-specific regions nor an explanation of the transfer model.
 
-The near-zero Grad-CAM--occlusion correlation limits the consistency of spatial interpretation for this CNN. The maps alone do not establish disease-specific features or explain the classifier's lower performance.
-
-Independent-cohort validation is needed to estimate generalization beyond this development process, including the effects of age imbalance and acquisition differences. A new random split of PaHaW would still reuse the cohort involved in design decisions. Further evaluation should select representations within training partitions or freeze them before testing on a new cohort.
+All experiments reuse a small cohort that informed development. Participant separation protects each fitted evaluation, while the uncertainty intervals remain conditional on saved predictions and omit the full history of research decisions. Independent-cohort validation is needed to assess transfer across participants, acquisition conditions and demographic distributions.
 
 \subsection{Reproducibility}
 \noindent
-The accompanying experimental source package supplies the rendering, feature extraction, model fitting, fusion and XAI code, together with the eight stage configurations and pinned dependencies. Reproduction requires access to the original PaHaW recordings, which are not redistributed in this package. Its README gives the execution order and distinguishes model reruns from figure generation using the archived results.
-
-Our internal experimental archive retains participant assignments, rendering diagnostics, inner searches, outer predictions and CNN checkpoints. XAI checks reproduce checkpoint probabilities before explanation, and checksums link figure inputs and tables to their source files.
+The source package includes stage configurations and code for rendering, LPQ and kinematic extraction, frozen CNN transfer, selection, fusion and XAI. Its execution instructions require the original PaHaW recordings, which are not redistributed. Archived searches, partitions, predictions and checkpoints support independent reconstruction of choices and fusion. Checksums connect code and derived artifacts to their inputs.
 
 \section{\uppercase{Conclusion}}
 \label{sec:conclusion}
 \noindent
-We introduced a formulation of pseudodynamic handwriting minimap signatures that maps normalized pen signals onto contact-only trajectories. Its incremental evaluation shows observed gains on four of eight tasks for speed, altitude and azimuth, with the largest increase on the spiral. The task mean rises from 0.5643 to 0.5752, while the paired analysis leaves the overall advantage over static uncertain.
-
-On this SVM-selected encoding, LPQ-based classifiers outperform the tested CNN in the conditional task-mean comparison. Majority voting yields participant-level macro F1 near 0.65 for logistic regression and SVM. Grad-CAM concentrates on writing, but its poor agreement with occlusion limits the consistency of spatial interpretation. An independent-cohort test, with the encoding fixed in advance, is needed to assess whether these task-dependent gains generalize.
+We introduced a new formulation of pseudodynamic handwriting minimap signatures and evaluated its construction incrementally, followed by training-only selection, spatial controls and competitive baselines. The observed responses vary across tasks, with substantial uncertainty about predictive gains. On the literature-defined T2/T3/T4 set, selected LPQ fusion reaches macro F1 of 0.6449 against 0.6143 for static; the paired improvement remains uncertain. Neither the controls nor the competitive comparisons establish overall superiority after multiplicity correction. The formulation and reproducible evaluation provide a basis for testing which aspects of pen dynamics generalize beyond this development cohort.

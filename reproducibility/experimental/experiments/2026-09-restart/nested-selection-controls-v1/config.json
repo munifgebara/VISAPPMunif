@@ -1,0 +1,42 @@
+{
+  "experiment_id": "nested-selection-controls-v1",
+  "dataset_root": "C:/Users/munif/PycharmProjects/PseudodynamicHandwritingMinimapSignatures/dataset/PaHaW",
+  "output_root": "experiments/2026-09-restart/runs/nested-selection-controls-v1",
+  "controls_output_root": "experiments/2026-09-restart/runs/spatial-controls-v1",
+  "static_run": "experiments/2026-09-restart/runs/static-svm-v1",
+  "single_signal_run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+  "triplet_run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "render_config": "experiments/2026-09-restart/dynamic-triplet-svm-v1/config.json",
+  "tasks": [1, 2, 3, 4, 5, 6, 7, 8],
+  "encoding_order": ["static", "speed", "pressure", "altitude", "azimuth", "speed_pressure_altitude", "speed_pressure_azimuth", "speed_altitude_azimuth", "pressure_altitude_azimuth"],
+  "signal_channels": {
+    "speed": ["speed"], "pressure": ["pressure"], "altitude": ["altitude"], "azimuth": ["azimuth"],
+    "speed_pressure_altitude": ["speed", "pressure", "altitude"],
+    "speed_pressure_azimuth": ["speed", "pressure", "azimuth"],
+    "speed_altitude_azimuth": ["speed", "altitude", "azimuth"],
+    "pressure_altitude_azimuth": ["pressure", "altitude", "azimuth"]
+  },
+  "controls": {"methods": ["circular_shift", "joint_permutation"], "seeds": [20260909, 20260910, 20260911], "endpoint": "task_mean_only", "preserve_joint_channel_vectors_within_each_pen_down_stroke": true},
+  "features": {"descriptor": "LPQ_RGB", "dimension": 768, "preprocess_size": 64, "window_size": 5},
+  "validation": {
+    "outer_splits_from": "experiments/2026-09-restart/runs/static-svm-v1/metrics/cv_splits.json",
+    "repeats": 5, "outer_folds": 5, "meta_folds": 3, "tuning_folds": 3,
+    "master_seed": 20260908,
+    "encoding_selection": "global encoding: mean over eight tasks of each task's best mean inner-fold macro F1",
+    "hyperparameter_selection": "per task; first candidate in declared order breaks ties",
+    "encoding_tie_break": "first in encoding_order; static first when eligible",
+    "fusion_order": ["majority_vote_all8", "calibrated_mean_all8", "calibrated_reliability_weighted_all8"],
+    "fusion_selection": "highest pooled meta-OOF participant macro F1, first rule in declared order breaks ties",
+    "fusion_calibration": "sigmoid; CalibratedClassifierCV ensemble=False; participant CV confined to each fitting partition",
+    "fusion_reliability": "max(selected inner macro F1 - 0.5, 0.01)",
+    "bootstrap_resamples": 10000, "bootstrap_seed": 20260912,
+    "task_global_family": ["auth9_vs_static", "auth8_vs_static", "auth8_vs_circular_shift_seed_mean", "auth8_vs_joint_permutation_seed_mean"],
+    "fusion_secondary_family": ["auth9_vs_static", "auth8_vs_static"],
+    "task_specific_exploratory_family_size": 32,
+    "correction": "Holm within each declared family",
+    "seed_aggregation": "mean of metrics over seeds; shared participant resampling; no prediction ensemble"
+  },
+  "svm_search": {"linear_c": [0.01, 0.1, 1.0, 10.0, 100.0], "rbf_c": [0.1, 1.0, 10.0, 100.0], "rbf_gamma": ["scale", 0.0001, 0.001, 0.01], "class_weight": "balanced"},
+  "execution": {"n_jobs": 8, "inner_threads": 1, "resume_completed_units_only_with_identical_config_and_source": true},
+  "scope": "SVM fixed; no new classifier family, CNN training or XAI. Reanalysis of an already explored PaHaW cohort, not external validation."
+}

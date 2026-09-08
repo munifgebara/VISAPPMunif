@@ -2,7 +2,7 @@
 \label{sec:protocol}
 
 \noindent
-Each recording produces nine alternative images, all derived from the same participant. We compare encodings on common participant partitions and define separate endpoints for individual tasks and decisions combined across tasks.
+Each recording produces nine alternative images, all derived from the same participant. We compare encodings on common participant partitions and define separate endpoints for individual tasks and decisions combined across tasks. The initial descriptive ranking, the training-selected encoding evaluation and the competitive task-subset comparison are distinct stages with explicitly stated selection rules.
 
 \subsection{Participants and Tasks}
 \noindent
@@ -28,7 +28,7 @@ T8 & \textit{Tramvaj dnes u\v{z} nepojede.} & 75\\
 \end{tabular}
 \end{table}
 
-An input audit checked file counts, sample counts, finite values and timestamp increments. Five files have a declared sample count different from the number of rows present. The renderer uses the rows actually available. There are 253 negative timestamp increments in 151 recordings, but all 1,065,788 segments with contact at both endpoints have positive increments. Equation~\ref{eq:speed} therefore requires no interpolation or imputation for the segments used in this experiment. None of the signal normalization ranges was degenerate.
+An input audit checked file counts, sample counts, finite values and timestamp increments. Five files have a declared sample count different from the number of rows present. The renderer uses the rows actually available. There are 253 negative timestamp increments in 151 recordings, but all 1,065,788 segments with contact at both endpoints have positive increments. Equation~\ref{eq:speed} therefore requires no interpolation or imputation for the rendered contact segments. The later kinematic baseline also uses in-air intervals and applies the timestamp rules in Section~\ref{sec:competitive}. None of the signal normalization ranges was degenerate.
 
 The participant is the independent observational unit; tasks and alternative renderings do not enlarge the cohort. Mean age is 69.32 years in PD and 62.42 in H. Age and clinical fields are excluded from classifier inputs, but handwriting may still carry this confounding.
 
@@ -36,7 +36,7 @@ The participant is the independent observational unit; tasks and alternative ren
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.91\textwidth]{grouped_validation.pdf}
-\caption{Participant separation throughout model fitting and evaluation. The CNN selects its epoch count on the first inner holdout; the classical models average three inner-fold scores. The outer assignments are common across tasks and methods. This diagram describes model fitting for a fixed encoding; representation selection from the outer scores remains exploratory.}
+\caption{Participant separation in the initial model comparisons. The scratch-trained CNN selects its epoch count on the first inner holdout; the classical models average three inner-fold scores. Outer assignments are common across tasks and methods. This diagram describes fitting for a fixed encoding; the initial outer-score representation choice is exploratory. Follow-up encoding selection uses training-only folds as described in Sections~\ref{sec:nested-followup} and~\ref{sec:competitive}.}
 \label{fig:validation}
 \end{figure*}
 \noindent
@@ -44,9 +44,9 @@ We construct stratified folds from one row per participant, then propagate the a
 
 Within each outer training partition, three participant-separated inner folds choose the classical model hyperparameters. Feature standardization is fitted on the corresponding training portion, never on its validation or test participants. The selected model is refitted on all outer training participants and evaluated once on the outer test set. The rendering is independent per record, so it has no parameters learned from the other records before splitting.
 
-Each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions. These are repeated predictions of 597 records from 75 participants. Every later stage reuses the saved assignments.
+In the initial eight-task evaluation, each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions. These are repeated predictions of 597 records from 75 participants. Every later stage reuses the saved outer assignments. The follow-up stages use three inner folds common across tasks, intersected with available recordings.
 
-The highest-ranked encoding was selected from these outer scores for subsequent comparisons. Nested fitting protects model hyperparameter estimation, but not that representation choice. Earlier explorations also used PaHaW. The downstream results thus concern a fixed, selected encoding on a development cohort, without an independent estimate of the complete selection procedure.
+The initial highest-ranked encoding was selected from outer scores for the first classifier comparison and XAI analysis. That stage protects hyperparameter fitting but not representation choice. Sections~\ref{sec:nested-followup} and~\ref{sec:competitive} subsequently evaluate encoding selection within training. They estimate different learning procedures and retain the limitation that earlier exploration used the same cohort.
 
 \subsection{Metrics and Paired Comparisons}
 \noindent
@@ -54,7 +54,7 @@ Macro F1 gives equal weight to the two diagnosis classes:
 \begin{equation}
  F_{\mathrm{macro}}=\frac{F_{1,\mathrm{H}}+F_{1,\mathrm{PD}}}{2}.
 \end{equation}
-For each task and repetition, we concatenate the five outer-test folds and compute the metric once. We then average the five resulting scores. For the representation and classifier rankings, the endpoint is the unweighted mean across all eight tasks:
+For each task and repetition, we concatenate the five outer-test folds and compute the metric once. We then average the five resulting scores. For the initial representation and classifier rankings, the endpoint is the unweighted mean across all eight tasks:
 \begin{equation}
  \overline F_{\mathrm{tasks}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r}.
  \label{eq:taskmetric}
@@ -63,6 +63,6 @@ We also retain accuracy, balanced accuracy, PD sensitivity, H specificity, posit
 
 We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants. A draw preserves all available tasks and repeated predictions for each selected person. For a paired contrast, the same draw is applied to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 participant-wise swap patterns. It tests the difference between fixed sets of predictions, not a shuffled-label learning pipeline.
 
-Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; three SVM fusion-rule pairs; and eight task-specific CNN--SVM contrasts. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
+For the initial analyses, Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; three SVM fusion-rule pairs; and eight task-specific CNN--SVM contrasts. Each follow-up section defines its additional families. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
 
 Both resampling procedures leave models fixed. Intervals and tests describe conditional uncertainty in these predictions, without the full variability of retraining or selection.

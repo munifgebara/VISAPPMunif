@@ -1,0 +1,40 @@
+{
+  "generator": "scripts/generate_followup_paper_figures.py",
+  "generator_sha256": "0c8fe18227678095e9914a2b799ad124d06e68a333d44b3e0e91796ec7b154ba",
+  "input_sha256": {
+    "experiments/2026-09-restart/runs/nested-selection-controls-v1/metrics/global_summary.csv": "37b0894b55b74c6f789623c330a397baa50d659b766ac760e125e42ebf7d5e45",
+    "experiments/2026-09-restart/runs/nested-selection-controls-v1/metrics/task_global_comparisons.csv": "32e26a5b8ab27f6649879a7229c5c5ef20db27f131fb111dfe87ae574f556bde",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_methods.pdf": "a3caff9466edbea8060979f0479c735b3b01fe2a4f6c81061bc2d5692c806ec8",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_methods.png": "293f8a56e338c049d60c21303b89d6b1262f6a2df2bf61a62fc6e88620c2b230",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_methods.svg": "92309f1b212384245ef2e105d80fb74ab32fcc20c4c63afce9883387f331b4b3",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/task_subset_effects.pdf": "304c86532b2731c41ee11da7ee3f5a3a6f42cf542bab650653cedef0fb8f420f",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/task_subset_effects.png": "3952bccfecd33787b38b90790e7e9db0b9c6e961884e812af5e38de39db6e04d",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/task_subset_effects.svg": "6f835be48a934b2a02e9b9ae62b26b93aed0cb0e7df5e7f1d0750a4040c7230a",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_task_profiles.pdf": "a317aa1b8e1abed7d44c7f5cb9e7460cf7cce4aae1f8ef8fd5368a260cf66ecf",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_task_profiles.png": "c96dd12f8aea5b5fb5bbf42c023751e536110946d228def7c21b3791d5c13a41",
+    "experiments/2026-09-restart/runs/competitive-task-subset-v1/figures/competitive_task_profiles.svg": "1856483b74ef36f31bfb169a6078ee1c8cfd0608b5fb847d669d193b97aa1328",
+    "experiments/2026-09-restart/runs/spatial-controls-v1/figures/spatial_controls_examples.png": "9b1959aa08324a168517a8c7360de287608f8fd2514b9c563328fa4def1605b3"
+  },
+  "output_sha256": {
+    "nested_selection_controls.pdf": "a1a29d295e59e1e51e6ca199c53d0e7d80173aff430b123a19608a53ed43eb89",
+    "nested_selection_controls.png": "cf131cd73ed406705796161e6bef418c515a3083e7c47beafe0ff061ed531201",
+    "competitive_methods.pdf": "a3caff9466edbea8060979f0479c735b3b01fe2a4f6c81061bc2d5692c806ec8",
+    "competitive_methods.png": "293f8a56e338c049d60c21303b89d6b1262f6a2df2bf61a62fc6e88620c2b230",
+    "competitive_methods.svg": "92309f1b212384245ef2e105d80fb74ab32fcc20c4c63afce9883387f331b4b3",
+    "task_subset_effects.pdf": "304c86532b2731c41ee11da7ee3f5a3a6f42cf542bab650653cedef0fb8f420f",
+    "task_subset_effects.png": "3952bccfecd33787b38b90790e7e9db0b9c6e961884e812af5e38de39db6e04d",
+    "task_subset_effects.svg": "6f835be48a934b2a02e9b9ae62b26b93aed0cb0e7df5e7f1d0750a4040c7230a",
+    "competitive_task_profiles.pdf": "a317aa1b8e1abed7d44c7f5cb9e7460cf7cce4aae1f8ef8fd5368a260cf66ecf",
+    "competitive_task_profiles.png": "c96dd12f8aea5b5fb5bbf42c023751e536110946d228def7c21b3791d5c13a41",
+    "competitive_task_profiles.svg": "1856483b74ef36f31bfb169a6078ee1c8cfd0608b5fb847d669d193b97aa1328",
+    "spatial_controls_examples.png": "9b1959aa08324a168517a8c7360de287608f8fd2514b9c563328fa4def1605b3"
+  },
+  "new_model_fits": 0,
+  "figure_names": [
+    "nested_selection_controls",
+    "competitive_methods",
+    "task_subset_effects",
+    "competitive_task_profiles",
+    "spatial_controls_examples"
+  ]
+}

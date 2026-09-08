@@ -2,7 +2,7 @@
 \label{sec:classifiers}
 
 \noindent
-The encoding comparison leads to a second question: how does the selected representation interact with the classifier? Keeping $SAZ$ and the participant partitions fixed, we compare models fitted to LPQ features with a CNN that learns directly from pixels.
+We return to the initial exploratory ranking to examine how its numerically leading representation interacts with the classifier. Keeping $SAZ$ and the participant partitions fixed, we compare models fitted to LPQ features with a CNN trained from scratch. These results are conditional on the earlier outer-score selection of $SAZ$; they are distinct from the adaptive policies evaluated above and the competitive comparison that follows.
 
 \subsection{Linear and Tree-Based Alternatives}
 \noindent
@@ -36,18 +36,18 @@ The CNN reaches 0.5105. The SVM--CNN contrast is 0.0646, with interval [0.0277, 
 
 The task pattern in Figure~\ref{fig:classifiers} differs from the overall ranking. Random Forest is strongest on T4 at 0.6791, even though its eight-task mean is below SVM. The CNN is slightly above SVM on T2 and T5, two tasks on which SVM itself performs poorly. Its task-specific differences against SVM do not survive the family of eight contrasts. 
 
-LPQ-based models perform better under these choices, which differ in more than architecture: LPQ uses $64\times64$ inputs, the CNN uses $128\times128$, and their selection budgets differ. The comparison does not isolate the effect of architecture or evaluate pretrained features such as those used by Diaz et al.~\cite{Diaz2019}.
+LPQ-based models perform better under these choices, which differ in more than architecture: LPQ uses $64\times64$ inputs, the CNN uses $128\times128$, and their selection budgets differ. The comparison does not isolate the effect of architecture or evaluate the pretrained features used in earlier enhanced-image work~\cite{Diaz2019}.
 
 \section{\uppercase{Combining Handwriting Tasks}}
 \label{sec:fusion}
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{participant_fusion.pdf}
-\caption{One prediction per participant obtained by voting over available tasks. Points average macro F1 over the five repetitions; intervals are conditional 95\% participant-bootstrap intervals. These scores have a different prediction unit from the task means. None of the six paired fusion comparisons remains significant after Holm adjustment.}
+\caption{Initial fixed-$SAZ$ classifier comparison: one prediction per participant from voting over available tasks. Points average macro F1 over five repetitions; intervals are conditional 95\% participant-bootstrap intervals. These scores have a different prediction unit from task means. None of the six paired fusion comparisons remains significant after Holm adjustment.}
 \label{fig:fusion}
 \end{figure*}
 \noindent
-Late fusion combines the available task predictions into one decision per participant. Because all tasks share the same participant folds, every model contributing to a held-out person's decision was fitted without that person.
+For the initial fixed-$SAZ$ models, late fusion combines available task predictions into one decision per participant. Because all tasks share the same participant folds, every model contributing to a held-out person's decision was fitted without that person.
 
 We first considered three SVM rules over every available task: the mean calibrated PD probability, a reliability-weighted mean, and majority voting. Sigmoid calibration uses the three inner participant folds with ensemble averaging. Reliability is derived from inner-validation macro F1, with weight $\max(F_{\mathrm{inner}}-0.5,0.01)$. We do not select a subset of tasks according to outer-test performance. A missing spiral is omitted from that participant's denominator.
 

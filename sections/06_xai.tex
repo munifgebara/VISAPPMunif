@@ -1,8 +1,8 @@
-\section{\uppercase{What Does the CNN Use?}}
+\section{\uppercase{What Does the Scratch-Trained CNN Use?}}
 \label{sec:xai}
 
 \noindent
-The preceding classification scores leave open how the CNN uses the encoded images. We examine whether its predictions depend on the handwriting region or on image placement and background, then compare spatial explanations and responses to perturbations.
+We return to the small CNN trained from scratch in Section~\ref{sec:classifiers}. Its saved checkpoints support a separate analysis of how that model uses the encoded images; these explanations do not describe the ResNet18 transfer pipeline. We examine whether its predictions depend on the handwriting region or on image placement and background, then compare spatial explanations and responses to perturbations.
 
 \subsection{Explanations of Held-Out Predictions}
 \begin{figure*}[t]

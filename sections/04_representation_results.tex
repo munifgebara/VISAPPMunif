@@ -12,7 +12,7 @@ Before extraction, foreground is detected by any channel intensity below 250. We
 
 The static RGB channels are identical, so the static vector repeats the same histogram three times. This keeps the interface and nominal dimension constant; it does not create additional static information. For the isolated signals, two channels remain constant along the trace and retain its geometric pattern.
 
-Standardization and SVM fitting occur inside each training partition. The search contains five linear models with $C\in\{0.01,0.1,1,10,100\}$ and sixteen radial-basis models with $C\in\{0.1,1,10,100\}$ and $\gamma\in\{\mathrm{scale},10^{-4},10^{-3},10^{-2}\}$. We use inverse-frequency class weights. The candidate with the highest mean inner-fold macro F1 is chosen, with ties resolved by the stored candidate order. The SVM learns from image texture; it never receives the original signal measurements as tabular features \cite{Cortes1995}.
+Standardization and SVM fitting occur inside each training partition. The search contains five linear models with $C\in\{0.01,0.1,1,10,100\}$ and sixteen radial-basis models with $C\in\{0.1,1,10,100\}$ and $\gamma\in\{\mathrm{scale},10^{-4},10^{-3},10^{-2}\}$. We use inverse-frequency class weights. The candidate with the highest mean inner-fold macro F1 is chosen, with ties resolved by the stored candidate order. The SVM in this encoding comparison learns from LPQ image texture; it receives no original signal measurements as tabular features \cite{Cortes1995}.
 
 \subsection{The Static Baseline}
 \noindent
@@ -37,3 +37,39 @@ Combining signals produces a similarly narrow ranking. Starting from $PAZ$, repl
 The paired $SAZ$--static difference is +0.0109 with a 95\% interval of [$-$0.0146, 0.0370]. Its randomization $p$ is 0.4096 and Holm-adjusted $p$ is 1.0000 across the 36 encoding pairs. The $SAZ$--$PAZ$ interval is [$-$0.0185, 0.0198], also with adjusted $p=1.0000$. We carry $SAZ$ forward as the numerical leader in this exploratory comparison.
 
 Its per-task changes explain the smaller average gain: the spiral improves by 0.0802, T6 by 0.0524, and T7 by 0.0455, whereas T2 falls by 0.0612. None of its eight task-specific contrasts against static remains significant within the 32-comparison triplet family.
+
+\subsection{Evaluating the Encoding Choice Within Training}
+\label{sec:nested-followup}
+\noindent
+The ranking above evaluates fixed encodings. We next evaluate the procedure that chooses an encoding, retaining the outer participant partitions while introducing three inner folds common across tasks. Within each outer training set, each task and encoding receives the same 21-candidate SVM search. We choose one global encoding by the unweighted mean of its eight selected task scores. Ties follow the declared order, with static first when eligible. We evaluate a fixed-static policy, selection among all nine encodings, and selection restricted to the eight dynamic encodings.
+
+For participant fusion in this stage, a further internal layer compares the three rules from Section~\ref{sec:fusion}. Each of three intermediate training sets repeats encoding and SVM selection in its own three folds before predicting the intermediate validation participants. These predictions choose the fusion rule; the encoding and task models are then selected anew on the full outer training set. Sigmoid calibration uses training-only folds with a single final estimator (\texttt{ensemble=False}); reliability remains $\max(F_{\mathrm{inner}}-0.5,0.01)$. All choices are saved before outer-test evaluation.
+
+The re-evaluated static task mean is 0.5620. Selection among nine encodings gives 0.5618, and dynamic-only selection gives 0.5643. Their paired differences from static are $-$0.0002 [$-$0.0192, 0.0190] and 0.0023 [$-$0.0172, 0.0221]. These are results of adaptive procedures, not new estimates for a fixed $SAZ$ encoding. The altered inner folds and calibration also prevent attributing every difference from the initial stage solely to correcting encoding selection.
+
+The chosen encoding varies substantially. In the dynamic-only policy, azimuth is selected in five of the 25 outer training sets and $SAZ$ in four; no encoding predominates. All-nine selection chooses static once. These overlapping training sets describe selection stability, not 25 independent cohorts. Internally selected fusion yields macro F1 0.6171 for static, 0.5991 for all-nine selection and 0.6017 for dynamic-only selection. Neither contrast against static survives its two-comparison Holm family.
+
+\subsection{Controls of the Signal--Position Association}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{spatial_controls_examples.png}
+\caption{Within-stroke controls illustrated with $SAZ$. The first two participants in a fixed identifier-based example order contribute T1 and T4; the seed is 20260909. Each row shares geometry, line width and display crop. Circular shifts and joint permutations change signal assignment within each pen-down stroke while preserving its multiset of joint signal vectors. The examples were not selected by classifier performance.}
+\label{fig:spatial-controls}
+\end{figure*}
+\noindent
+Adding colour changes both signal content and image texture. We test its spatial association using two controls: a nonzero circular shift by 25--75\% of the segment count within each pen-down stroke, and an unrestricted joint permutation within that stroke. Channels move together, preserving their joint vectors and cross-channel relationships. Single-segment strokes remain unchanged. No values move across pen lifts.
+
+Both controls retain geometry, line width, normalization and the multiset of vectors within each stroke. They need not preserve the raster colour histogram: segments have unequal lengths, overlap and undergo antialiasing. Joint permutation additionally disrupts local continuity, so a performance difference would not isolate physiological signal placement from induced texture changes.
+
+Each control transforms training and test records using three fixed seeds. For each seed, its own eight transformed encodings receive the same internal SVM and encoding search as the authentic dynamic-only policy. We average metrics over seeds rather than selecting a seed or ensembling their predictions. Participant bootstrap draws and swaps retain every person's tasks, repetitions and seeds together. This control experiment evaluates task scores only.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{nested_selection_controls.pdf}
+\caption{Training-selected encoding and spatial controls on all eight tasks. Left: task-mean macro F1. Right: paired effects with pointwise 95\% participant-bootstrap intervals. Control points average three fixed seeds; they do not treat seeds as independent participants. The four contrasts form one Holm family, with no supported difference.}
+\label{fig:nested-controls}
+\end{figure*}
+
+Circular shifts yield task-mean macro F1 0.5561 and permutations 0.5442, compared with 0.5643 for authentic dynamic-only selection (Figure~\ref{fig:nested-controls}). The authentic-minus-permutation difference is 0.0201 [0.0010, 0.0399], with unadjusted $p=0.0462$ and Holm-adjusted $p=0.1848$. A pointwise interval excluding zero is compatible with an adjusted test that does not reject. The circular-shift contrast is 0.0082 [$-$0.0102, 0.0264].
+
+The four global task contrasts comprise both authentic policies against static and dynamic-only selection against each control. None survives Holm adjustment. The corresponding 32 task-specific contrasts also remain unsupported in a separate exploratory family. These results neither establish a spatial-dynamic advantage nor demonstrate equivalence with static images.

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "experiment_id": "competitive-task-subset-v1",
+  "stage": "label_independent_frozen_transfer_feature_extraction",
+  "output_root": "C:\\Users\\munif\\Documents\\ChatGPT\\PseudodynamicHandwritingMinimapSignatures\\experiments\\2026-09-restart\\runs\\competitive-task-subset-v1\\transfer_features",
+  "encoding_order": [
+    "static",
+    "speed",
+    "pressure",
+    "altitude",
+    "azimuth",
+    "speed_pressure_altitude",
+    "speed_pressure_azimuth",
+    "speed_altitude_azimuth",
+    "pressure_altitude_azimuth"
+  ],
+  "expected_rows_per_encoding": 597,
+  "row_order": "exactly static-svm-v1/features/metadata.csv; subject_id retained as text",
+  "model": {
+    "architecture": "torchvision.models.resnet18",
+    "weights": "ResNet18_Weights.IMAGENET1K_V1",
+    "weights_path": "C:\\Users\\munif\\.cache\\torch\\hub\\checkpoints\\resnet18-f37072fd.pth",
+    "weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "output": "global average pool; fc replaced by Identity",
+    "feature_dimension": 512,
+    "trainable_backbone_parameters": 0,
+    "mode": "eval",
+    "batchnorm_updates": false,
+    "fine_tuning": false
+  },
+  "preprocess": {
+    "implementation": "pdhms_restart.lpq.preprocess(rgb, output_size=224)",
+    "foreground": "any RGB channel < 250",
+    "bounding_box_margin_fraction": 0.05,
+    "padding": "white square, centred, integer floor offsets",
+    "resize_size": 224,
+    "resize": "PIL.Image.Resampling.BILINEAR",
+    "centre_crop": false,
+    "augmentation": false,
+    "input_mode": "RGB uint8",
+    "rescale": "float32 / 255",
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "cohort_fitted_statistics": false
+  },
+  "execution": {
+    "device": "cuda",
+    "batch_size": 32,
+    "cpu_threads": 4,
+    "seed": 20260908,
+    "dtype": "float32",
+    "autocast": false,
+    "tf32": false,
+    "deterministic_algorithms": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true,
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "repeat_first_batch_per_encoding_bitwise": true,
+    "require_model_state_unchanged_after_each_encoding": true
+  },
+  "scope": "Frozen ImageNet transfer. No PaHaW backbone optimization, labels, classifier fitting, feature standardization or encoding selection enter extraction. A separately nested training-only logistic head and encoding selection belong to the downstream experiment.",
+  "sources": [
+    "https://docs.pytorch.org/vision/0.26/models/generated/torchvision.models.resnet18.html",
+    "https://docs.pytorch.org/docs/2.11/notes/randomness.html",
+    "https://download.pytorch.org/models/resnet18-f37072fd.pth"
+  ]
+}

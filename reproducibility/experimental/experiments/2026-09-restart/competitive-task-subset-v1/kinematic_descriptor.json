@@ -1,0 +1,30 @@
+{
+  "descriptor": "fixed_kinematic_pressure_83_v1",
+  "dimension": 83,
+  "timestamp_seconds_per_unit": 0.001,
+  "max_valid_interval_ms": 60000.0,
+  "coordinate_units": "native tablet units; no millimeter conversion",
+  "pressure_units": "native tablet units; no per-record normalization",
+  "global_features": ["valid_acquisition_time_s", "contact_acquisition_time_s", "air_acquisition_time_s", "transition_acquisition_time_s", "contact_time_fraction", "contact_stroke_count", "air_stroke_count", "contact_path_length_native", "air_path_length_native", "contact_bbox_width_native", "contact_bbox_height_native"],
+  "distribution_order": ["contact_stroke_duration_s", "contact_stroke_length_native", "air_stroke_duration_s", "air_stroke_length_native", "contact_speed_native_per_s", "contact_acceleration_native_per_s2", "contact_jerk_native_per_s3", "air_speed_native_per_s", "air_acceleration_native_per_s2", "air_jerk_native_per_s3", "contact_pressure_native", "contact_absolute_pressure_rate_native_per_s"],
+  "summary_order": ["mean", "std", "median", "p05", "p95", "iqr"],
+  "standard_deviation_ddof": 0,
+  "quantile_method": "NumPy linear interpolation",
+  "stroke_definition": "maximal consecutive run of identical pen state; includes single-point runs",
+  "duration_definition": "sum of valid consecutive timestamp intervals; a valid state transition contributes half to each state; transition duration is also reported separately, not added again to total",
+  "stroke_duration_and_length": "sum over valid intervals within the state run; no state transitions or invalid intervals",
+  "derivative_definition": "velocity vectors at interval midpoints; successive differences over midpoint time differences for acceleration and jerk; summarize Euclidean vector norms",
+  "pressure_rate_definition": "absolute consecutive pressure difference divided by seconds, within valid contact derivative runs",
+  "invalid_interval_policy": "dt<=0 or dt>60000ms contributes no time or length and splits derivative runs; no interpolation or invented nominal timestamps",
+  "long_valid_interval_policy": "preserve intervals up to 60s; secant velocity measures average movement over the gap, not unobserved instantaneous motion",
+  "empty_distribution_policy": "all six summaries zero; counts and empty names stored in diagnostics, never added as extra predictors",
+  "smoothing": "none; finite differences can amplify temporal and coordinate quantization",
+  "supervised_feature_selection": "none; all 83 features fixed before fitting",
+  "scope": "independently specified kinematic+pressure SVM baseline inspired by Drotar 2016 signal families; not an exact reproduction",
+  "unit_evidence": {
+    "time": "old checkout README.md line 79 and src/pdhms/pahaw/svc_loader.py line 68 explicitly identify milliseconds; positive input dt median 8 and p99=15 native units are consistent with milliseconds",
+    "coordinates": "dataset/PaHaW/PaHaW_files/info.txt gives Y then X; PaHaW_matlab/read_SVC_file.m swaps them, and contains only a commented coordinate conversion; retain native units",
+    "sampling": "use observed timestamp differences, not either nominal frequency reported in earlier sources"
+  },
+  "prefit_audit_decision": "before extraction/fitting and without labels: 147 positive intervals >1000ms, of which 145 are 1-26.61s and two approximately 1.334e12ms; proposed 1s cutoff replaced with 60s to retain plausible long pauses. Nonpositive intervals are also excluded. No performance-based choice."
+}

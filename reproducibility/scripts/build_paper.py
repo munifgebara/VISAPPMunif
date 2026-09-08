@@ -27,12 +27,13 @@ BUILD = PAPER / "build"
 OUTPUT = ROOT / "output" / "pdf"
 MAIN_FIGURES = [
     "activity_diagram", "progressive_encoding", "grouped_validation", "encoding_effects",
-    "classifiers_tasks", "participant_fusion", "xai_examples", "xai_validation",
+    "spatial_controls_examples", "nested_selection_controls", "classifiers_tasks",
+    "participant_fusion", "competitive_methods", "task_subset_effects", "xai_examples", "xai_validation",
 ]
 ALTERNATIVES = [
     "single_signals", "rgb_semantics", "task_atlas", "rgb_task_atlas",
     "encoding_heatmap", "encoding_tasks", "classifier_contrasts", "fusion_rules",
-    "fusion_roc", "fusion_confusion", "xai_channel_tasks", "xai_agreement",
+    "fusion_roc", "fusion_confusion", "xai_channel_tasks", "xai_agreement", "competitive_task_profiles",
 ]
 SUBMISSION_PAGE_LIMIT = 12
 SUBMISSION_CHARACTER_RANGE = (10000, 50000)
@@ -40,6 +41,7 @@ REPRODUCTION_SOURCES = [
     ROOT / "scripts" / "build_paper.py",
     ROOT / "scripts" / "generate_paper_figures.py",
     ROOT / "scripts" / "generate_activity_diagram.py",
+    ROOT / "scripts" / "generate_followup_paper_figures.py",
     ROOT / "pyproject.toml",
     ROOT / "requirements-lock.txt",
 ]
@@ -52,6 +54,15 @@ EXPERIMENT_STAGES = [
     ("task-fusion-v1", "run_task_fusion.py", "verify_task_fusion.py"),
     ("cnn-v1", "run_cnn.py", "verify_cnn_run.py"),
     ("cnn-xai-v1", "run_cnn_xai.py", "verify_cnn_xai_run.py"),
+    ("nested-selection-controls-v1", "run_nested_selection_controls.py", "verify_nested_selection_controls.py"),
+    ("competitive-task-subset-v1", "run_competitive_task_subset.py", "verify_competitive_task_subset.py"),
+]
+FOLLOWUP_SCRIPTS = [
+    "prepare_spatial_control_features.py", "verify_spatial_control_features.py",
+    "generate_spatial_control_figure.py", "analyze_nested_selection_controls.py",
+    "finalize_nested_selection_controls.py", "prepare_kinematic_features.py",
+    "verify_kinematic_features.py", "prepare_transfer_features.py",
+    "analyze_competitive_task_subset.py", "finalize_competitive_task_subset.py", "generate_followup_paper_figures.py",
 ]
 EXPERIMENT_README = PAPER / "review" / "experimental_reproduction.md"
 
@@ -63,6 +74,15 @@ def experimental_sources() -> list[Path]:
         paths.extend([ROOT / "scripts" / runner, ROOT / "scripts" / verifier,
                       ROOT / "experiments" / "2026-09-restart" / stage / "config.json"])
     paths.extend([ROOT / "pyproject.toml", ROOT / "requirements-lock.txt"])
+    paths.extend(ROOT / "scripts" / name for name in FOLLOWUP_SCRIPTS)
+    for stage in ("nested-selection-controls-v1", "competitive-task-subset-v1"):
+        directory = ROOT / "experiments/2026-09-restart" / stage
+        paths.extend([directory / "DECISION.md", directory / "README.md"])
+    directory = ROOT / "experiments/2026-09-restart/competitive-task-subset-v1"
+    paths.extend(directory / name for name in ("kinematic_descriptor.json", "transfer_descriptor.json", "kinematic_features.md"))
+    paths.extend(ROOT / "tests" / name for name in ("test_competitive_selection.py", "test_competitive_analysis.py",
+                  "test_kinematic_features.py", "test_transfer_features.py", "test_nested_selection.py",
+                  "test_selection_analysis.py", "test_spatial_controls.py"))
     missing = [str(path) for path in [*paths, EXPERIMENT_README] if not path.is_file()]
     if missing:
         raise FileNotFoundError(f"Missing experimental reproduction sources: {missing}")
@@ -76,16 +96,28 @@ def write_experimental_package(archive: zipfile.ZipFile) -> dict:
     for path in paths:
         archive.write(path, arcname=prefix + path.relative_to(ROOT).as_posix())
     archive.write(EXPERIMENT_README, arcname=prefix + "README.md")
+    aggregates = {
+        "nested-selection-controls-v1": ["global_summary.csv", "task_global_comparisons.csv", "fusion_comparisons.csv", "task_specific_comparisons.csv", "encoding_selection_frequency.csv"],
+        "competitive-task-subset-v1": ["global_summary.csv", "method_comparisons.csv", "task_subset_comparisons.csv", "task_summary.csv", "encoding_selection_frequency.csv"],
+    }
+    aggregate_hashes = {}
+    for stage, names in aggregates.items():
+        for name in names:
+            path = ROOT / "experiments/2026-09-restart/runs" / stage / "metrics" / name
+            arcname = f"reproducibility/aggregate_results/{stage}/{name}"
+            archive.write(path, arcname=arcname)
+            aggregate_hashes[arcname] = digest(path)
     manifest = {
-        "scope": "Code and original configurations for the eight manuscript stages",
+        "scope": "Code and original configurations for the ten manuscript stages, including the controlled follow-up experiments",
         "experiments_executed_during_packaging": False,
         "stage_order": [stage for stage, _, _ in EXPERIMENT_STAGES],
         "source_file_count": len(paths),
         "source_bytes": sum(path.stat().st_size for path in paths),
         "source_sha256": {path.relative_to(ROOT).as_posix(): digest(path) for path in paths},
         "readme_sha256": digest(EXPERIMENT_README),
+        "aggregate_results_sha256": aggregate_hashes,
         "excluded": ["participant recordings and identifiers", "individual predictions",
-                     "model checkpoints and attribution maps", "saved run artifacts",
+                     "model checkpoints and attribution maps", "individual and intermediate run artifacts",
                      "width-ablation and performance-gap-audit scripts/configurations"],
     }
     archive.writestr(prefix + "manifest.json", json.dumps(manifest, indent=2) + "\n")
@@ -171,7 +203,7 @@ def main() -> None:
     included = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", tex)
     if [Path(name).stem for name in included] != MAIN_FIGURES:
         raise ValueError(
-            "Main figure inventory/order changed; expected eight figures with the activity diagram first."
+            "Main figure inventory/order differs from the declared list, with the activity diagram first."
         )
     for index in range(1, len(MAIN_FIGURES) + 1):
         if f"Figure {index}:" not in extracted:
@@ -180,7 +212,7 @@ def main() -> None:
     compile_tex("gallery")
     gallery = PdfReader(BUILD / "gallery.pdf")
     if len(gallery.pages) != len(ALTERNATIVES):
-        raise ValueError("The gallery must contain one page for each of the 12 alternatives.")
+        raise ValueError("The gallery must contain one page for each declared alternative.")
 
     shutil.copyfile(BUILD / "main.pdf", OUTPUT / "manuscript.pdf")
     selection = PdfWriter()
@@ -213,7 +245,7 @@ def main() -> None:
     source_files += sorted((PAPER / "figures").glob("*.png"))
     source_files += sorted((PAPER / "figures").glob("*.svg"))
     source_files += [PAPER / "figures" / name for name in
-                     ["figure_manifest.json", "activity_diagram_manifest.json"]]
+                     ["figure_manifest.json", "activity_diagram_manifest.json", "followup_figure_manifest.json"]]
     source_files += sorted((PAPER / "review").glob("*.md"))
     required_activity = [PAPER / "figures" / f"activity_diagram.{extension}"
                          for extension in ("pdf", "png", "svg")]
@@ -233,7 +265,7 @@ def main() -> None:
             "These are exact copies of the manuscript/figure generators and project environment files.\n"
             "Run them from the original experiment repository with its saved runs and src/ package.\n"
             "experimental/ additionally contains the exact code and original configurations for the\n"
-            "eight manuscript experiment stages. Read experimental/README.md for data requirements,\n"
+            "ten manuscript experiment stages. Read experimental/README.md for data requirements,\n"
             "path changes in a fresh working copy, command order, and reproduction limits.\n"
             "The Overleaf package supplies the rendered figures, editable activity SVG, source manifests,\n"
             "and generated gallery_start.tex; it does not embed participant recordings or model checkpoints.\n"
