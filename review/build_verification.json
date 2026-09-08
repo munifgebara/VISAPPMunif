@@ -10,9 +10,9 @@
     50000
   ],
   "submission_character_range_satisfied": true,
-  "main_non_whitespace_characters_from_pdf_text": 40034,
+  "main_non_whitespace_characters_from_pdf_text": 40567,
   "character_count_note": "Text extracted from final PDF, including extractable figure/table text and references.",
-  "abstract_words": 190,
+  "abstract_words": 184,
   "main_figures": [
     "activity_diagram",
     "progressive_encoding",
@@ -38,12 +38,12 @@
     "xai_agreement"
   ],
   "main_tables": 3,
-  "cited_references": 12,
+  "cited_references": 13,
   "latex_unresolved_reference_or_overflow_warnings": [],
   "outputs_sha256": {
-    "manuscript.pdf": "66f26daceabf9ae2b2941ef7069c6c427f19399a23497d2cdf9117b27d0eba07",
-    "manuscript_with_figure_alternatives.pdf": "504eab1d83ba6c007d546766a431df0ccb8f8e50bee020a9725ba0712d93a9a7",
-    "manuscript_overleaf.zip": "5539837731be1c1ca363318fd589248a65e0a05cde61619500a5d3bc2a4cfcff"
+    "manuscript.pdf": "9a8618b488cb3c45c436874229557e777eced84fbc512bd24778c09683aa89c9",
+    "manuscript_with_figure_alternatives.pdf": "711dea02f7c7d1deee0ef11133d3244a3fef8aa6660837a79a69cc639fe02091",
+    "manuscript_overleaf.zip": "50effffe8a2c60699d2aa81a56a05966bfb1ec24c359d125fcb673b00bd5eab9"
   },
   "source_sha256": {
     "apalike.bst": "1ac47965976a186451b7fc1830dfd8d7e9101d832f5e465792505636edb73ef3",
@@ -95,14 +95,14 @@
     "figures/xai_validation.png": "8365851f9a94625e69d492433630e369d8a131fc45a49e73a52767c2f84c9bda",
     "gallery.tex": "6adc762f067a13f4cf7f03be45533c3b75285033af589afba89a4fc3305d0193",
     "gallery_start.tex": "80d52f45dc9a59ba4a702af9200704b9cc333a5a47a0689f2e3f0e4d1edf0757",
-    "main.tex": "3408dca3d1789013c9f96f0da24c18a0f10f1e7225a3ef100978e46ecd66c778",
+    "main.tex": "f0576f7d1e15975a81761d4b5cf86815b2706f3fde1581e1f75124d8e8afba38",
     "README.md": "22aa19b84e78a6e767b2720b41b32c8814c020be2a479309e163dda924b95de9",
-    "refs.bib": "048b1894ce640eeae494037ba338d614c7784f822f5104023e3c161445375128",
+    "refs.bib": "8437af6294585a517674fb8db81da644186e382fde3648a3d52e641dfecd4b49",
     "review/activity_insertion_gallery_qa.md": "b66ae44a43b10221dc8e7e7cbc9a76c09bb2a03c5147ed807235b8a9e6e6611f",
     "review/activity_insertion_main_qa.md": "3d2704bfe617ccacbcfa0f41c19be62990cda2c431a487f96937deb0ca9ea991",
     "review/ai_disclosure.md": "caf7c36ccec5a00a9c2bca7db94eb2bf64da4ba3893307248b1c9063772d75d2",
     "review/bibliography_audit.md": "343f9bf2789cb05c424490e44d9ee32940615d59d9f79de4bc78620876651f89",
-    "review/delivery_notes.md": "3975e8cc123d32252c1edd7d930b06afe44e26014703bf700b935f1bb8c5efdd",
+    "review/delivery_notes.md": "3d72cce54f0108f116857b15b6b5adfc7b34ce1a356b27360355ac7863dd8576",
     "review/editorial_review_v1.md": "c6d21de4d54001da07a1e7d81b33ef914ca11b5bfa0bff8c0bcb45014596efb6",
     "review/figure_catalog.md": "1ba88b05c9cd49e99a514979f85e69f57c8b851b758b24aaeb976a7558af080e",
     "review/final_visual_qa_gallery.md": "d724f134f6e7d39f2e7029e55815960e3ec5b43964bcef6ece721be71cdf10ff",
@@ -111,9 +111,10 @@
     "review/opening_revision.md": "0fd6bc7095698fd22702f15fe94987d0d8e7f490791428f31043332a76212ee0",
     "review/reviewer_report_v1.md": "c071e943e5e45ba357fa49a80f8f4f87cbd93181cf0d2a8269ebb24bd4663af4",
     "review/revision_response.md": "5fcdb56d0b2b29d4d60512f2d7140d1dddd24d23833f66f42bdc83fbcdc8e58c",
+    "review/title_novelty_and_gains.md": "5a5840afff4a9c8064f2bb80f98ea163da95f7640ad639801a94ed978571a609",
     "review/visual_qa.md": "c6afd77a45c574d35afae1aee0612650b8e1ad4d41edb79aab18aeeb4ff0b5bc",
     "SCITEPRESS.sty": "fdc497bbace6d3362df2566b06e1048ca3961a0fa7e10c4acc866bbf158bbf8a",
-    "sections/01_introduction.tex": "255ca0bbd80750c5999ab88422ca5a45652cac449712d6f4d137f85b350e69b2",
+    "sections/01_introduction.tex": "84bf7685e0172c278a0af975cc7738c6fbc3fec43c5f423479f2f3489dbe8b3c",
     "sections/02_encoding.tex": "0110c85b11d81798f2b1d9729e7b5d301bb929ddf9c6e13d40ae6398ded19cd3",
     "sections/03_protocol.tex": "8edf3dade88848eb29ade5a9388ac12dd66f832f12f89abe01e123822f1ad721",
     "sections/04_representation_results.tex": "4e1d934d43dff34a240264ce6256b377a5310512f126043360ca2003672f5007",
@@ -129,10 +130,10 @@
     "requirements-lock.txt": "518f7cd98ff7c8aae65a5f1922cecea1e63daed65d8ce4da419aac192dd56ede"
   },
   "visual_review": {
-    "main": "review/opening_revision.md",
+    "main": "review/title_novelty_and_gains.md",
     "gallery": "review/opening_revision.md",
     "pages_individually_inspected": 26,
-    "final_layout_adjustment": "After keeping the contribution paragraph together, pages 1 and 3-7 changed and were re-inspected. Pages 2 and 8-26 were unchanged by PNG SHA256.",
+    "final_layout_adjustment": "New title, proposed-formulation statement, task-specific gains and verified Cilia citation: pages 1 and 3-14 re-inspected; pages 2 and 15-26 pixel-identical by PNG SHA256 to the previously inspected version.",
     "blocking_issues": []
   }
 }

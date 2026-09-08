@@ -20,7 +20,7 @@
 \newif\ifanonymous
 \anonymoustrue
 \begin{document}
-\title{From Static Traces to Pseudodynamic Handwriting Minimap Signatures}
+\title{Encoding Pen Dynamics in Handwriting Images: An Incremental Study of Parkinson's Disease Classification}
 \ifanonymous
 \author{\authorname{Anonymous Authors}\affiliation{Anonymous Institution}}
 \else
@@ -29,7 +29,7 @@
 \affiliation{\sup{2}Universidad Rey Juan Carlos, Spain}}
 \fi
 \keywords{Handwriting, Pseudodynamic Images, Local Phase Quantization, Parkinson's Disease, Explainable AI.}
-\abstract{Pseudodynamic handwriting minimap signatures preserve the visible pen trajectory while assigning recorded movement signals to colour channels. We investigate whether this compact representation benefits Parkinson's disease classification and whether increasing classifier complexity improves its use. On 597 PaHaW recordings from 75 participants across eight tasks, we compare a static baseline, four isolated signals (speed, pressure, altitude and azimuth) and four RGB combinations using Local Phase Quantization (LPQ) and SVM, with repeated nested model fitting in common participant-separated partitions. Speed, altitude and azimuth rank first, with task-mean macro F1 of 0.5752 versus 0.5643 for static, but no encoding difference survives multiplicity correction. In an exploratory comparison using this SVM-selected encoding, LPQ-based classifiers exceed a small CNN trained from scratch; SVM reaches 0.5752 versus 0.5105, with Holm-adjusted $p=0.0054$. Majority voting across tasks yields participant-level macro F1 of 0.6498 for logistic regression and 0.6488 for SVM, a distinct endpoint from the task mean. Held-out Grad-CAM concentrates on writing, yet its median correlation with occlusion is $-0.0121$. These findings support fixed texture features as a competitive baseline in this cohort and show why adding recorded signals and interpreting attribution maps each require empirical validation.}
+\abstract{We introduce a new formulation of pseudodynamic handwriting minimap signatures, combining contact-only trajectories with normalized pen signals in explicit colour channels. On 597 PaHaW recordings from 75 participants across eight tasks, we compare static traces, four isolated signals (speed, pressure, altitude and azimuth) and four RGB combinations using Local Phase Quantization (LPQ) and SVM, with repeated nested model fitting and common participant partitions. Speed, altitude and azimuth raise observed macro F1 on four tasks, including the spiral (0.5915 to 0.6716), and the task mean (0.5643 to 0.5752). Gains coexist with losses on other tasks; overall superiority remains unresolved after multiplicity correction. In an exploratory comparison on this SVM-selected encoding, LPQ-based classifiers outperform a small CNN trained from scratch; SVM reaches 0.5752 versus 0.5105, with Holm-adjusted $p=0.0054$. Majority voting yields participant-level macro F1 of 0.6498 for logistic regression and 0.6488 for SVM, a distinct endpoint from the task mean. Held-out Grad-CAM concentrates on writing, yet its median correlation with occlusion is $-0.0121$. The proposed technique provides a reproducible way to examine spatially encoded pen signals, with observed gains that vary across tasks and classifier choices.}
 \onecolumn\maketitle\normalsize\setcounter{footnote}{0}\vfill
 \input{sections/01_introduction}
 \input{sections/02_encoding}

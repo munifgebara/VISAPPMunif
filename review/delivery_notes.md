@@ -1,7 +1,8 @@
 # Entrega da reescrita integral
 
-Atualização de 8 de setembro de 2026: resumo e introdução revisados para destacar
-os achados sustentados pelos experimentos. O diagrama de atividade permanece
+Atualização de 8 de setembro de 2026: aplicado o título escolhido pelo autor,
+explicitada a formulação proposta e distinguidos os ganhos numéricos por tarefa
+da evidência de superioridade geral. O diagrama de atividade permanece
 como Figura 1, na página 2. O rascunho ampliado é destinado à discussão dos cortes
 com os orientadores Yandre e Ángel, conforme autorização do usuário.
 
@@ -14,14 +15,15 @@ e da galeria. A espessura constante aparece apenas como parâmetro de renderiza�
 
 | Arquivo | Conteúdo |
 |---|---|
-| `output/pdf/manuscript.pdf` | 14 páginas; 8 figuras principais, 3 tabelas e 12 referências citadas |
+| `output/pdf/manuscript.pdf` | 14 páginas; 8 figuras principais, 3 tabelas e 13 referências citadas |
 | `output/pdf/manuscript_with_figure_alternatives.pdf` | O mesmo artigo, seguido de 12 figuras alternativas nas páginas 15–26 |
 | `output/pdf/manuscript_overleaf.zip` | Fontes LaTeX, bibliografia, template, figuras PDF/PNG, SVG do diagrama, fontes dos geradores e registros de revisão |
 
-O resumo tem 190 palavras. A contagem atual de caracteres está no manifesto de build,
+O resumo tem 184 palavras. A contagem atual de caracteres está no manifesto de build,
 incluindo texto extraível de tabelas, gráficos e referências. O log final
 não contém referências indefinidas, caracteres ausentes ou caixas transbordando.
-O relatório `opening_revision.md` registra a revisão científica e visual atual.
+O relatório `title_novelty_and_gains.md` registra a revisão científica e visual atual.
+`opening_revision.md` documenta a etapa anterior da redação.
 Os relatórios `activity_insertion_main_qa.md` e `activity_insertion_gallery_qa.md`
 documentam a versão anterior à revisão da abertura. O manifesto de build registra os hashes
 dos arquivos. A galeria é renumerada automaticamente após o corpo completo.
@@ -47,7 +49,9 @@ em resposta aos pareceres; os dois relatórios finais de QA encerram suas pendê
 de paginação, referências e legibilidade.
 
 A bibliografia anterior foi mantida no arquivo `.bib`, usando no texto as referências
-pertinentes. As três novas referências metodológicas têm DOI confirmado. O TFG de
+pertinentes. As três referências metodológicas acrescentadas na reescrita têm DOI
+confirmado. Cilia et al. (2021), também com DOI confirmado, foi acrescentado para
+delimitar a contribuição frente a um antecedente de dinâmica codificada em RGB. O TFG de
 Alberto Casademunt González, orientado por Ángel Sánchez Calle e solicitado pelo
 usuário, foi identificado e comparado separadamente; não foi encontrado DOI para ele.
 As comparações com o TFG, Drotár e Diaz distinguem métrica, tarefas e protocolo.
