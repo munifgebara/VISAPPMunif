@@ -1,0 +1,52 @@
+{
+  "experiment_id": "task-fusion-v1",
+  "selected_encoding": "speed_altitude_azimuth",
+  "source_run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "static_run": "experiments/2026-09-restart/runs/static-svm-v1",
+  "output_root": "experiments/2026-09-restart/runs/task-fusion-v1",
+  "tasks": [1, 2, 3, 4, 5, 6, 7, 8],
+  "base_model": {
+    "algorithm": "SVM on LPQ_RGB",
+    "hyperparameters": "reuse the candidate selected inside each outer training fold",
+    "outer_test_predictions": "reuse frozen predictions",
+    "probability_calibration": "CalibratedClassifierCV sigmoid",
+    "calibration_folds": "reuse the three frozen inner participant folds",
+    "calibration_ensemble": true
+  },
+  "fusion_methods": {
+    "majority_vote_all8": {
+      "score": "mean of task-specific hard predictions",
+      "threshold": 0.5
+    },
+    "calibrated_mean_all8": {
+      "score": "unweighted mean of task-specific internally calibrated probabilities",
+      "threshold": 0.5,
+      "role": "primary"
+    },
+    "calibrated_reliability_weighted_all8": {
+      "score": "weighted mean of task-specific internally calibrated probabilities",
+      "weight": "max(inner_macro_f1 - 0.5, 0.01)",
+      "threshold": 0.5
+    }
+  },
+  "missing_task_policy": "average over the tasks available for that participant",
+  "validation": {
+    "reuse_static_splits": true,
+    "primary_metric": "macro_f1",
+    "primary_method": "calibrated_mean_all8",
+    "endpoint": "one fused prediction per participant in each of five repeated outer folds",
+    "bootstrap_unit": "participant, stratified by diagnosis and shared across repeats",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 173205,
+    "paired_randomization_resamples": 10000,
+    "paired_randomization_seed": 223607,
+    "global_multiple_comparison_family": "all 3 pairs among fusion rules",
+    "multiple_comparison_method": "Holm"
+  },
+  "historical_context": {
+    "legacy_eight_task_fusion": 0.6925,
+    "legacy_note": "descriptive comparison only; legacy preprocessing and validation differ",
+    "drotar_multitask_accuracy": 0.813,
+    "drotar_note": "descriptive comparison only; signal features and validation differ"
+  }
+}

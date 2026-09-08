@@ -2,7 +2,7 @@
 \label{sec:protocol}
 
 \noindent
-The resulting images provide several views of the same handwriting records. Comparing them requires a common account of the available data, participant separation and evaluation criteria. These choices establish how the encoding and classifier results will be measured and interpreted.
+Each recording produces nine alternative images, all derived from the same participant. We compare encodings on common participant partitions and define separate endpoints for individual tasks and decisions combined across tasks.
 
 \subsection{Participants and Tasks}
 \noindent
@@ -59,10 +59,10 @@ For each task and repetition, we concatenate the five outer-test folds and compu
  \overline F_{\mathrm{tasks}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r}.
  \label{eq:taskmetric}
 \end{equation}
-We also retain accuracy, balanced accuracy, PD sensitivity, H specificity, positive-class F1 and ROC AUC. A mean of task scores answers a different question from a single diagnosis obtained by combining tasks; Section~\ref{sec:fusion} defines the latter.
+We also retain accuracy, balanced accuracy, PD sensitivity, H specificity, positive-class F1 and ROC AUC. Section~\ref{sec:fusion} defines a separate participant-level prediction by combining tasks.
 
-Confidence intervals use 10,000 diagnosis-stratified bootstrap draws of participants. A draw preserves all available tasks and repeated predictions for each selected person. For a paired contrast, the same draw is applied to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 participant-wise swap patterns. It tests the difference between fixed sets of predictions, not a shuffled-label learning pipeline.
+We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants. A draw preserves all available tasks and repeated predictions for each selected person. For a paired contrast, the same draw is applied to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 participant-wise swap patterns. It tests the difference between fixed sets of predictions, not a shuffled-label learning pipeline.
 
-Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; and eight task-specific CNN--SVM contrasts. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
+Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; three SVM fusion-rule pairs; and eight task-specific CNN--SVM contrasts. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
 
 Both resampling procedures leave models fixed. Intervals and tests describe conditional uncertainty in these predictions, without the full variability of retraining or selection.

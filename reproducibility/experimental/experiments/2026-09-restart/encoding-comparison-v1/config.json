@@ -1,0 +1,51 @@
+{
+  "experiment_id": "encoding-comparison-v1",
+  "output_root": "experiments/2026-09-restart/runs/encoding-comparison-v1",
+  "prediction_sources": {
+    "static": {
+      "run": "experiments/2026-09-restart/runs/static-svm-v1",
+      "encoding": null
+    },
+    "speed": {
+      "run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+      "encoding": "speed"
+    },
+    "pressure": {
+      "run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+      "encoding": "pressure"
+    },
+    "altitude": {
+      "run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+      "encoding": "altitude"
+    },
+    "azimuth": {
+      "run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+      "encoding": "azimuth"
+    },
+    "speed_pressure_altitude": {
+      "run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+      "encoding": "speed_pressure_altitude"
+    },
+    "speed_pressure_azimuth": {
+      "run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+      "encoding": "speed_pressure_azimuth"
+    },
+    "speed_altitude_azimuth": {
+      "run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+      "encoding": "speed_altitude_azimuth"
+    },
+    "pressure_altitude_azimuth": {
+      "run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+      "encoding": "pressure_altitude_azimuth"
+    }
+  },
+  "validation": {
+    "ranking_endpoint": "unweighted mean of task-specific macro F1 across 8 tasks and 5 repeats",
+    "bootstrap_unit": "participant, stratified by diagnosis and shared across tasks/repeats",
+    "paired_randomization_resamples": 10000,
+    "paired_randomization_seed": 173205,
+    "multiple_comparison_family": "all 36 pairs among 9 encodings",
+    "multiple_comparison_method": "Holm"
+  },
+  "selection_rule": "highest ranking_endpoint; retain uncertainty and multiplicity-corrected comparisons in interpretation"
+}

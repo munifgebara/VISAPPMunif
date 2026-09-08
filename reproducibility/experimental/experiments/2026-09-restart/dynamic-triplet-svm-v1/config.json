@@ -1,0 +1,66 @@
+{
+  "experiment_id": "dynamic-triplet-svm-v1",
+  "dataset_root": "C:/Users/munif/PycharmProjects/PseudodynamicHandwritingMinimapSignatures/dataset/PaHaW",
+  "static_run": "experiments/2026-09-restart/runs/static-svm-v1",
+  "single_signal_run": "experiments/2026-09-restart/runs/dynamic-single-signal-v1",
+  "output_root": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "tasks": [1, 2, 3, 4, 5, 6, 7, 8],
+  "encodings": {
+    "speed_pressure_altitude": {
+      "rgb": ["speed", "pressure", "altitude"]
+    },
+    "speed_pressure_azimuth": {
+      "rgb": ["speed", "pressure", "azimuth"]
+    },
+    "speed_altitude_azimuth": {
+      "rgb": ["speed", "altitude", "azimuth"]
+    },
+    "pressure_altitude_azimuth": {
+      "rgb": ["pressure", "altitude", "azimuth"]
+    }
+  },
+  "render": {
+    "image_size": 512,
+    "margin": 20,
+    "antialias_scale": 3,
+    "line_width_px": 4,
+    "channel_min": 30,
+    "channel_max": 220,
+    "constant_channels": [30, 30],
+    "background_rgb": [255, 255, 255],
+    "normalization": "per_recording_surface_segments_p05_p95",
+    "normalization_low_percentile": 5.0,
+    "normalization_high_percentile": 95.0,
+    "speed_transform": "log1p",
+    "azimuth_transform": "surface_circular_mean_centering_before_segment_average",
+    "include_air": false,
+    "coordinate_frame": "per_sample_surface_only_preserve_aspect_ratio",
+    "channel_order_rationale": "LPQ_RGB plus standardized linear/RBF SVM is invariant to permutations of 256-feature channel blocks"
+  },
+  "features": {
+    "descriptor": "LPQ_RGB",
+    "dimension": 768,
+    "preprocess_size": 64,
+    "window_size": 5
+  },
+  "validation": {
+    "reuse_static_splits": true,
+    "primary_metric": "macro_f1",
+    "global_endpoint": "unweighted mean of task-specific macro F1 across 8 tasks and 5 repeats",
+    "bootstrap_unit": "participant, stratified by diagnosis and shared across tasks/repeats",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 314159,
+    "paired_randomization_resamples": 10000,
+    "paired_randomization_seed": 141421,
+    "per_task_multiple_comparison_family": "4 triplets x 8 tasks against static = 32 contrasts",
+    "global_multiple_comparison_family": "all 10 pairs among 4 triplets and static",
+    "multiple_comparison_method": "Holm"
+  },
+  "svm_search": {
+    "linear_c": [0.01, 0.1, 1.0, 10.0, 100.0],
+    "rbf_c": [0.1, 1.0, 10.0, 100.0],
+    "rbf_gamma": ["scale", 0.0001, 0.001, 0.01],
+    "class_weight": "balanced",
+    "tie_break": "first candidate in declared order"
+  }
+}

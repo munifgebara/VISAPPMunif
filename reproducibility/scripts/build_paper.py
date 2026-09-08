@@ -43,6 +43,53 @@ REPRODUCTION_SOURCES = [
     ROOT / "pyproject.toml",
     ROOT / "requirements-lock.txt",
 ]
+EXPERIMENT_STAGES = [
+    ("static-svm-v1", "run_static_svm.py", "verify_static_svm_run.py"),
+    ("dynamic-single-signal-v1", "run_dynamic_single_signal.py", "verify_dynamic_single_signal_run.py"),
+    ("dynamic-triplet-svm-v1", "run_dynamic_triplet_svm.py", "verify_dynamic_triplet_svm_run.py"),
+    ("encoding-comparison-v1", "run_encoding_comparison.py", "verify_encoding_comparison.py"),
+    ("classical-classifier-comparison-v1", "run_classical_classifier_comparison.py", "verify_classical_classifier_comparison.py"),
+    ("task-fusion-v1", "run_task_fusion.py", "verify_task_fusion.py"),
+    ("cnn-v1", "run_cnn.py", "verify_cnn_run.py"),
+    ("cnn-xai-v1", "run_cnn_xai.py", "verify_cnn_xai_run.py"),
+]
+EXPERIMENT_README = PAPER / "review" / "experimental_reproduction.md"
+
+
+def experimental_sources() -> list[Path]:
+    """Select code/configuration explicitly; never traverse saved run outputs."""
+    paths = sorted((ROOT / "src" / "pdhms_restart").glob("*.py"))
+    for stage, runner, verifier in EXPERIMENT_STAGES:
+        paths.extend([ROOT / "scripts" / runner, ROOT / "scripts" / verifier,
+                      ROOT / "experiments" / "2026-09-restart" / stage / "config.json"])
+    paths.extend([ROOT / "pyproject.toml", ROOT / "requirements-lock.txt"])
+    missing = [str(path) for path in [*paths, EXPERIMENT_README] if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Missing experimental reproduction sources: {missing}")
+    return paths
+
+
+def write_experimental_package(archive: zipfile.ZipFile) -> dict:
+    """Archive exact source copies without fitting or loading participant data."""
+    paths = experimental_sources()
+    prefix = "reproducibility/experimental/"
+    for path in paths:
+        archive.write(path, arcname=prefix + path.relative_to(ROOT).as_posix())
+    archive.write(EXPERIMENT_README, arcname=prefix + "README.md")
+    manifest = {
+        "scope": "Code and original configurations for the eight manuscript stages",
+        "experiments_executed_during_packaging": False,
+        "stage_order": [stage for stage, _, _ in EXPERIMENT_STAGES],
+        "source_file_count": len(paths),
+        "source_bytes": sum(path.stat().st_size for path in paths),
+        "source_sha256": {path.relative_to(ROOT).as_posix(): digest(path) for path in paths},
+        "readme_sha256": digest(EXPERIMENT_README),
+        "excluded": ["participant recordings and identifiers", "individual predictions",
+                     "model checkpoints and attribution maps", "saved run artifacts",
+                     "width-ablation and performance-gap-audit scripts/configurations"],
+    }
+    archive.writestr(prefix + "manifest.json", json.dumps(manifest, indent=2) + "\n")
+    return manifest
 
 
 def run(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
@@ -180,10 +227,14 @@ def main() -> None:
             archive.write(path, arcname=path.relative_to(PAPER).as_posix())
         for path in REPRODUCTION_SOURCES:
             archive.write(path, arcname="reproducibility/" + path.relative_to(ROOT).as_posix())
+        experimental_manifest = write_experimental_package(archive)
         archive.writestr(
             "reproducibility/README.txt",
             "These are exact copies of the manuscript/figure generators and project environment files.\n"
             "Run them from the original experiment repository with its saved runs and src/ package.\n"
+            "experimental/ additionally contains the exact code and original configurations for the\n"
+            "eight manuscript experiment stages. Read experimental/README.md for data requirements,\n"
+            "path changes in a fresh working copy, command order, and reproduction limits.\n"
             "The Overleaf package supplies the rendered figures, editable activity SVG, source manifests,\n"
             "and generated gallery_start.tex; it does not embed participant recordings or model checkpoints.\n"
             "Compile main.tex or gallery.tex at the archive root for normal Overleaf editing.\n"
@@ -212,6 +263,7 @@ def main() -> None:
         "source_sha256": {path.relative_to(PAPER).as_posix(): digest(path) for path in source_files},
         "reproducibility_source_sha256": {path.relative_to(ROOT).as_posix(): digest(path)
                                           for path in REPRODUCTION_SOURCES},
+        "experimental_reproducibility": experimental_manifest,
     }
     (PAPER / "review" / "build_verification.json").write_text(
         json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

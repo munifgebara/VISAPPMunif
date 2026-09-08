@@ -1,0 +1,51 @@
+{
+  "experiment_id": "cnn-xai-v1",
+  "cnn_run": "experiments/2026-09-restart/runs/cnn-v1",
+  "image_run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "output_root": "experiments/2026-09-restart/runs/cnn-xai-v1",
+  "selected_encoding": "speed_altitude_azimuth",
+  "input_size": 128,
+  "channel_semantics": {
+    "red": "speed",
+    "green": "altitude",
+    "blue": "azimuth"
+  },
+  "gradcam": {
+    "target": "class predicted by the external-fold model",
+    "target_layer": "last convolutional ReLU, before fourth max pooling",
+    "scope": "all 2985 external predictions",
+    "normalization": "per-map positive maximum"
+  },
+  "deletion": {
+    "fraction": 0.10,
+    "fill": "white background",
+    "random_control": "one deterministic equal-area random mask per prediction",
+    "scope": "all 2985 external predictions",
+    "seed": 271828
+  },
+  "channel_ablation": {
+    "fill": "white background",
+    "metric": "change in confidence of the originally predicted class",
+    "scope": "all 2985 external predictions"
+  },
+  "occlusion": {
+    "patch_size": 16,
+    "stride": 16,
+    "batch_size": 64,
+    "fill": "white background",
+    "scope": "all 597 external predictions from repeat 1"
+  },
+  "weight_randomization_sanity": {
+    "scope": "one deterministically selected external image per each of 200 checkpoints",
+    "comparison": "trained Grad-CAM versus fully reinitialized model Grad-CAM",
+    "seed": 314159
+  },
+  "aggregation": {
+    "primary_unit": "participant after averaging the five repeated external predictions",
+    "foreground_threshold": 250,
+    "top_map_fraction": 0.10,
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 161803
+  },
+  "interpretation": "diagnostic explanation of this frozen low-performing CNN; no clinical attribution"
+}

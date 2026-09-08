@@ -1,0 +1,44 @@
+{
+  "experiment_id": "classical-classifier-comparison-v1",
+  "selected_encoding": "speed_altitude_azimuth",
+  "selected_encoding_rgb": {
+    "red": "speed",
+    "green": "altitude",
+    "blue": "azimuth"
+  },
+  "feature_run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "static_run": "experiments/2026-09-restart/runs/static-svm-v1",
+  "output_root": "experiments/2026-09-restart/runs/classical-classifier-comparison-v1",
+  "algorithms": {
+    "svm": {
+      "mode": "reuse_frozen_outer_predictions"
+    },
+    "random_forest": {
+      "n_estimators": 100,
+      "max_features": ["sqrt", 0.25],
+      "min_samples_leaf": [1, 2, 4],
+      "criterion": "gini",
+      "class_weight": "balanced_subsample",
+      "master_seed": 424242
+    },
+    "logistic_regression": {
+      "penalties": ["l1", "l2"],
+      "c_values": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0],
+      "solver": "liblinear",
+      "class_weight": "balanced",
+      "master_seed": 515151
+    }
+  },
+  "validation": {
+    "reuse_static_splits": true,
+    "primary_metric": "macro_f1",
+    "global_endpoint": "unweighted mean of task-specific macro F1 across 8 tasks and 5 repeats",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 223606,
+    "paired_randomization_resamples": 10000,
+    "paired_randomization_seed": 244949,
+    "per_task_family": "random forest and logistic regression versus SVM over 8 tasks = 16 contrasts",
+    "global_family": "all 3 pairs among SVM, random forest, and logistic regression",
+    "multiple_comparison_method": "Holm"
+  }
+}

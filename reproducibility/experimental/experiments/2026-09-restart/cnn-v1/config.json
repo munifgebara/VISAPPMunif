@@ -1,0 +1,71 @@
+{
+  "experiment_id": "cnn-v1",
+  "selected_encoding": "speed_altitude_azimuth",
+  "image_run": "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1",
+  "classical_run": "experiments/2026-09-restart/runs/classical-classifier-comparison-v1",
+  "fusion_run": "experiments/2026-09-restart/runs/task-fusion-v1",
+  "static_run": "experiments/2026-09-restart/runs/static-svm-v1",
+  "output_root": "experiments/2026-09-restart/runs/cnn-v1",
+  "tasks": [1, 2, 3, 4, 5, 6, 7, 8],
+  "input": {
+    "source": "SAZ RGB images with fixed 4 px width and no air path",
+    "foreground_crop": true,
+    "square_padding": true,
+    "image_size": 128,
+    "normalization": "fixed per-channel (x - 0.5) / 0.5"
+  },
+  "architecture": {
+    "name": "SmallHandwritingCNN",
+    "training": "from scratch",
+    "convolution_channels": [16, 32, 64, 128],
+    "kernel_size": 3,
+    "batch_normalization": true,
+    "pooling_per_block": "2x2 max pool",
+    "head_pooling": "flatten final 128x8x8 feature map",
+    "dropout": 0.3,
+    "output": "one binary logit",
+    "trainable_parameters": 105873
+  },
+  "augmentation": {
+    "enabled_only_for_training": true,
+    "random_rotation_degrees": 3,
+    "random_translation_fraction": 0.03,
+    "random_scale": [0.95, 1.05],
+    "fill_normalized": 1.0,
+    "horizontal_flip": false,
+    "vertical_flip": false
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 16,
+    "maximum_epoch_selection_epochs": 60,
+    "minimum_epochs_before_stopping": 12,
+    "early_stopping_patience": 10,
+    "epoch_selection": "macro F1 then BCE loss on first frozen inner validation fold",
+    "final_fit": "reinitialize and train on all outer-training participants for selected epoch count",
+    "loss": "BCEWithLogitsLoss with outer-training class-derived positive weight",
+    "master_seed": 202609071,
+    "deterministic_algorithms": true
+  },
+  "validation": {
+    "reuse_static_splits": true,
+    "primary_metric": "macro_f1",
+    "task_endpoint": "unweighted mean of task-specific macro F1 across 8 tasks and 5 repeats",
+    "participant_endpoint": "majority vote across all available task predictions",
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 264575,
+    "paired_randomization_resamples": 10000,
+    "paired_randomization_seed": 316228,
+    "per_task_family": "CNN versus SVM over 8 tasks",
+    "task_global_family": "all 6 pairs among CNN, SVM, Random Forest, and Logistic Regression",
+    "fusion_global_family": "all 6 pairs among majority-vote fusion of the same four classifiers",
+    "multiple_comparison_method": "Holm"
+  },
+  "xai": {
+    "status": "deferred_until_model_results_are_frozen",
+    "planned_methods": ["Grad-CAM", "occlusion"],
+    "eligible_samples": "external-test participants explained by their corresponding saved fold model"
+  }
+}

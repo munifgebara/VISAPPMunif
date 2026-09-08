@@ -2,7 +2,7 @@
 \label{sec:encoding}
 
 \noindent
-The proposed signatures require an image construction whose components can be varied separately. We begin with the visible trace, define how each pen signal becomes colour, and then combine signals while keeping the rendering geometry fixed.
+To vary the information encoded in each signature, we first reconstruct the visible trace. We then map individual pen signals to colour and combine them without changing the trajectory or rendering geometry.
 
 \subsection{The Visible Trace}
 \noindent
@@ -53,11 +53,11 @@ with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer ch
 \end{equation}
 The white background stays outside the semantic range. Antialiasing introduces intermediate intensities at boundaries, as in the static reconstruction.
 
-This normalization needs neither a cohort-wide reference distribution nor a class label. A future record can be rendered independently. The cost is that colour describes relative variation within that recording. The same red value in two images does not imply the same absolute speed or pressure. Absolute pen orientation is also removed by circular centring. These losses matter when interpreting the final comparison with classifiers that use physical measurements directly.
+Each record is normalized independently, without a cohort-wide reference distribution or class labels. Colour therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centring also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
 
 \subsection{Combining Signals in RGB}
 \noindent
-Three channels cannot carry four independent scalar signals without an additional design choice. We evaluate the four subsets of size three, rather than deciding in advance which measurement to discard. Table~\ref{tab:encoding} gives the assignments, and Figure~\ref{fig:progressive} illustrates the progression. The static image and the isolated additions use the same geometry, background and rendering settings as these combinations.
+We assign one scalar signal to each RGB channel and evaluate all four subsets of size three. Table~\ref{tab:encoding} gives the assignments, and Figure~\ref{fig:progressive} illustrates the progression. All combinations use the same geometry, background and rendering settings as the static and isolated-signal images.
 
 \begin{table}[t]
 \centering\small

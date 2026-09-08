@@ -6,13 +6,13 @@ The encoding comparison leads to a second question: how does the selected repres
 
 \subsection{Linear and Tree-Based Alternatives}
 \noindent
-With the $SAZ$ image fixed, we compare SVM with regularized logistic regression and Random Forest. All three consume the same 768 LPQ attributes. Logistic regression is a useful linear reference because it can succeed without fitting a nonlinear decision boundary. We search $L_1$ and $L_2$ penalties with $C\in\{0.001,0.01,0.1,1,10,100\}$, using the liblinear solver and inverse-frequency class weights. Standardization remains inside the training pipeline.
+With the $SAZ$ image fixed, SVM, regularized logistic regression and Random Forest use the same 768 LPQ attributes. Logistic regression provides a linear baseline. We search $L_1$ and $L_2$ penalties with $C\in\{0.001,0.01,0.1,1,10,100\}$, using the liblinear solver and inverse-frequency class weights. Standardization remains inside the training pipeline.
 
 Random Forest supplies a different form of nonlinear modelling through an ensemble of decision trees \cite{Breiman2001}. Each candidate uses 100 trees, the Gini criterion and class weights calculated within bootstrap samples. The search combines maximum-feature choices $\{\sqrt{d},0.25d\}$ with minimum leaf sizes $\{1,2,4\}$, where $d=768$. Tree depth is unrestricted. Both algorithms reuse the same three-fold inner search and the same outer test assignments as SVM.
 
 \subsection{Learning Directly from Pixels}
 \noindent
-The CNN removes the fixed texture descriptor. Convolutional learning has a long history in document recognition \cite{LeCun1998}, but the number of independent participants here is small. We use a compact network trained from scratch to establish a direct pixel-learning baseline; this experiment is not a search across modern pretrained architectures.
+We use a compact CNN trained from scratch as a direct pixel-learning baseline, following the use of convolutional models in document recognition \cite{LeCun1998}. Its architecture is fixed throughout the comparison.
 
 The input follows the same foreground crop and square padding as LPQ but is resized to $128\times128$. Pixel values are mapped from $[0,255]$ to $[-1,1]$ with fixed constants. Four blocks contain a bias-free $3\times3$ convolution, batch normalization, ReLU and $2\times2$ max pooling. Their channel counts are 16, 32, 64 and 128. A dropout layer with probability 0.3 and one linear output act on the flattened $128\times8\times8$ feature map. The network has 105,873 trainable parameters.
 
@@ -32,11 +32,11 @@ Selected counts range from 1 to 48 epochs, with median 15. All 200 outer checkpo
 \noindent
 SVM leads the task-mean ranking at 0.5752, followed by logistic regression at 0.5674 and Random Forest at 0.5599. Their differences are small relative to the paired uncertainty. SVM minus logistic regression is 0.0077, with interval [$-$0.0074, 0.0230] and Holm-adjusted $p=0.6563$. SVM minus Random Forest is 0.0152, with interval [$-$0.0066, 0.0365] and adjusted $p=0.5645$.
 
-The CNN reaches 0.5105. The SVM--CNN contrast is 0.0646, with interval [0.0277, 0.1021] and adjusted $p=0.0054$ in the six-pair classifier family. Random Forest and logistic regression also exceed the CNN in that analysis, with adjusted $p=0.0460$ and $p=0.0255$, respectively. These are conditional comparisons of the saved cross-validated predictions as defined in Section~\ref{sec:protocol}.
+The CNN reaches 0.5105. The SVM--CNN contrast is 0.0646, with interval [0.0277, 0.1021] and adjusted $p=0.0054$ in the six-pair classifier family. Random Forest and logistic regression also exceed the CNN, with adjusted $p=0.0460$ and $p=0.0255$, respectively. The inference follows the fixed-prediction procedure in Section~\ref{sec:protocol}.
 
 The task pattern in Figure~\ref{fig:classifiers} differs from the overall ranking. Random Forest is strongest on T4 at 0.6791, even though its eight-task mean is below SVM. The CNN is slightly above SVM on T2 and T5, two tasks on which SVM itself performs poorly. Its task-specific differences against SVM do not survive the family of eight contrasts. 
 
-The experiment favours LPQ-based models under these choices. Architecture is not the only difference: LPQ uses $64\times64$ inputs, the CNN uses $128\times128$, and their selection budgets differ. Pretrained features, as used by Diaz et al.~\cite{Diaz2019}, remain a distinct approach.
+LPQ-based models perform better under these choices, which differ in more than architecture: LPQ uses $64\times64$ inputs, the CNN uses $128\times128$, and their selection budgets differ. The comparison does not isolate the effect of architecture or evaluate pretrained features such as those used by Diaz et al.~\cite{Diaz2019}.
 
 \section{\uppercase{Combining Handwriting Tasks}}
 \label{sec:fusion}
@@ -47,11 +47,11 @@ The experiment favours LPQ-based models under these choices. Architecture is not
 \label{fig:fusion}
 \end{figure*}
 \noindent
-A participant can be represented by several task executions rather than one. Late fusion combines their predictions while keeping each task model separate. Because all tasks share the same participant folds, the models used for a held-out person's fusion were all fitted without that person.
+Late fusion combines the available task predictions into one decision per participant. Because all tasks share the same participant folds, every model contributing to a held-out person's decision was fitted without that person.
 
 We first considered three SVM rules over every available task: the mean calibrated PD probability, a reliability-weighted mean, and majority voting. Sigmoid calibration uses the three inner participant folds with ensemble averaging. Reliability is derived from inner-validation macro F1, with weight $\max(F_{\mathrm{inner}}-0.5,0.01)$. We do not select a subset of tasks according to outer-test performance. A missing spiral is omitted from that participant's denominator.
 
-The initially declared probability-mean endpoint reaches macro F1 0.6341, with interval [0.5417, 0.7189]. Reliability weighting reaches 0.6447. Majority voting has the largest observed score, 0.6488, but the three rules do not differ significantly after correction. Majority minus probability mean is 0.0147, with interval [$-$0.0317, 0.0618] and adjusted $p=1.0000$.
+The probability mean, specified before the fusion-rule comparison, reaches macro F1 0.6341, with interval [0.5417, 0.7189]. Reliability weighting reaches 0.6447 and majority voting 0.6488. Majority minus probability mean is 0.0147, with interval [$-$0.0317, 0.0618] and adjusted $p=1.0000$; none of the three rule comparisons survives correction.
 
 We use majority voting as a common descriptive participant endpoint for all four classifiers. If $\mathcal{T}_j$ is the set of tasks available for participant $j$, its score in repetition $r$ is
 \begin{equation}
@@ -66,4 +66,4 @@ Figure~\ref{fig:fusion} places logistic regression at 0.6498 and SVM at 0.6488 a
 
 The fused SVM has PD sensitivity 0.7135 and H specificity 0.5895. Logistic regression has sensitivity 0.7081 and specificity 0.5947. Their error rates are not symmetric despite near-balanced class counts. The PD decision on tied votes contributes to the interpretation of this operating point; no alternative threshold was chosen from the outer labels. The vote fraction gives an SVM AUC of 0.6808 and a logistic-regression AUC of 0.6658, even though logistic regression ranks slightly higher by thresholded macro F1.
 
-The larger fused scores describe a participant-level decision. We do not test their difference from task-mean scores as a paired improvement, because the two endpoints summarize different predictions.
+These participant-level scores and the earlier task means summarize different predictions; their numerical difference is not tested as a paired improvement.

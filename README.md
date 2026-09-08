@@ -18,6 +18,11 @@ and held-out CNN explanations. The stroke-width experiment is excluded.
   appear in its reference list. New methodological citations have verified DOIs;
   the specifically requested Casademunt thesis has no verified DOI.
 - `review/` records the source audit, independent reviews and applied revisions.
+- The Overleaf package includes `reproducibility/experimental/`: exact sources
+  and configurations for the eight experimental stages, with an execution guide
+  and a SHA-256 manifest. It requires separately obtained PaHaW recordings and
+  path adjustments in a fresh working copy. See `review/experimental_reproduction.md`
+  for the distinction between rerunning experiments and regenerating paper figures.
 
 Compile `main.tex` with pdfLaTeX, BibTeX, then pdfLaTeX twice. Overleaf performs the
 bibliography sequence automatically. Compile `gallery.tex` separately to edit the
@@ -45,10 +50,13 @@ representation was selected from this cohort's outer scores. The downstream
 comparison is exploratory and conditional on that choice. The reported bootstrap
 intervals and permutation comparisons use saved predictions without refitting.
 
+SAZ improves observed macro F1 over static on four tasks, including the spiral
+(0.5915 to 0.6716); the task mean rises from 0.5643 to 0.5752. Its overall
+advantage remains uncertain after the paired analysis and multiplicity correction.
 The strongest task-mean model is SVM (macro F1 0.5752). Majority fusion gives
 participant-level macro F1 0.6498 for logistic regression and 0.6488 for SVM.
-These are different endpoints. No significant advantage of SAZ over static, or
-between the fused classifiers, was established after the declared corrections.
+These are different endpoints. No significant difference between the fused
+classifiers was established after the declared corrections.
 
 ## Editorial status
 
@@ -57,11 +65,17 @@ block is retained from the previous manuscript and must be verified by the autho
 before a named version is circulated. No claim of author approval is implied.
 
 The [VISAPP 2027 guidelines](https://visapp.scitevents.org/Guidelines.aspx?y=2027),
-checked on 7 September 2026, specify 10,000–50,000 non-whitespace characters for
-regular-paper submission and 12 pages for full-paper publication, including
-references and illustrations. The build records counts in `review/build_verification.json`.
+checked on 8 September 2026, specify 10,000–50,000 non-whitespace characters for
+regular-paper submission and a standard 12-page full-paper publication allowance,
+including references and illustrations, with up to four extra pages available for
+an additional fee. The build's optional submission check conservatively uses
+the standard 12 pages. Counts are in `review/build_verification.json`.
 The current advisor draft may exceed the main-paper limit by the user's instruction;
 it is not cut automatically. The alternative gallery follows the full main text.
+
+`review/final_referee_review.md` records the final scientific and editorial audit,
+the corrections applied without further experiments, and the remaining limits
+that require new data or a different evaluation design.
 
 The same guidelines require disclosure of AI-generated text, including a citation
 to the system, while also requesting removal of acknowledgements for anonymous

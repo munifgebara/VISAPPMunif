@@ -19,3 +19,9 @@ The appropriate placement and system citation should be resolved for the submiss
 version using the venue's instructions. This record makes no claim that the current
 anonymous editorial draft has completed those submission requirements. No DOI for
 Codex was invented or added to the scientific bibliography.
+
+On 8 September 2026 the final editorial pass also checked the venue's
+[AI policy](https://visapp.scitevents.org/AiTools.aspx?y=2027). Revisions removed
+repetition, generic commentary and imprecise transitions while preserving the
+scientific qualifications. No authorship detector was used, and these edits do
+not change the assistance described above.

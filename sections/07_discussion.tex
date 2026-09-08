@@ -2,11 +2,11 @@
 \label{sec:discussion}
 
 \noindent
-The classification and explanation analyses address different aspects of the proposed technique. Taken together, they inform the interpretation of the colour encoding, its relation to earlier handwriting studies, and the limits of the tested models and explanations. These connections also define the scope of further evaluation.
+The observed encoding gains vary across tasks, while LPQ-based models outperform the tested CNN on the selected encoding. We interpret these findings in terms of the information retained by the representation, compare them with earlier PaHaW studies, and examine the limits of the evaluation and attribution analyses.
 
 \subsection{What the Incremental Comparison Establishes}
 \noindent
-$SAZ$ ranks first, but its advantage over static is about one macro-F1 percentage point and its interval includes zero. Normalized colour patterns summarized by LPQ did not provide a clear gain across all eight tasks. This finding concerns the representation and descriptor, not the general relevance of writing dynamics.
+$SAZ$ improves observed macro F1 on four tasks, with an increase of 0.0802 on the spiral. Gains and losses across tasks produce a smaller mean increase of 0.0109, whose interval includes zero. The result is a task-dependent response to the tested colour encoding and LPQ descriptor, with insufficient evidence for overall superiority.
 
 The renderer removes absolute size and signal levels, LPQ discards the location of each phase code, and the image omits in-air movement. These choices may discard useful information alongside nuisance variation. The present experiment cannot separate their effects.
 
@@ -39,25 +39,25 @@ Drot\'ar et al. report 81.3\% accuracy for kinematic and pressure features from 
 
 Diaz et al. report 86.67\% accuracy for their enhanced representation and ensemble, versus 72.50\% for its static counterpart \cite{Diaz2019}. The enhancement includes in-air movement, and their pipeline uses pretrained CNN features and five selected tasks. It preserves and models different information from our contact-only colour images with LPQ. These protocol differences preclude a controlled cross-paper ranking.
 
-Our strongest participant-level result remains below these published accuracies. Different inputs and evaluation procedures may explain part of that gap, but do not make it disappear.
+Our participant-level accuracy is lower than the published combined-task results of Drot\'ar and Diaz. The present study does not determine how much of this gap arises from representation, classifier or evaluation choices.
 
 \subsection{Limits of Complexity and Explanation}
 \noindent
-With approximately 60 outer-training participants, a single task offers little independent data for learning filters from scratch. Affine augmentation adds views, not people. The tested CNN's lower scores favour the fixed descriptor in this setting, without establishing that CNNs generally are unsuitable for handwriting.
+Each task provides approximately 60 outer-training participants for learning filters from scratch; augmented images remain correlated views of those records. The observed LPQ advantage is conditional on this cohort and the selected representation. Differences in input resolution and model-selection procedures also prevent attributing it solely to network architecture.
 
-An attribution can identify the strip occupied by writing without identifying stable disease-related features. The near-zero Grad-CAM--occlusion correlation exposes that limitation. Neither method explains why the CNN underperformed; that would require a separate controlled investigation.
+The near-zero Grad-CAM--occlusion correlation limits the consistency of spatial interpretation for this CNN. The maps alone do not establish disease-specific features or explain the classifier's lower performance.
 
-Independent-cohort validation is needed to estimate generalization beyond this development process, including age matching and acquisition differences. Another random split of PaHaW would not undo its role in design decisions. Future work could select representations within training partitions or freeze them before collecting a new cohort.
+Independent-cohort validation is needed to estimate generalization beyond this development process, including the effects of age imbalance and acquisition differences. A new random split of PaHaW would still reuse the cohort involved in design decisions. Further evaluation should select representations within training partitions or freeze them before testing on a new cohort.
 
-\subsection{Reproducibility and Scope}
+\subsection{Reproducibility}
 \noindent
-Saved configurations, participant assignments, rendering diagnostics, inner searches and outer predictions support reproduction. XAI reproduces checkpoint probabilities before explanation, and checksums link figure inputs and tables to source files.
+The accompanying experimental source package supplies the rendering, feature extraction, model fitting, fusion and XAI code, together with the eight stage configurations and pinned dependencies. Reproduction requires access to the original PaHaW recordings, which are not redistributed in this package. Its README gives the execution order and distinguishes model reruns from figure generation using the archived results.
 
-The scope is fixed-thickness, contact-only colour encoding. Absolute magnitude and spatial location can both matter for classification; the representation and descriptor make explicit compromises on each.
+Our internal experimental archive retains participant assignments, rendering diagnostics, inner searches, outer predictions and CNN checkpoints. XAI checks reproduce checkpoint probabilities before explanation, and checksums link figure inputs and tables to their source files.
 
 \section{\uppercase{Conclusion}}
 \label{sec:conclusion}
 \noindent
-Across eight PaHaW tasks, explicit RGB combinations changed performance only modestly: speed, altitude and azimuth ranked first, without a supported advantage over the static reconstruction. On that representation, LPQ with SVM or logistic regression was more effective than the small CNN trained from scratch. Combining task predictions gave the strongest participant-level scores, with the two classical methods near 0.65 macro F1.
+We introduced a formulation of pseudodynamic handwriting minimap signatures that maps normalized pen signals onto contact-only trajectories. Its incremental evaluation shows observed gains on four of eight tasks for speed, altitude and azimuth, with the largest increase on the spiral. The task mean rises from 0.5643 to 0.5752, while the paired analysis leaves the overall advantage over static uncertain.
 
-Grad-CAM concentrated on the handwriting and guided stronger deletions than an equal-area random control, yet agreed poorly with occlusion. These explanations show the CNN's sensitivity to image regions without establishing disease-specific features. Under the tested normalization and participant partitions, neither additional colour signals nor the CNN trained from scratch produced a clear advantage over the corresponding simpler alternatives.
+On this SVM-selected encoding, LPQ-based classifiers outperform the tested CNN in the conditional task-mean comparison. Majority voting yields participant-level macro F1 near 0.65 for logistic regression and SVM. Grad-CAM concentrates on writing, but its poor agreement with occlusion limits the consistency of spatial interpretation. An independent-cohort test, with the encoding fixed in advance, is needed to assess whether these task-dependent gains generalize.

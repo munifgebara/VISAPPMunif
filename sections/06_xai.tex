@@ -23,7 +23,7 @@ For the single output logit $g$, the PD target is $g_c=g$ and the H target is $g
 
 We calculate Grad-CAM for all 2,985 held-out predictions. A separate occlusion analysis replaces each non-overlapping $16\times16$ input patch with white and measures the decrease in confidence for the original predicted class. Negative changes are clipped to zero for the spatial occlusion map. This analysis covers all 597 predictions in the first repetition.
 
-Figure~\ref{fig:xai-examples} includes a correct and an incorrect prediction from each diagnosis class on T4. Examples were selected at median confidence within each stratum, before inspecting their explanations. The aggregate results cover every task; the four examples illustrate the methods rather than estimate their reliability.
+Figure~\ref{fig:xai-examples} illustrates correct and incorrect T4 predictions from both diagnosis classes, selected by the rule in its caption before inspecting the explanations. The aggregate analyses cover every task.
 
 \subsection{Spatial Concentration and Perturbation}
 \begin{figure*}[t]
@@ -35,20 +35,22 @@ Figure~\ref{fig:xai-examples} includes a correct and an incorrect prediction fro
 \noindent
 We define foreground as pixels with at least one channel below 250, matching the preprocessing. Foreground enrichment is the fraction of attribution inside that mask divided by the fraction of image area occupied by the mask. A uniform nonzero attribution map has enrichment one.
 
-The participant-averaged Grad-CAM enrichment is 1.803, with interval [1.723, 1.884]. The result shows concentration around the rendered writing. It does not establish a spatial feature specific to PD: the foreground also indicates where any writing, from either class, is located. There are 174 all-zero Grad-CAM maps, 5.83\% of the predictions. Enrichment is undefined for those maps, and the reported mean omits them before aggregation.
+The participant-averaged Grad-CAM enrichment is 1.803, with interval [1.723, 1.884], indicating concentration around the rendered writing. There are 174 all-zero Grad-CAM maps, 5.83\% of the predictions. Enrichment is undefined for those maps, which are omitted before aggregation.
 
 To test sensitivity to the highlighted pixels (Figure~\ref{fig:xai-validation}), we whiten the 10\% of input pixels with the greatest Grad-CAM values. Confidence in the original class falls by 0.0489 on average, with interval [0.0427, 0.0553]. An equal-area random deletion gives a drop of 0.0033 [0.0016, 0.0050]. The paired advantage of the directed deletion is 0.0456 [0.0395, 0.0518]. Before bootstrapping, repeated predictions are averaged within each participant and task, and tasks are averaged within participant.
 
-This control matches the number of replaced pixels. It does not match the amount of foreground removed or the spatial shape of the deleted region, and whitening can create inputs outside the training distribution. The larger directed effect is evidence of prediction sensitivity to the highlighted area, not a complete validation of attribution faithfulness.
+Deletion summaries retain all 2,985 predictions, including the 174 all-zero maps. For those maps, the selected pixels follow the ranking routine's tie handling and carry no attribution-based preference.
 
-Spatial agreement provides a less favourable result. The median pixelwise Spearman correlation between Grad-CAM and occlusion is $-$0.0121, using 540 of the 597 pairs with nonconstant maps. The remaining 57 correlations are undefined. Smooth gradient-based regions and patch perturbations do not give interchangeable accounts of the relevant locations in these images.
+The random control matches the number of replaced pixels but not their overlap with foreground or spatial shape. Whitening can also create inputs outside the training distribution. The deletion contrast therefore measures sensitivity under these perturbations and does not fully establish attribution faithfulness.
+
+The two attribution methods show little spatial agreement. Median pixelwise Spearman correlation between Grad-CAM and occlusion is $-$0.0121 across 540 nonconstant pairs; the remaining 57 correlations are undefined. Concentration on handwriting therefore does not imply agreement about which regions influence the prediction.
 
 We also reinitialize all network weights and compare Grad-CAM for one deterministically chosen held-out image per checkpoint. The 200 checks cover only 11 distinct participants because the selection rule repeatedly chooses the first identifier in each test partition. The median trained--random correlation is 0.0276 among 160 nonconstant pairs. Low agreement is consistent with dependence on learned weights, but the limited participant coverage and excluded constant maps constrain this check.
 
 \subsection{Sensitivity to the Encoded Channels}
 \noindent
-A whole-channel perturbation addresses a different part of the representation: whether the CNN's confidence changes when one colour channel is replaced with white. Across the held-out predictions, the mean drops are 0.0429 for speed, 0.0482 for altitude and 0.0427 for azimuth. Their intervals are [0.0343, 0.0512], [0.0400, 0.0568] and [0.0360, 0.0494], respectively.
+Replacing a whole colour channel with white tests the CNN's sensitivity to that input component. Across the held-out predictions, the mean confidence drops are 0.0429 for speed, 0.0482 for altitude and 0.0427 for azimuth. Their intervals are [0.0343, 0.0512], [0.0400, 0.0568] and [0.0360, 0.0494], respectively.
 
 These similar global values conceal task variation. Speed has the largest average effect on the spiral, while its effect on T6 is slightly negative. Removing a channel alters colour contrast as well as its coded measurement. The perturbation therefore cannot rank the underlying physiological signals or settle the speed-versus-pressure choice in the earlier SVM experiment.
 
-The XAI results describe this fitted CNN: gradients emphasize writing, but agree poorly with occlusion. Their clinical meaning cannot be established from a classifier with task-mean macro F1 of 0.5105.
+These checks show sensitivity to writing regions and to all three input channels. They do not identify a disease-specific image feature.
