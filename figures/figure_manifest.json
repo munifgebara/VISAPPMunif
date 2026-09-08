@@ -1,0 +1,231 @@
+{
+  "generator": "scripts/generate_paper_figures.py",
+  "dpi": 300,
+  "figures": [
+    {
+      "name": "progressive_encoding",
+      "suggested_role": "main",
+      "caption": "Progressive rendering of task 1 (Archimedean spiral) for one control participant and one participant with Parkinson's disease. Static geometry is followed by speed in one channel and the SAZ and PAZ triplets. All images preserve the same contact-only geometry and foreground/background mapping. Examples are the lowest anonymous IDs with all eight recordings in each class, chosen without reference to prediction quality.",
+      "png_width": 1819,
+      "png_height": 805,
+      "dpi": 300
+    },
+    {
+      "name": "single_signals",
+      "suggested_role": "alternative",
+      "caption": "Isolated signal encodings of the same task-1 examples as progressive_encoding. The tested signal varies in the red channel; green and blue are held at 30. Per-recording contact-segment 5th and 95th percentiles define the scale; speed is log-transformed, and azimuth is centred circularly.",
+      "png_width": 1819,
+      "png_height": 805,
+      "dpi": 300
+    },
+    {
+      "name": "rgb_semantics",
+      "suggested_role": "main",
+      "caption": "The semantic channels of an SAZ spiral, displayed individually in grayscale and jointly as RGB. Red stores normalized log-speed, green stores altitude, and blue stores circularly centred azimuth. Grayscale panels are exact channel values of the composite image, including antialiasing and the white background.",
+      "png_width": 1856,
+      "png_height": 500,
+      "dpi": 300
+    },
+    {
+      "name": "task_atlas",
+      "suggested_role": "alternative",
+      "caption": "The eight PaHaW tasks rendered as static grayscale images for the same two illustrative participants. Tasks progress from a spiral through repeated letters and words to a sentence. Each recording is scaled separately while preserving aspect ratio; absolute writing size is therefore not represented.",
+      "png_width": 1737,
+      "png_height": 1720,
+      "dpi": 300
+    },
+    {
+      "name": "rgb_task_atlas",
+      "suggested_role": "alternative",
+      "caption": "The eight PaHaW tasks rendered as SAZ RGB images for the same two illustrative participants. Tasks progress from a spiral through repeated letters and words to a sentence. Each recording is scaled separately while preserving aspect ratio; absolute writing size is therefore not represented.",
+      "png_width": 1737,
+      "png_height": 1720,
+      "dpi": 300
+    },
+    {
+      "name": "grouped_validation",
+      "suggested_role": "main",
+      "caption": "Evaluation flow. Participant identities define every split. Outer assignments are shared across tasks and methods. Classical hyperparameters are selected in three inner folds; the CNN selects its epoch count using the first inner fold, then retrains on the entire outer-training set. LPQ-RGB uses 64\u00d764 inputs, whereas the CNN uses 128\u00d7128 inputs. Confidence intervals resample participants jointly across tasks and repetitions. Every XAI map uses the checkpoint responsible for that external prediction.",
+      "png_width": 1842,
+      "png_height": 1075,
+      "dpi": 300
+    },
+    {
+      "name": "encoding_effects",
+      "suggested_role": "main",
+      "caption": "SVM performance for all nine encodings, ordered by the mean of task-specific macro-F1 across eight tasks and five repeats. Right: paired differences from the static representation, with 95% stratified participant-bootstrap intervals. Participants are sampled jointly across tasks and repeats. The full 36-pair Holm family supports no encoding difference; the SAZ lead is descriptive.",
+      "png_width": 1862,
+      "png_height": 985,
+      "dpi": 300,
+      "value_label_decimals": 4
+    },
+    {
+      "name": "encoding_heatmap",
+      "suggested_role": "alternative",
+      "caption": "Task-specific mean macro-F1 for the nine encodings under LPQ-RGB plus SVM. Every cell averages five out-of-fold repetition metrics. The shared colour scale makes the variation across tasks and encodings visible; cells are descriptive and do not imply separately significant contrasts.",
+      "png_width": 1861,
+      "png_height": 1045,
+      "dpi": 300
+    },
+    {
+      "name": "encoding_tasks",
+      "suggested_role": "alternative",
+      "caption": "Task profiles for static, altitude alone, SAZ, and PAZ under the same SVM protocol. Values are mean macro-F1 over the five repeats. Lines connect task identifiers only and do not indicate a continuous scale or a fitted trend.",
+      "png_width": 1862,
+      "png_height": 761,
+      "dpi": 300
+    },
+    {
+      "name": "classifiers_tasks",
+      "suggested_role": "main",
+      "caption": "The fixed SAZ representation evaluated with SVM, logistic regression (LR), random forest (RF), and a compact CNN. Left: task-specific macro-F1 averaged over five repetitions. Right: unweighted mean over the eight tasks. Classical methods use LPQ-RGB descriptors; the CNN learns from the image. The CNN is below each classical method in the global six-pair Holm family, whereas differences among classical methods are unsupported.",
+      "png_width": 1862,
+      "png_height": 1109,
+      "dpi": 300
+    },
+    {
+      "name": "classifier_contrasts",
+      "suggested_role": "alternative",
+      "caption": "Paired differences from SVM on the task-mean endpoint. Error bars are 95% stratified participant-bootstrap intervals; annotations report Holm-adjusted permutation p-values from all six classifier pairs. Negative differences favour SVM.",
+      "png_width": 1862,
+      "png_height": 595,
+      "dpi": 300
+    },
+    {
+      "name": "participant_fusion",
+      "suggested_role": "main",
+      "caption": "Participant classification by majority voting across available tasks for each classifier. Points show the mean macro-F1 of the five repeats, and error bars are 95% stratified participant-bootstrap intervals. No pairwise classifier difference survives Holm correction for this fused endpoint. These values evaluate one decision per participant and must not be read as task-level scores.",
+      "png_width": 1862,
+      "png_height": 655,
+      "dpi": 300
+    },
+    {
+      "name": "fusion_roc",
+      "suggested_role": "alternative",
+      "caption": "Mean participant-level ROC curves for task-vote fractions. A ROC is computed separately in each of the five repetitions (75 distinct participants per repeat), interpolated to a common false-positive-rate grid, and then averaged. Legend AUCs are the mean of the five original repeat AUCs, not areas of pooled repeated predictions. Vote fractions are discrete scores, not calibrated disease probabilities.",
+      "png_width": 1862,
+      "png_height": 1015,
+      "dpi": 300
+    },
+    {
+      "name": "fusion_confusion",
+      "suggested_role": "alternative",
+      "caption": "Confusion matrices after task voting. Each matrix is computed from 75 distinct participants within a repeat, then averaged over five repetitions. Cell percentages are normalized by the observed class; parenthetical counts are mean participants per repeat (therefore fractional). Repeated predictions are not counted as independent observations.",
+      "png_width": 1702,
+      "png_height": 1495,
+      "dpi": 300
+    },
+    {
+      "name": "xai_examples",
+      "suggested_role": "main",
+      "caption": "Task-4 explanations for correct and incorrect predictions from both classes. The four frozen repeat-1 cases were selected at median predicted-class confidence within each class/outcome stratum, without selecting for visual plausibility. Grad-CAM and positive occlusion sensitivity are normalized per map; overlay opacity increases with attribution. The PD error has an all-zero Grad-CAM map and is retained. Maps explain the predicted class and use the exact external-test checkpoint. P(PD) is the CNN output, not a calibrated clinical probability.",
+      "png_width": 1793,
+      "png_height": 1960,
+      "dpi": 300,
+      "annotation_font_pt": 10,
+      "pdf_width_pt": 430.7348070417,
+      "pdf_height_pt": 470.63952,
+      "annotation_pt_at_113_76mm_width": 7.4864
+    },
+    {
+      "name": "xai_validation",
+      "suggested_role": "main",
+      "caption": "Perturbation checks for all 2,985 external CNN predictions. Left: removing the top 10% Grad-CAM pixels, equal-area random removal, and their paired difference. The random control matches pixel count but not foreground coverage or patch shape. Right: replacing each complete SAZ channel by white. Points are participant means and intervals are 95% stratified participant-bootstrap intervals after averaging repeats and tasks within participant. Channel removal changes image contrast and cannot isolate a physiological mechanism.",
+      "png_width": 1862,
+      "png_height": 746,
+      "dpi": 300
+    },
+    {
+      "name": "xai_channel_tasks",
+      "suggested_role": "alternative",
+      "caption": "Mean channel-removal confidence changes by task. Repeated predictions are averaged within participant/task before the task mean. Positive values mean the original channel supported the predicted class; negative values mean its removal increased confidence. Colour uses a symmetric scale around zero. These are image perturbations, not isolated physiological effects.",
+      "png_width": 1861,
+      "png_height": 970,
+      "dpi": 300
+    },
+    {
+      "name": "xai_agreement",
+      "suggested_role": "alternative",
+      "caption": "Descriptive distributions of spatial agreement. Left: Grad-CAM and positive occlusion maps for repeat 1 (one map per available participant/task recording). Right: trained and fully randomized networks, one external image for each of 200 checkpoints. Spearman correlations omit constant maps. These distributions are not independent-sample significance tests: participants recur across tasks, and checkpoints share training data.",
+      "png_width": 1862,
+      "png_height": 775,
+      "dpi": 300
+    },
+    {
+      "name": "fusion_rules",
+      "suggested_role": "alternative",
+      "caption": "SVM task-fusion rules with 95% stratified participant-bootstrap intervals. Probability calibration and reliability weights use outer-training data only. The mean-probability rule was the primary fusion endpoint; the reliability-weighted mean and majority vote were declared sensitivity analyses. Task-fusion rules use all available tasks without selecting a subset from external results.",
+      "png_width": 1862,
+      "png_height": 595,
+      "dpi": 300
+    }
+  ],
+  "source_sha256": {
+    "experiments/2026-09-restart/runs/static-svm-v1/metrics/image_manifest.csv": "8433fb71fbccd1b20c2725eb832023ada801e95c0e40ef233205f998d6c70380",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/metrics/image_manifest.csv": "6cae055f20f30d121a5865dd63f18290ecc6ab6ab9d23aafebbd7f6ed41d5063",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/metrics/image_manifest.csv": "19bf6a18e783553174b31ff91b66dc2a8bd3c3ee6a4f2e988e9c0d1e728b030c",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_01/subject_00026_task_01_static.png": "4e758f086963da34fc115b4dcfff0cf49adabdb3504cca98ab08a44656492d23",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/speed/task_01/subject_00026_task_01_speed.png": "d6dfe4307cd767fec032798db0941fe2a973ce017b35f9622135860f9af918f1",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_01/subject_00026_task_01_speed_altitude_azimuth.png": "040eaeab9b93fa82fbe5d2e40669d2a9181ce11dae2aa4e4d1247d4a2c642d7b",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/pressure_altitude_azimuth/task_01/subject_00026_task_01_pressure_altitude_azimuth.png": "f1046322dbf01aa740f32858a2ad75d5ae3c615b45cb1690ec10a964a985aea3",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_01/subject_00001_task_01_static.png": "1f58a6eaa24b7026d3e264cfe2a8e9814f1d4e400f3bebc28ee94862fcc5043b",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/speed/task_01/subject_00001_task_01_speed.png": "db1d12ceeb0f37be94846e5f2d756fcb7281b0090edb7b5824380dda78393fff",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_01/subject_00001_task_01_speed_altitude_azimuth.png": "8a0be3b35922931e8914ff847f6a8c09fb674eef8994c0a7a94cd157ed287062",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/pressure_altitude_azimuth/task_01/subject_00001_task_01_pressure_altitude_azimuth.png": "58a432e4e876ef8bdd4f9df6cca828a1eb0d6d7fe554a939e16867bec4c1f55b",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/pressure/task_01/subject_00026_task_01_pressure.png": "88f164553e0739dd137f8503d62f9b34ae27a74c188188992b2acadf6128fb2b",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/altitude/task_01/subject_00026_task_01_altitude.png": "93a9afa0dd62fad1d2f5a06ff8697266fad23d1e854ac116e2dbaaf74973ee49",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/azimuth/task_01/subject_00026_task_01_azimuth.png": "f5cbee50188d1c03934c772ad2af63bb14147f2e4eaa90435632e24b9ea4e840",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/pressure/task_01/subject_00001_task_01_pressure.png": "c50af8a411a57036b9757d8082bce29f85e4f88567632c43c59299d5049d188d",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/altitude/task_01/subject_00001_task_01_altitude.png": "fb677418ee34041fadd75246d5525dbd667656d07ffb3ebb10f35f9030d407f9",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/images/azimuth/task_01/subject_00001_task_01_azimuth.png": "e0f8054860e64fe58ce173d352970756a7380ab9f51017505946b4c97c87cb34",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_02/subject_00026_task_02_static.png": "36a6cec8e6417a26503d95e7133788692b11df44235c935cf85dddab83abb0f7",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_02/subject_00001_task_02_static.png": "54fabdd22a0862752ba5234399bcffe81e1065310837f16aa824cacd56710153",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_03/subject_00026_task_03_static.png": "9df3e18deb52b5ea0d743f642070809fd5d6249aa80dc8e252fe9ee5eed7ea58",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_03/subject_00001_task_03_static.png": "34b1d511156bc46f724800f28593c72e029bfc7518a4a54b460cb0979e849c6f",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_04/subject_00026_task_04_static.png": "9e89599b9cf69645a12b645b8981fff4d2172567ae6aa233cd65ee6d5cf41129",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_04/subject_00001_task_04_static.png": "7333521fb65130a814d83f2054ec29ee4629881f8ca4d27c05e24e7f8cb47bcf",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_05/subject_00026_task_05_static.png": "1d8f4822ce17ba203bedda37974721300b43aa8bf602077667b1171a5995f4dd",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_05/subject_00001_task_05_static.png": "e62364bf661840de344e64faed7ddc2f6485cf0e804010cfa5650902399e7dd7",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_06/subject_00026_task_06_static.png": "ecb6100c9350e23b1109fb9c3be6eeb8d87e0703caa91197c3233a67bad49a29",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_06/subject_00001_task_06_static.png": "736c41c14ef12c6e48804864422a52d5f52b8aaef0d162d45345d8a68232c435",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_07/subject_00026_task_07_static.png": "853ec7814a7c10d969c098a08d8395f02f4fb3bd4bce58ac4c012809419debbd",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_07/subject_00001_task_07_static.png": "d6dccf4bca371fc4af1ca3131fcce8d19d1dd95b1e3086614387c08c2f66d4bb",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_08/subject_00026_task_08_static.png": "8ae8745141b7d2b4d14191cd5e6d9c7dea34c5285494950266c2fa602f2260a4",
+    "experiments/2026-09-restart/runs/static-svm-v1/images/static/task_08/subject_00001_task_08_static.png": "ef06b12dd1ef6394224942d6da2a1b6e52d3a0186fef701cbb65acd02dc9b448",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_02/subject_00026_task_02_speed_altitude_azimuth.png": "45883db60a680a2113f9f2b0e2ee50f08dbb3b3e5bff781040316519b3b484f2",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_02/subject_00001_task_02_speed_altitude_azimuth.png": "ca6d9af18fd829c3f79abaddb7527002cbeca7afd3dd925ab052fe8279523f21",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_03/subject_00026_task_03_speed_altitude_azimuth.png": "09bb72cebab06de45dea421167b65edabf625dbb1c9b05c948186629ea0f54a6",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_03/subject_00001_task_03_speed_altitude_azimuth.png": "cbfc1f641332ced7abdd948fa7daf03b28c0fdba1878626a3b7b4093d8ae926f",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00026_task_04_speed_altitude_azimuth.png": "f1fd4641ce3e88172819b8873512c2f2002be41d5d586211fde343685789a1b8",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00001_task_04_speed_altitude_azimuth.png": "2a1b469220ff28a3b7844e6ff79f67fbca77092765912c7f3ff61ea209f0b162",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_05/subject_00026_task_05_speed_altitude_azimuth.png": "1d12cc79cbf1b103cb01a161c5fbbeff5e24369c8583cc274fce02a45b39b78d",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_05/subject_00001_task_05_speed_altitude_azimuth.png": "324b1420c8314bff16a78db3b6dedab89ceaee8a80275136e10643c774fb6289",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_06/subject_00026_task_06_speed_altitude_azimuth.png": "27db7816bed238f4f02d0fa85c35609ca8a16a886e0ad4a511b9b73ff51e92e7",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_06/subject_00001_task_06_speed_altitude_azimuth.png": "502c2ac1f00d04dd68e07adb066bcaf403402201f25a1cfab7cd8eb1c5b10bdc",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_07/subject_00026_task_07_speed_altitude_azimuth.png": "6d27e4b7300d9fb0dfd3af95d82706f4f2a994557acddb70bd388bc388df9e4f",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_07/subject_00001_task_07_speed_altitude_azimuth.png": "74b6b603e7165f2c507bb149b7437fe9fccd9ea502a52fb27e73706cce8a0d39",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_08/subject_00026_task_08_speed_altitude_azimuth.png": "8e5706e047bea4e024aa7238329bcbe05716d454f1d5a457819c4acf98536175",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_08/subject_00001_task_08_speed_altitude_azimuth.png": "7c206c8158d519c7a5bd204a3f13cd162f43c593b971fc30ccc0fd74e7d6ad92",
+    "experiments/2026-09-restart/runs/article-experiment-package-v1/metrics/article_representation_table.csv": "e717ff63f9d6159460493833e2c6f9339f853931a406c96190eaa9c096438028",
+    "experiments/2026-09-restart/runs/encoding-comparison-v1/metrics/all_encoding_global_pairwise.csv": "71f8e944cb06a87763db868e3d24f1b80f5dccb3350f824bb2b98b9a990abcd9",
+    "experiments/2026-09-restart/runs/static-svm-v1/metrics/task_summary.csv": "47f2f58365d6285e3c1c9053244963aafcfa1eccf40acdf6ad92483902b2377b",
+    "experiments/2026-09-restart/runs/dynamic-single-signal-v1/metrics/task_summary.csv": "f2c60b98c6b423b30672dbe943d7de4cfc847faf525da1bcd1235865f476c3d6",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/metrics/task_summary.csv": "bd19591a80a1fb63f6423e7bccbd6d6e3212ed52b3ddba303045d41b3ccc1f09",
+    "experiments/2026-09-restart/runs/article-experiment-package-v1/metrics/article_classifier_table.csv": "b9eedeb9346c237e8be2258921204abd68c823321e2819e0e0fcc96260e519b1",
+    "experiments/2026-09-restart/runs/cnn-v1/metrics/combined_task_summary.csv": "b0d215c7392a4dc676cd51d6c144fd1c20af1d164a11dc43bbbc7febb47614b9",
+    "experiments/2026-09-restart/runs/cnn-v1/metrics/combined_task_pairwise.csv": "6480cb25cde5d45a8584933af9242a2ae33fce74f56c5aa83551f1115c824435",
+    "experiments/2026-09-restart/runs/task-fusion-v1/metrics/method_summary.csv": "dcd3530b41119261885b14ea396ff99bebfb4a938d5428a7d89f09176d663024",
+    "experiments/2026-09-restart/runs/cnn-v1/metrics/fused_majority_predictions.csv": "6c14ba833852d5905e5a89a4ba10690cca22138d313a4084ae3826e09e6ebbcc",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/prediction_xai_metrics.csv": "ddd7ccad65d6c6f2737abdbef152863dadf4864a346e9e38b8ecc9df1aea753a",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/figure_example_selection.csv": "dcc6ee71c8a2109ecba607b4a65739635819630588a0ab926ed789500d99cedc",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/occlusion_metrics.csv": "ad73f9ab8bc49d988fdf08a3ab80e197f1bc1ccc45e165474b9a0984a0444c8f",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/weight_randomization_sanity.csv": "12d384abbd8d0545ad6ea593a389304c17a5b062bf935da85fdfaafbed6f46a9",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/global_participant_bootstrap.csv": "3801bd33e77e3efdb13bd3fc32dd2e0580e02f6ee392bbd324596d42b5b03a65",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/maps/spatial_maps.npz": "ae1991b7dca49836c3e3cb8b591ece2ed297ca5840f93739ab4e8d9a0e071e29",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00092_task_04_speed_altitude_azimuth.png": "1caf9a177b61a5384a7808b1225917e7596e76877478fa681002c1fa00add514",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00069_task_04_speed_altitude_azimuth.png": "c421997139f86438472aaaa110d43bea17a470cb555ebb16c2c0ee196f129577",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00019_task_04_speed_altitude_azimuth.png": "710118b3d296e8042f08fd1ae51a75cc75298f6ca02e341ad91195702959b5b8",
+    "experiments/2026-09-restart/runs/dynamic-triplet-svm-v1/images/speed_altitude_azimuth/task_04/subject_00014_task_04_speed_altitude_azimuth.png": "2debce2e05a967e8d0174d4e01bb5dee81fd07c37644521ffc7b68b875b9d046",
+    "experiments/2026-09-restart/runs/cnn-xai-v1/metrics/participant_task_xai_metrics.csv": "ab6890996fc2c9e0b67cd4a5f1339821e370e744568c3a3cc9e61b0a2cc2aa1c"
+  }
+}

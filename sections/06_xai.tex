@@ -1,0 +1,51 @@
+\section{\uppercase{What Does the CNN Use?}}
+\label{sec:xai}
+
+\subsection{Explanations of Held-Out Predictions}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.72\textwidth]{xai_examples.pdf}
+\caption{Task-4 explanations for correct and incorrect predictions from both classes. The four cases come from the first repetition, selected at median predicted-class confidence within each diagnosis/outcome stratum. Maps target the original predicted class and use its outer-test checkpoint. Opacity follows per-map attribution. The all-zero Grad-CAM in the PD error is retained. The CNN output is not a calibrated clinical probability.}
+\label{fig:xai-examples}
+\end{figure*}
+\noindent
+The CNN's weak classification result raises a specific question: do its predictions depend on the handwriting region, or on artefacts of image placement and background? We apply XAI after freezing all outer checkpoints. Each image is explained by the exact checkpoint that produced its held-out prediction, rather than by a model fitted later to the entire cohort.
+
+Grad-CAM weights convolutional activation maps with gradients of a target score \cite{Selvaraju2017}. We target the originally predicted class and use the last ReLU before the fourth pooling layer. At this point the spatial map is $16\times16$ for a $128\times128$ input. For activation map $A^k$ and predicted-class logit $g_c$, the attribution is
+\begin{equation}
+ L_c=\operatorname{ReLU}\!\left(\sum_k\alpha_k^c A^k\right),
+ \quad \alpha_k^c=\frac{1}{UV}\sum_{u,v}\frac{\partial g_c}{\partial A^k_{uv}}.
+\end{equation}
+For the single output logit $g$, the PD target is $g_c=g$ and the H target is $g_c=-g$. The positive map is interpolated to input size and divided by its maximum when nonzero. Heatmap colours express attribution magnitude, independently of the input's semantic channels.
+
+We calculate Grad-CAM for all 2,985 held-out predictions. A separate occlusion analysis replaces each non-overlapping $16\times16$ input patch with white and measures the decrease in confidence for the original predicted class. Negative changes are clipped to zero for the spatial occlusion map. This analysis covers all 597 predictions in the first repetition.
+
+Figure~\ref{fig:xai-examples} includes a correct and an incorrect prediction from each diagnosis class on T4. Examples were selected at median confidence within each stratum, before inspecting their explanations. The aggregate results cover every task; the four examples illustrate the methods rather than estimate their reliability.
+
+\subsection{Spatial Concentration and Perturbation}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{xai_validation.pdf}
+\caption{Confidence changes for the originally predicted class. Left: deleting the top 10\% Grad-CAM pixels versus equal-area random deletion. Right: whitening each semantic channel. Intervals resample participants after averaging repeats and tasks. These perturbations measure sensitivity of the frozen CNN; the random control does not match foreground overlap, and channel removal also changes colour contrast.}
+\label{fig:xai-validation}
+\end{figure*}
+\noindent
+We define foreground as pixels with at least one channel below 250, matching the preprocessing. Foreground enrichment is the fraction of attribution inside that mask divided by the fraction of image area occupied by the mask. A uniform nonzero attribution map has enrichment one.
+
+The participant-averaged Grad-CAM enrichment is 1.803, with interval [1.723, 1.884]. The result shows concentration around the rendered writing. It does not establish a spatial feature specific to PD: the foreground also indicates where any writing, from either class, is located. There are 174 all-zero Grad-CAM maps, 5.83\% of the predictions. Enrichment is undefined for those maps, and the reported mean omits them before aggregation.
+
+To test sensitivity to the highlighted pixels (Figure~\ref{fig:xai-validation}), we whiten the 10\% of input pixels with the greatest Grad-CAM values. Confidence in the original class falls by 0.0489 on average, with interval [0.0427, 0.0553]. An equal-area random deletion gives a drop of 0.0033 [0.0016, 0.0050]. The paired advantage of the directed deletion is 0.0456 [0.0395, 0.0518]. Before bootstrapping, repeated predictions are averaged within each participant and task, and tasks are averaged within participant.
+
+This control matches the number of replaced pixels. It does not match the amount of foreground removed or the spatial shape of the deleted region, and whitening can create inputs outside the training distribution. The larger directed effect is evidence of prediction sensitivity to the highlighted area, not a complete validation of attribution faithfulness.
+
+Spatial agreement provides a less favourable result. The median pixelwise Spearman correlation between Grad-CAM and occlusion is $-$0.0121, using 540 of the 597 pairs with nonconstant maps. The remaining 57 correlations are undefined. Smooth gradient-based regions and patch perturbations do not give interchangeable accounts of the relevant locations in these images.
+
+We also reinitialize all network weights and compare Grad-CAM for one deterministically chosen held-out image per checkpoint. The 200 checks cover only 11 distinct participants because the selection rule repeatedly chooses the first identifier in each test partition. The median trained--random correlation is 0.0276 among 160 nonconstant pairs. Low agreement is consistent with dependence on learned weights, but the limited participant coverage and excluded constant maps constrain this check.
+
+\subsection{Sensitivity to the Encoded Channels}
+\noindent
+A whole-channel perturbation addresses a different part of the representation: whether the CNN's confidence changes when one colour channel is replaced with white. Across the held-out predictions, the mean drops are 0.0429 for speed, 0.0482 for altitude and 0.0427 for azimuth. Their intervals are [0.0343, 0.0512], [0.0400, 0.0568] and [0.0360, 0.0494], respectively.
+
+These similar global values conceal task variation. Speed has the largest average effect on the spiral, while its effect on T6 is slightly negative. Removing a channel alters colour contrast as well as its coded measurement. The perturbation therefore cannot rank the underlying physiological signals or settle the speed-versus-pressure choice in the earlier SVM experiment.
+
+The XAI results describe this fitted CNN: gradients emphasize writing, but agree poorly with occlusion. Their clinical meaning cannot be established from a classifier with task-mean macro F1 of 0.5105.

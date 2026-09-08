@@ -1,0 +1,95 @@
+% Editable figure-selection gallery. Compile separately from main.tex.
+% The 12 manuscript pages precede this gallery in the editorial PDF.
+\documentclass[11pt,a4paper]{article}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[margin=20mm,footskip=10mm]{geometry}
+\usepackage{graphicx}
+\usepackage{mathptmx}
+\usepackage{xcolor}
+\usepackage[pdfpagelabels,hidelinks]{hyperref}
+\hypersetup{pdftitle={Alternative figures -- editorial selection copy},pdfauthor={}}
+\graphicspath{{figures/}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\pagestyle{plain}
+
+% One non-floating panel per page. The image always retains its aspect ratio.
+% Arguments: identifier/title, PDF basename, scientific caption, editorial option.
+\newcommand{\gallerypage}[4]{%
+  {\small\color{black!55}Alternative figures --- editorial selection copy\par}
+  \vspace{5mm}
+  {\Large\bfseries #1\par}
+  \vfill
+  \begin{center}
+    \includegraphics[width=\textwidth,height=0.70\textheight,keepaspectratio]{#2.pdf}
+  \end{center}
+  \vspace{3mm}
+  {\small #3\par}
+  \vfill
+  {\footnotesize\color{black!60}\textit{Editorial option:} #4\par}
+}
+
+\begin{document}
+\setcounter{page}{13}
+
+\gallerypage{A1. Isolated dynamic signals}{single_signals}
+{The same spiral recordings rendered with speed, pressure, altitude or azimuth in the red channel; green and blue remain at 30. The two participants were chosen by a fixed identifier rule, without reference to prediction quality. Scaling uses within-recording fifth and ninety-fifth percentiles of surface-segment values; speed is log-transformed and azimuth is circularly centred.}
+{Can replace the progressive-encoding figure when the isolated additions deserve more visual space.}
+\newpage
+
+\gallerypage{A2. Reading the RGB representation}{rgb_semantics}
+{Individual channels of a speed--altitude--azimuth ($SAZ$) spiral, shown in grayscale beside their RGB composite. Red carries normalized log-speed, green altitude, and blue circularly centred azimuth. The grayscale panels display the actual channel intensities, including antialiasing and background. A channel value describes variation within this recording, not an absolute physical value shared across participants.}
+{Can replace the progressive-encoding figure when explaining channel semantics is the priority.}
+\newpage
+
+\gallerypage{A3. The eight tasks as static images}{task_atlas}
+{Static reconstructions of all eight PaHaW tasks for the same two illustrative participants, progressing from a spiral through letters and words to a sentence. Each recording is scaled independently while preserving its aspect ratio. The atlas shows the task inventory and within-image geometry; it does not preserve absolute writing size or represent a statistical sample of class differences.}
+{An alternative introductory image when the task inventory needs a visual explanation.}
+\newpage
+
+\gallerypage{A4. The eight tasks in pseudodynamic colour}{rgb_task_atlas}
+{The same task inventory rendered as $SAZ$ images for the same two participants as A3. Each task retains its contact-only trajectory and has its own within-recording signal scales. Colours therefore expose local variation without providing an absolute speed, inclination or orientation comparison between recordings. These examples illustrate the encoding rather than evidence of a diagnostic group difference.}
+{Can replace the progressive-encoding panel with a broader view of how the representation behaves across tasks.}
+\newpage
+
+\gallerypage{A5. Encoding performance across tasks}{encoding_heatmap}
+{Mean task-specific macro F1 for all nine encodings with LPQ-RGB and SVM. Each cell averages the five metrics computed separately from the out-of-fold predictions of each repetition. The common colour scale reveals variation across encodings and tasks. Individual cells are descriptive; their relative shading does not establish a significant pairwise difference.}
+{Can replace the encoding-effect figure if task heterogeneity is the focus; retain the paired uncertainty estimates in the text.}
+\newpage
+
+\gallerypage{A6. Selected encoding profiles}{encoding_tasks}
+{Task-specific macro F1 for static reconstruction, altitude alone, $SAZ$ and pressure--altitude--azimuth ($PAZ$), evaluated under the same SVM protocol. Each value averages five out-of-fold repetition metrics. Lines connect task identifiers to aid comparison; they imply neither a continuous task scale nor a fitted trend. These four profiles are a descriptive subset of the nine evaluated encodings.}
+{An alternative to the encoding-effect figure when a small set of task profiles communicates the result more clearly.}
+\newpage
+
+\gallerypage{A7. Classifier differences relative to SVM}{classifier_contrasts}
+{Paired differences from SVM in the unweighted mean of task-specific macro F1 across all eight tasks. Intervals are conditional 95\% diagnosis-stratified participant-bootstrap intervals, preserving tasks and repetitions together. Labels give Holm-adjusted randomization $p$-values for the family of six classifier pairs. Negative differences favour SVM. The comparison is conditional on the selected $SAZ$ representation and saved predictions.}
+{Can replace the classifier-profile figure when effect sizes and uncertainty are more important than per-task detail.}
+\newpage
+
+\gallerypage{A8. Three ways to combine SVM task predictions}{fusion_rules}
+{Participant-level macro F1 for SVM task-fusion rules, with conditional 95\% diagnosis-stratified participant-bootstrap intervals. Calibration and reliability weights use outer-training data only. Mean probability was the primary fusion endpoint; the weighted mean and majority vote were sensitivity analyses. Every rule uses all available tasks, without selecting a subset from outer-test performance.}
+{Can replace the participant-fusion comparison when the choice of fusion rule needs its own figure.}
+\newpage
+
+\gallerypage{A9. Discrimination from task-vote fractions}{fusion_roc}
+{Mean participant-level ROC curves for task-vote fractions. A curve is computed separately for each repetition using 75 distinct participants, interpolated to a common false-positive-rate grid, and then averaged. Legend AUCs average the five original repetition AUCs; they are not computed from pooled repeated predictions. The discrete vote fractions are ranking scores, not calibrated disease probabilities.}
+{An alternative to the participant-fusion figure when discrimination over thresholds is the emphasis.}
+\newpage
+
+\gallerypage{A10. Errors after task voting}{fusion_confusion}
+{Confusion matrices averaged over five repetitions of participant-level task voting. Each repetition contains 75 distinct participants. Percentages are normalized by the observed class, and parenthetical counts are mean participants per repetition, so fractional counts are expected. Tied task votes are assigned to PD. The repeated predictions are not treated as independent observations.}
+{Can replace the participant-fusion figure when the balance of false-positive and false-negative decisions is the main point.}
+\newpage
+
+\gallerypage{A11. Channel-removal sensitivity by task}{xai_channel_tasks}
+{Mean changes in the CNN's original predicted-class confidence when each complete $SAZ$ channel is replaced with white. Repetitions are averaged within participant and task before calculating task means. Positive values indicate a confidence decrease after removal; negative values indicate an increase. The symmetric colour scale is centred at zero. Channel replacement also changes image contrast, so these effects do not isolate physiological mechanisms.}
+{Can replace the aggregate channel-removal panel when variation between tasks deserves emphasis.}
+\newpage
+
+\gallerypage{A12. Agreement between spatial explanations}{xai_agreement}
+{Descriptive distributions of pixelwise Spearman correlation. Left: Grad-CAM versus positive occlusion sensitivity for the first repetition, with 540 valid nonconstant pairs among 597 task records. Right: trained versus fully randomized networks, with 160 valid pairs among 200 checkpoint comparisons. Constant maps are omitted. Participants recur across tasks and training sets overlap; these distributions are not independent-sample significance tests.}
+{An alternative to the XAI perturbation-validation figure when the limits of spatial agreement should be shown directly.}
+
+\end{document}

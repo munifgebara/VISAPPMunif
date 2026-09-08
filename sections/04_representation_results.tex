@@ -1,0 +1,38 @@
+\section{\uppercase{From Shape to Colour}}
+\label{sec:representation-results}
+
+\subsection{A Fixed Descriptor for the Comparison}
+\noindent
+We compare the nine encodings with one image descriptor and the same SVM search. Local Phase Quantization (LPQ) was introduced for texture classification using local Fourier phase information \cite{Ojansivu2008}. We use a fixed channel-wise implementation, so a change in the result can be associated with a change in the rendering under the same extraction procedure.
+
+Before extraction, foreground is detected by any channel intensity below 250. We crop its bounding box, add a margin equal to 5\% of the longer dimension, pad to a square with white, and resize to $64\times64$ by bilinear interpolation. LPQ filters each channel with four complex $5\times5$ kernels at frequency offsets $(1,0)$, $(0,1)$, $(1,1)$ and $(1,-1)$, scaled by $1/5$. The signs of their real and imaginary responses form an eight-bit code at each pixel, using reflected boundaries. We normalize a 256-bin histogram by its count, take its element-wise square root, and concatenate the channels. The 768-attribute vector includes the padded background. No decorrelation or spatial pyramid is applied.
+
+The static RGB channels are identical, so the static vector repeats the same histogram three times. This keeps the interface and nominal dimension constant; it does not create additional static information. For the isolated signals, two channels remain constant along the trace and retain its geometric pattern.
+
+Standardization and SVM fitting occur inside each training partition. The search contains five linear models with $C\in\{0.01,0.1,1,10,100\}$ and sixteen radial-basis models with $C\in\{0.1,1,10,100\}$ and $\gamma\in\{\mathrm{scale},10^{-4},10^{-3},10^{-2}\}$. We use inverse-frequency class weights. The candidate with the highest mean inner-fold macro F1 is chosen, with ties resolved by the stored candidate order. The SVM learns from image texture; it never receives the original signal measurements as tabular features \cite{Cortes1995}.
+
+\subsection{The Static Baseline}
+\noindent
+The static reconstruction reaches a task-mean macro F1 of 0.5643. Its best task is repeated \textit{les} (T4), with 0.6502 and a participant-bootstrap interval of [0.5582, 0.7351]. The spiral reaches 0.5915, while T5 is close to 0.5 at 0.5038. Static performance varies across tasks.
+
+All tasks remain in the subsequent comparison; the strongest static task is not selected as a new benchmark.
+
+\subsection{Isolated Signals and RGB Combinations}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{encoding_effects.pdf}
+\caption{Encoding comparison with SVM. Left: unweighted mean of task-specific macro F1 over eight tasks and five repetitions. Right: paired differences from static with conditional 95\% participant-bootstrap intervals. The complete family of 36 pairwise comparisons supports no difference after Holm adjustment.}
+\label{fig:encoding-effects}
+\end{figure*}
+\noindent
+Figure~\ref{fig:encoding-effects} orders the encodings by Equation~\ref{eq:taskmetric}. Altitude is the strongest isolated addition at 0.5718, followed by azimuth at 0.5688. Speed alone reaches 0.5625 and pressure 0.5568. Neither the presence of a dynamic signal nor an intuitively relevant physiological measurement guarantees a better image descriptor.
+
+
+
+The individual-task contrasts vary in direction. For example, speed changes the spiral score from 0.5915 to 0.6153 but changes repeated \textit{les} from 0.6502 to 0.5994. Altitude increases the spiral score to 0.6294 and changes T4 only slightly, to 0.6548. None of the 32 isolated-signal versus static contrasts survives its Holm correction.
+
+Combining signals produces a similarly narrow ranking. Starting from $PAZ$, replacing pressure, azimuth or altitude with speed gives $SAZ$, $SPA$ or $SPZ$, respectively. $SAZ$ leads at 0.5752, only 0.0006 above $PAZ$; $SPA$ reaches 0.5697 and $SPZ$ reaches 0.5574. These results provide no basis for declaring pressure intrinsically uninformative. LPQ summarizes normalized image patterns, not the physical measurements directly.
+
+The paired $SAZ$--static difference is +0.0109 with a 95\% interval of [$-$0.0146, 0.0370]. Its randomization $p$ is 0.4096 and Holm-adjusted $p$ is 1.0000 across the 36 encoding pairs. The $SAZ$--$PAZ$ interval is [$-$0.0185, 0.0198], also with adjusted $p=1.0000$. The numerical leader is therefore a practical choice for the next experiment, not a demonstrated improvement over the simpler reconstruction.
+
+We retain $SAZ$ for the remaining comparisons. Its per-task changes help interpret the modest average: the spiral improves by 0.0802, T6 by 0.0524, and T7 by 0.0455, whereas T2 falls by 0.0612. None of its eight task-specific contrasts against static remains significant within the 32-comparison triplet family. 

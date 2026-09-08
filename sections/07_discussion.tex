@@ -1,0 +1,60 @@
+\section{\uppercase{Discussion}}
+\label{sec:discussion}
+
+\subsection{What the Incremental Comparison Establishes}
+\noindent
+$SAZ$ ranks first, but its advantage over static is about one macro-F1 percentage point and its interval includes zero. Normalized colour patterns summarized by LPQ did not provide a clear gain across all eight tasks. This finding concerns the representation and descriptor, not the general relevance of writing dynamics.
+
+The renderer removes absolute size and signal levels, LPQ discards the location of each phase code, and the image omits in-air movement. These choices may discard useful information alongside nuisance variation. The present experiment cannot separate their effects.
+
+Task dependence remains substantial: T4 is strongest for static SVM and $SAZ$ Random Forest, whereas the spiral is strongest for $SAZ$ SVM. The task average captures this variation, while fusion asks whether combining their predictions is useful for a participant-level decision.
+
+\subsection{Comparison with Handwriting Studies}
+\noindent
+Casademunt Gonz\'alez~\cite{Casademunt2023} evaluates CNNs on PaHaW crops of size 111 for T2, T3 and T4. The code separates 62 training and 13 test participants before producing crops. Its F1 concerns the positive PD class, rather than macro F1.
+
+Table~\ref{tab:literature} compares reported accuracy with the task set identified. Casademunt's T2/T3/T4 accuracies exceed our $SAZ$ SVM values of 51.20/58.13/64.00\% and CNN values of 55.20/52.00/53.60\%. This is not a paired comparison: the splits, number of training crops and selection procedures differ, and the thesis compares crop sizes using the designated test group.
+
+\begin{table*}[t]
+\centering\small
+\caption{Contextual comparison on PaHaW. All values in this table are accuracy, not macro F1. Published results are transcribed from the cited works; none was rerun under our partitions. Different task sets and selection procedures prevent a direct superiority test.}
+\label{tab:literature}
+\begin{tabular}{@{}p{2.6cm}p{3.9cm}p{4.2cm}p{3.6cm}@{}}
+\toprule
+Study & Input and classifier & Evaluation scope & Accuracy (\%)\\
+\midrule
+Casademunt Gonz\'alez (2023) & CNN, handwriting crops & T2 / T3 / T4; 62 train, 13 test & 69.23 / 61.54 / 69.23\\
+Drot\'ar et al. (2016) & Kinematics + pressure, SVM & T2--T8; repeated ten-fold CV & 81.30\\
+Diaz et al. (2019) & Enhanced images and task ensemble & Ten-fold CV; five selected tasks & 86.67\\
+Present experiment & $SAZ$ + LPQ + SVM & T1--T8; $5\times5$ participant CV; majority fusion & 65.07\\
+Present experiment & $SAZ$ + LPQ + logistic regression & T1--T8; $5\times5$ participant CV; majority fusion & 65.07\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Drot\'ar et al. report 81.3\% accuracy for kinematic and pressure features from T2--T8 \cite{Drotar2016}. Their descriptors can retain physical information removed by our normalization. They repeat ten-fold validation ten times and screen features statistically; the description does not fully establish whether screening is nested in each split.
+
+Diaz et al. report 86.67\% accuracy for their enhanced representation and ensemble, versus 72.50\% for its static counterpart \cite{Diaz2019}. The enhancement includes in-air movement, and their pipeline uses pretrained CNN features and five selected tasks. It preserves and models different information from our contact-only colour images with LPQ. These protocol differences preclude a controlled cross-paper ranking.
+
+Our strongest participant-level result remains below these published accuracies. Different inputs and evaluation procedures may explain part of that gap, but do not make it disappear.
+
+\subsection{Limits of Complexity and Explanation}
+\noindent
+With approximately 60 outer-training participants, a single task offers little independent data for learning filters from scratch. Affine augmentation adds views, not people. The tested CNN's lower scores favour the fixed descriptor in this setting, without establishing that CNNs generally are unsuitable for handwriting.
+
+An attribution can identify the strip occupied by writing without identifying stable disease-related features. The near-zero Grad-CAM--occlusion correlation exposes that limitation. Neither method explains why the CNN underperformed; that would require a separate controlled investigation.
+
+Independent-cohort validation is needed to estimate generalization beyond this development process, including age matching and acquisition differences. Another random split of PaHaW would not undo its role in design decisions. Future work could select representations within training partitions or freeze them before collecting a new cohort.
+
+\subsection{Reproducibility and Scope}
+\noindent
+Saved configurations, participant assignments, rendering diagnostics, inner searches and outer predictions support reproduction. XAI reproduces checkpoint probabilities before explanation, and checksums link figure inputs and tables to source files.
+
+The scope is fixed-thickness, contact-only colour encoding. Absolute magnitude and spatial location can both matter for classification; the representation and descriptor make explicit compromises on each.
+
+\section{\uppercase{Conclusion}}
+\label{sec:conclusion}
+\noindent
+Across eight PaHaW tasks, explicit RGB combinations changed performance only modestly: speed, altitude and azimuth ranked first, without a supported advantage over the static reconstruction. On that representation, LPQ with SVM or logistic regression was more effective than the small CNN trained from scratch. Combining task predictions gave the strongest participant-level scores, with the two classical methods near 0.65 macro F1.
+
+Grad-CAM concentrated on the handwriting and guided stronger deletions than an equal-area random control, yet agreed poorly with occlusion. These explanations show the CNN's sensitivity to image regions without establishing disease-specific features. Under the tested normalization and participant partitions, neither additional colour signals nor the CNN trained from scratch produced a clear advantage over the corresponding simpler alternatives.

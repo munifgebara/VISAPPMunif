@@ -1,0 +1,16 @@
+\section{\uppercase{Introduction}}
+\label{sec:introduction}
+\noindent
+A handwritten line shows where the pen travelled. It does not show how quickly the pen moved, how firmly it pressed, or how its inclination changed. A digitizing tablet records these quantities together with the planar trajectory. The representation problem is to make them available to an image classifier without losing the recognizable structure of the writing.
+
+We start with a monochrome reconstruction of the visible trace, then vary one colour channel using one recorded signal. After measuring these isolated additions, we combine signals into RGB images. Each stage asks whether the additional information improves classification under the same evaluation procedure.
+
+The application is the distinction between Parkinson's disease (PD) and healthy controls (H) in PaHaW, a database of online handwriting and drawing tasks \cite{Drotar2016}. Handwriting exposes aspects of fine motor behaviour, but the relation between pen motion and diagnosis also depends on the task, device and participant characteristics \cite{Impedovo2019}.
+
+We call the images \emph{pseudodynamic handwriting minimap signatures}: compact visual representations of task executions, derived from dynamic recordings. The term minimap follows work using compact source-code renderings as visual signatures \cite{Gebara2025}. Here, planar position supplies the image coordinates and colour carries measured pen attributes. A signature denotes this representation, not a person's authentication signature.
+
+Handwriting classification has often used explicitly designed kinematic and pressure features. Drot\'ar et al. compared such features with several classifiers on PaHaW \cite{Drotar2016}. Learned features provide another route, either from pen dynamics \cite{Pereira2016} or from visual attributes of the reconstructed writing \cite{Moetesum2019}. These studies motivate evaluating both a fixed image descriptor and a network that learns from pixels. They do not imply that a learned representation will be preferable with only a few dozen participants per task.
+
+The closest representation precedent is the dynamically enhanced handwriting of Diaz et al. \cite{Diaz2019}. Their images encode movement through acquired points and pen-up trajectories. Our experiment instead assigns named signals to colour channels while holding the visible trajectory fixed. This gives each added measurement a defined spatial and chromatic role that can be tested against the same static reconstruction.
+
+Our contribution is an incremental evaluation of explicit colour encoding: a static baseline, four isolated signals and four RGB combinations under identical participant splits, followed by classifier comparison, task fusion and CNN explanation. The colour encoding carried forward was selected from its cross-validated results on this cohort. The downstream comparison is consequently exploratory, with no independent test of representation selection.

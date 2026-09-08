@@ -1,0 +1,61 @@
+# Incremental handwriting manuscript
+
+This is the reviewed September 2026 rewrite for author discussion and figure selection.
+The English manuscript uses the existing SCITEPRESS template. Its order is geometry,
+isolated signals, RGB combinations, LPQ with SVM, alternative classifiers, task fusion,
+and held-out CNN explanations. The stroke-width experiment is excluded.
+
+## Read and edit
+
+- `main.tex` is the Overleaf main document. The text is in `sections/`.
+- `gallery.tex` is a separate, editable set of alternative figures, numbered 13–24.
+- `figures/` contains 19 scientific figures in vector PDF and 300-dpi PNG forms.
+- `refs.bib` retains the previous bibliography. Only entries cited in the rewrite
+  appear in its reference list. New methodological citations have verified DOIs;
+  the specifically requested Casademunt thesis has no verified DOI.
+- `review/` records the source audit, independent reviews and applied revisions.
+
+Compile `main.tex` with pdfLaTeX, BibTeX, then pdfLaTeX twice. Overleaf performs the
+bibliography sequence automatically. Compile `gallery.tex` separately to edit the
+alternatives. The two PDFs are deliberately distinct: the selection copy contains
+the entire 12-page manuscript followed by the 12 alternative pages. It is not the
+conference submission file.
+
+In the experiment workspace, `python scripts/build_paper.py` compiles both files,
+checks references, page counts and template limits, and assembles the two final
+PDFs and an Overleaf ZIP under `output/pdf/`. It requires `pdflatex`, `bibtex` and
+Python's `pypdf`. It does not rerun the experiments. Scientific figure regeneration
+is a separate command, `python scripts/generate_paper_figures.py`, and depends on
+the saved experimental runs and the project environment.
+
+## Evaluation scope
+
+The records belong to 75 participants; tasks, renderings and repeated predictions
+are not independent extra participants. Outer assignments are common across tasks
+and models. Model hyperparameter selection is internal to training, while the SAZ
+representation was selected from this cohort's outer scores. The downstream
+comparison is exploratory and conditional on that choice. The reported bootstrap
+intervals and permutation comparisons use saved predictions without refitting.
+
+The strongest task-mean model is SVM (macro F1 0.5752). Majority fusion gives
+participant-level macro F1 0.6498 for logistic regression and 0.6488 for SVM.
+These are different endpoints. No significant advantage of SAZ over static, or
+between the fused classifiers, was established after the declared corrections.
+
+## Editorial status
+
+The main file is currently anonymous (`\anonymoustrue`). The alternative author
+block is retained from the previous manuscript and must be verified by the authors
+before a named version is circulated. No claim of author approval is implied.
+
+The [VISAPP 2027 guidelines](https://visapp.scitevents.org/Guidelines.aspx?y=2027),
+checked on 7 September 2026, specify 10,000–50,000 non-whitespace characters for
+regular-paper submission and 12 pages for full-paper publication, including
+references and illustrations. The build records counts in `review/build_verification.json`.
+The alternative gallery is outside that main-paper limit.
+
+The same guidelines require disclosure of AI-generated text, including a citation
+to the system, while also requesting removal of acknowledgements for anonymous
+review. `review/ai_disclosure.md` records the actual assistance and the remaining
+placement question for the authors before submission. This draft is for editorial
+review; final submission declarations have not been completed on the authors' behalf.

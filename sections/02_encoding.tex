@@ -1,0 +1,79 @@
+\section{\uppercase{Building the Representation}}
+\label{sec:encoding}
+
+\subsection{The Visible Trace}
+\noindent
+Let a recording contain samples
+\begin{equation}
+ q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i),
+\end{equation}
+where $s_i$ indicates surface contact, $z_i$ is azimuth, $a_i$ is altitude and $p_i$ is pressure. The stored PaHaW columns place $y$ before $x$; the renderer restores their planar order.
+
+The static image uses only position and the contact indicator. A segment between samples $i$ and $i+1$ is drawn if both samples are on the surface:
+\begin{equation}
+ \mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}.
+\end{equation}
+This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box, so an in-air excursion cannot change the scale of the visible writing.
+
+The bounding box is centred on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the colour experiments.
+
+The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding information about absolute micrographia.
+
+\subsection{Adding One Signal}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{progressive_encoding.pdf}
+\caption{Building a pseudodynamic image from the same spiral trace. Rows show one control and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from static geometry to speed alone and two RGB triplets. The trajectory is unchanged; colour describes within-recording variation.}
+\label{fig:progressive}
+\end{figure*}
+\noindent
+Four measurements are candidates for colour: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Pressure is the tablet's contact-pressure signal. Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone, always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
+
+For a surface segment, speed is calculated directly from the consecutive coordinates and timestamps:
+\begin{equation}
+ v_i=\frac{\sqrt{(x_{i+1}-x_i)^2+(y_{i+1}-y_i)^2}}{t_{i+1}-t_i}.
+ \label{eq:speed}
+\end{equation}
+We use $\log(1+v_i)$ in the tablet's native coordinate and time units. This compresses large values before the intensity mapping. Pressure and altitude use the arithmetic mean of the two endpoint measurements.
+
+Azimuth requires a circular reference. We convert the recorded tenths of a degree to radians and compute the mean direction over contact samples. Each angle is centred on that direction and wrapped into $[-\pi,\pi]$ before the endpoint average is taken. This reduces the effect of an arbitrary zero-degree boundary. It is a circular centring operation, not temporal unwrapping, and it does not remove every possible branch-cut artefact.
+
+Each transformed signal is scaled within the recording being rendered. Let $q_{.05}$ and $q_{.95}$ be its fifth and ninety-fifth percentiles over surface segments. The normalized value is
+\begin{equation}
+ u_i=\operatorname{clip}\left(\frac{f_i-q_{.05}}{q_{.95}-q_{.05}},0,1\right),
+ \label{eq:normalization}
+\end{equation}
+with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer channel value
+\begin{equation}
+ c_i=\operatorname{round}(30+190u_i).
+ \label{eq:colour}
+\end{equation}
+The white background stays outside the semantic range. Antialiasing introduces intermediate intensities at boundaries, as in the static reconstruction.
+
+This normalization needs neither a cohort-wide reference distribution nor a class label. A future record can be rendered independently. The cost is that colour describes relative variation within that recording. The same red value in two images does not imply the same absolute speed or pressure. Absolute pen orientation is also removed by circular centring. These losses matter when interpreting the final comparison with classifiers that use physical measurements directly.
+
+\subsection{Combining Signals in RGB}
+\noindent
+Three channels cannot carry four independent scalar signals without an additional design choice. We evaluate the four subsets of size three, rather than deciding in advance which measurement to discard. Table~\ref{tab:encoding} gives the assignments, and Figure~\ref{fig:progressive} illustrates the progression. The static image and the isolated additions use the same geometry, background and rendering settings as these combinations.
+
+\begin{table}[t]
+\centering\small
+\caption{Incremental colour encodings. A dash denotes a constant channel value of 30. $S$: speed; $P$: pressure; $A$: altitude; $Z$: azimuth.}
+\label{tab:encoding}
+\begin{tabular}{lccc}
+\toprule
+Encoding & Red & Green & Blue\\
+\midrule
+Static & -- & -- & --\\
+One signal & $S$, $P$, $A$ or $Z$ & -- & --\\
+$SPA$ & $S$ & $P$ & $A$\\
+$SPZ$ & $S$ & $P$ & $Z$\\
+$SAZ$ & $S$ & $A$ & $Z$\\
+$PAZ$ & $P$ & $A$ & $Z$\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The comparison holds the classifier procedure fixed. Because its descriptor concatenates the same histogram construction for each channel, permuting the RGB channels only permutes three feature blocks. Standardization followed by a linear or radial-basis SVM is invariant to that common permutation, apart from numerical effects. The RGB assignments thus specify a reproducible representation without requiring six permutations of every triplet for the SVM experiment. This argument does not extend to every image model; the later CNN receives one fixed RGB assignment.
+
+Segments are drawn in acquisition order. A later segment can overwrite an earlier colour at a crossing, and the image has no separate layer for repeated visits to the same position. It preserves spatially located signal variation, not the complete sample sequence. Calling the result pseudodynamic reflects that distinction.

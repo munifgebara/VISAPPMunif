@@ -1,0 +1,65 @@
+\section{\uppercase{Data and Evaluation}}
+\label{sec:protocol}
+
+\subsection{Participants and Tasks}
+\noindent
+PaHaW provides eight tasks recorded with a Wacom Intuos 4M tablet \cite{Drotar2016}. We calculate speed from the recorded timestamps rather than an assumed sampling interval. Our local inventory contains 597 recordings from 75 participants: 37 with PD and 38 controls. Table~\ref{tab:tasks} specifies the task set. Three spiral recordings are absent from the local corpus; the other tasks have one recording for every participant. We retain all available records and do not interpret missing files as quality exclusions.
+
+\begin{table}[t]
+\centering\small
+\caption{Task inventory. T1 contains 36 PD and 36 H records; each other task contains 37 PD and 38 H records.}
+\label{tab:tasks}
+\begin{tabular}{clr}
+\toprule
+ID & Task & Records\\
+\midrule
+T1 & Archimedean spiral & 72\\
+T2 & Repeated \textit{l} & 75\\
+T3 & Repeated \textit{le} & 75\\
+T4 & Repeated \textit{les} & 75\\
+T5 & Repeated \textit{lektorka} & 75\\
+T6 & Repeated \textit{porovnat} & 75\\
+T7 & Repeated \textit{nepopadnout} & 75\\
+T8 & \textit{Tramvaj dnes u\v{z} nepojede.} & 75\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+An input audit checked file counts, sample counts, finite values and timestamp increments. Five files have a declared sample count different from the number of rows present. The renderer uses the rows actually available. There are 253 negative timestamp increments in 151 recordings, but all 1,065,788 segments with contact at both endpoints have positive increments. Equation~\ref{eq:speed} therefore requires no interpolation or imputation for the segments used in this experiment. None of the signal normalization ranges was degenerate.
+
+The participant is the independent observational unit; tasks and alternative renderings do not enlarge the cohort. Mean age is 69.32 years in PD and 62.42 in H. Age and clinical fields are excluded from classifier inputs, but handwriting may still carry this confounding.
+
+\subsection{A Common Partition for Every Task}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.91\textwidth]{grouped_validation.pdf}
+\caption{Participant separation throughout model fitting and evaluation. The CNN selects its epoch count on the first inner holdout; the classical models average three inner-fold scores. The outer assignments are common across tasks and methods. This diagram describes model fitting for a fixed encoding; representation selection from the outer scores remains exploratory.}
+\label{fig:validation}
+\end{figure*}
+\noindent
+We construct stratified folds from one row per participant, then propagate the assignments to every task and rendering (Figure~\ref{fig:validation}). Five repetitions of five outer folds produce a test prediction for every available record in each repetition. All tasks from a participant are in the same outer fold. The spiral task uses the participants for whom a record exists.
+
+Within each outer training partition, three participant-separated inner folds choose the classical model hyperparameters. Feature standardization is fitted on the corresponding training portion, never on its validation or test participants. The selected model is refitted on all outer training participants and evaluated once on the outer test set. The rendering is independent per record, so it has no parameters learned from the other records before splitting.
+
+Each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions. These are repeated predictions of 597 records from 75 participants. Every later stage reuses the saved assignments.
+
+The highest-ranked encoding was selected from these outer scores for subsequent comparisons. Nested fitting protects model hyperparameter estimation, but not that representation choice. Earlier explorations also used PaHaW. The downstream results thus concern a fixed, selected encoding on a development cohort, without an independent estimate of the complete selection procedure.
+
+\subsection{Metrics and Paired Comparisons}
+\noindent
+Macro F1 gives equal weight to the two diagnosis classes:
+\begin{equation}
+ F_{\mathrm{macro}}=\frac{F_{1,\mathrm{H}}+F_{1,\mathrm{PD}}}{2}.
+\end{equation}
+For each task and repetition, we concatenate the five outer-test folds and compute the metric once. We then average the five resulting scores. For the representation and classifier rankings, the endpoint is the unweighted mean across all eight tasks:
+\begin{equation}
+ \overline F_{\mathrm{tasks}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r}.
+ \label{eq:taskmetric}
+\end{equation}
+We also retain accuracy, balanced accuracy, PD sensitivity, H specificity, positive-class F1 and ROC AUC. A mean of task scores answers a different question from a single diagnosis obtained by combining tasks; Section~\ref{sec:fusion} defines the latter.
+
+Confidence intervals use 10,000 diagnosis-stratified bootstrap draws of participants. A draw preserves all available tasks and repeated predictions for each selected person. For a paired contrast, the same draw is applied to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 participant-wise swap patterns. It tests the difference between fixed sets of predictions, not a shuffled-label learning pipeline.
+
+Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; and eight task-specific CNN--SVM contrasts. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
+
+Both resampling procedures leave models fixed. Intervals and tests describe conditional uncertainty in these predictions, without the full variability of retraining or selection.
