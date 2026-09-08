@@ -319,11 +319,7 @@ For a segment between samples $i$ and $i+1$, the instantaneous speed is
 v_i = \frac{\sqrt{(x_{i+1}-x_i)^2 + (y_{i+1}-y_i)^2}}{t_{i+1}-t_i} ,
 \end{equation}
 
-\noindent compressed logarithmically as $\tilde{v}_i = \log(1+v_i)$. Only strictly positive time
-differences are used. Real acquisitions contain invalid, repeated and non-monotonic timestamps;
-these fall back deterministically to the previous valid speed, or to the median valid speed of
-the file when no previous one exists. The rule is fixed and stateless with respect to input
-order, which is what keeps the pipeline reproducible.
+\noindent compressed logarithmically as $\tilde{v}_i = \log(1+v_i)$. Only strictly positive time differences are used. Real acquisitions contain invalid, repeated and non-monotonic timestamps; these fall back deterministically to the previous valid speed, or to the median valid speed of the file when no previous one exists. The rule is fixed and stateless with respect to input order, which is what keeps the pipeline reproducible.
 
 Normalization is computed per task over all selected files, and never per class:
 
