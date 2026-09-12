@@ -1,4 +1,4 @@
-\section{\uppercase{From Shape to Colour}}
+\section{\uppercase{Encoding and Classifier Comparisons}}
 \label{sec:representation-results}
 
 \noindent
@@ -12,7 +12,7 @@ Before extraction, foreground is detected by any channel intensity below 250. We
 
 The static RGB channels are identical, so the static vector repeats the same histogram three times. This keeps the interface and nominal dimension constant; it does not create additional static information. For the isolated signals, two channels remain constant along the trace and retain its geometric pattern.
 
-Standardization and SVM fitting occur inside each training partition. The search contains five linear models with $C\in\{0.01,0.1,1,10,100\}$ and sixteen radial-basis models with $C\in\{0.1,1,10,100\}$ and $\gamma\in\{\mathrm{scale},10^{-4},10^{-3},10^{-2}\}$. We use inverse-frequency class weights. The candidate with the highest mean inner-fold macro F1 is chosen, with ties resolved by the stored candidate order. The SVM in this encoding comparison learns from LPQ image texture; it receives no original signal measurements as tabular features \cite{Cortes1995}.
+Standardization and support vector machine fitting \cite{Cortes1995} occur inside each training partition. The search contains five linear models with $C\in\{0.01,0.1,1,10,100\}$ and sixteen radial-basis models with $C\in\{0.1,1,10,100\}$ and $\gamma\in\{\mathrm{scale},10^{-4},10^{-3},10^{-2}\}$. We use inverse-frequency class weights. The candidate with the highest mean inner-fold macro F1 is chosen, with ties resolved by the stored candidate order. The SVM in this encoding comparison learns from LPQ image texture; it receives no original signal measurements as tabular features.
 
 \subsection{The Static Baseline}
 \noindent
@@ -24,13 +24,20 @@ Ordering the encodings by Equation~\ref{eq:taskmetric}, altitude gives the highe
 
 
 
-The individual-task contrasts vary in direction. For example, speed changes the spiral score from 0.5915 to 0.6153 but changes repeated \textit{les} from 0.6502 to 0.5994. Altitude increases the spiral score to 0.6294 and changes T4 only slightly, to 0.6548. None of the 32 isolated-signal versus static contrasts survives its Holm correction.
+The individual-task contrasts vary in direction. For example, speed changes the spiral score from 0.5915 to 0.6153 but changes repeated \textit{les} from 0.6502 to 0.5994. Altitude increases the spiral score to 0.6294 and changes T4 only slightly, to 0.6548.
 
 Combining signals produces a similarly narrow ranking. Starting from $PAZ$, replacing pressure, azimuth or altitude with speed gives $SAZ$, $SPA$ or $SPZ$, respectively. $SAZ$ leads at 0.5752, only 0.0006 above $PAZ$; $SPA$ reaches 0.5697 and $SPZ$ reaches 0.5574. These results provide no basis for declaring pressure intrinsically uninformative. LPQ summarizes normalized image patterns, not the physical measurements directly.
 
 The paired $SAZ$--static difference is +0.0109 with a 95\% interval of [$-$0.0146, 0.0370]. Its randomization $p$ is 0.4096 and Holm-adjusted $p$ is 1.0000 across the 36 encoding pairs. The $SAZ$--$PAZ$ interval is [$-$0.0185, 0.0198], also with adjusted $p=1.0000$. We carry $SAZ$ forward as the numerical leader in this exploratory comparison.
 
-Its per-task changes explain the smaller average gain: the spiral improves by 0.0802, T6 by 0.0524, and T7 by 0.0455, whereas T2 falls by 0.0612. None of its eight task-specific contrasts against static remains significant within the 32-comparison triplet family.
+Its per-task changes explain the smaller average gain: the spiral improves by 0.0802, T6 by 0.0524, and T7 by 0.0455, whereas T2 falls by 0.0612.
+
+\subsection{Classifier and Fusion Choices}
+\label{sec:classifiers}
+\noindent
+Holding $SAZ$ and the participant partitions fixed, we also varied the classifier on the same 768 LPQ attributes. SVM leads with a task mean of 0.5752, ahead of regularized logistic regression at 0.5674 and a Random Forest of 100 trees at 0.5599 \cite{Breiman2001}. Neither gap is supported, with Holm-adjusted $p=0.6563$ and $p=0.5645$ in a six-pair family.
+
+A compact convolutional network trained from scratch on $128\times128$ pixels, in the tradition of convolutional models for document recognition \cite{LeCun1998}, reaches 0.5105. It falls below all three LPQ models, and these are the only contrasts in this paper that survive their correction: the SVM--CNN difference is 0.0646 [0.0277, 0.1021] at adjusted $p=0.0054$, while logistic regression and Random Forest exceed the CNN at adjusted $p=0.0255$ and $p=0.0460$. The comparison confounds architecture with input resolution and search budget, and Section~\ref{sec:competitive} shows pretrained features behaving differently. After participant fusion the ranking flattens, with logistic regression at 0.6498 and SVM at 0.6488. All of these estimates are conditional on having selected $SAZ$ from outer scores, so we carry the SVM forward as a fixed procedure rather than as a validated best classifier.
 
 \subsection{Evaluating the Encoding Choice Within Training}
 \label{sec:nested-followup}
@@ -41,7 +48,7 @@ For participant fusion in this stage, a further internal layer chooses among the
 
 The re-evaluated static task mean is 0.5620. Selection among nine encodings gives 0.5618, and dynamic-only selection gives 0.5643. Their paired differences from static are $-$0.0002 [$-$0.0192, 0.0190] and 0.0023 [$-$0.0172, 0.0221]. These are results of adaptive procedures, not new estimates for a fixed $SAZ$ encoding. The altered inner folds and calibration also prevent attributing every difference from the initial stage solely to correcting encoding selection.
 
-The chosen encoding varies substantially. In the dynamic-only policy, azimuth is selected in five of the 25 outer training sets and $SAZ$ in four; no encoding predominates. All-nine selection chooses static once. These overlapping training sets describe selection stability, not 25 independent cohorts. Internally selected fusion yields macro F1 0.6171 for static, 0.5991 for all-nine selection and 0.6017 for dynamic-only selection. Neither contrast against static survives its two-comparison Holm family.
+The chosen encoding varies substantially. In the dynamic-only policy, azimuth is selected in five of the 25 outer training sets and $SAZ$ in four; no encoding predominates. All-nine selection chooses static once. These overlapping training sets describe selection stability, not 25 independent cohorts. Internally selected fusion yields macro F1 0.6171 for static, 0.5991 for all-nine selection and 0.6017 for dynamic-only selection, placing both adaptive policies below the fixed static one.
 
 \subsection{Controls of the Signal--Position Association}
 \noindent
@@ -49,7 +56,7 @@ Adding colour changes both signal content and image texture. We test its spatial
 
 Both controls retain geometry, line width, normalization and the multiset of vectors within each stroke. They need not preserve the raster colour histogram: segments have unequal lengths, overlap and undergo antialiasing. Joint permutation additionally disrupts local continuity, so a performance difference would not isolate physiological signal placement from induced texture changes.
 
-Each control transforms training and test records using three fixed seeds. For each seed, its own eight transformed encodings receive the same internal SVM and encoding search as the authentic dynamic-only policy. We average metrics over seeds rather than selecting a seed or ensembling their predictions. Participant bootstrap draws and swaps retain every person's tasks, repetitions and seeds together. This control experiment evaluates task scores only.
+Each control transforms training and test records using three fixed seeds. For each seed, its own eight transformed encodings receive the same internal SVM and encoding search as the unpermuted dynamic-only policy. We average metrics over seeds rather than selecting a seed or ensembling their predictions. Participant bootstrap draws and swaps retain every person's tasks, repetitions and seeds together. This control experiment evaluates task scores only.
 
 \begin{figure*}[t]
 \centering
@@ -58,6 +65,6 @@ Each control transforms training and test records using three fixed seeds. For e
 \label{fig:nested-controls}
 \end{figure*}
 
-Circular shifts yield task-mean macro F1 0.5561 and permutations 0.5442, compared with 0.5643 for authentic dynamic-only selection (Figure~\ref{fig:nested-controls}). The authentic-minus-permutation difference is 0.0201 [0.0010, 0.0399], with unadjusted $p=0.0462$ and Holm-adjusted $p=0.1848$. A pointwise interval excluding zero is compatible with an adjusted test that does not reject. The circular-shift contrast is 0.0082 [$-$0.0102, 0.0264].
+Circular shifts yield task-mean macro F1 0.5561 and permutations 0.5442, compared with 0.5643 for unpermuted dynamic-only selection (Figure~\ref{fig:nested-controls}). The unpermuted-minus-permutation difference is 0.0201 [0.0010, 0.0399], with unadjusted $p=0.0462$ and Holm-adjusted $p=0.1848$. A pointwise interval excluding zero is compatible with an adjusted test that does not reject. The circular-shift contrast is 0.0082 [$-$0.0102, 0.0264].
 
-The four global task contrasts comprise both authentic policies against static and dynamic-only selection against each control. None survives Holm adjustment. The corresponding 32 task-specific contrasts also remain unsupported in a separate exploratory family. These results neither establish a spatial-dynamic advantage nor demonstrate equivalence with static images.
+The four global task contrasts comprise both unpermuted policies against static and dynamic-only selection against each control; the corresponding 32 task-specific contrasts form a separate exploratory family. These results neither establish a spatial-dynamic advantage nor demonstrate equivalence with static images.
