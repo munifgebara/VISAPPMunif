@@ -2,7 +2,7 @@
 \label{sec:encoding}
 
 \noindent
-To vary the information encoded in each signature, we first reconstruct the visible trace. We then map individual pen signals to colour and combine them without changing the trajectory or rendering geometry.
+To vary the information encoded in each minimap, we first reconstruct the visible trace. We then map individual pen signals to colour and combine them without changing the trajectory or rendering geometry.
 
 \subsection{The Visible Trace}
 \noindent
@@ -26,7 +26,7 @@ The image retains form and stroke discontinuities, but fitting every record to i
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{progressive_encoding.pdf}
-\caption{Building a pseudodynamic image from the same spiral trace. Rows show one control and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from static geometry to speed alone and two RGB triplets. The trajectory is unchanged; colour describes within-recording variation.}
+\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one control and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from static geometry to speed alone and two RGB triplets. The trajectory is unchanged; colour describes within-recording variation.}
 \label{fig:progressive}
 \end{figure*}
 \noindent
@@ -77,6 +77,6 @@ $PAZ$ & $P$ & $A$ & $Z$\\
 \end{tabular}
 \end{table}
 
-The comparison holds the classifier procedure fixed. Because its descriptor concatenates the same histogram construction for each channel, permuting the RGB channels only permutes three feature blocks. Standardization followed by a linear or radial-basis SVM is invariant to that common permutation, apart from numerical effects. The RGB assignments thus specify a reproducible representation without requiring six permutations of every triplet for the SVM experiment. This argument does not extend to every image model; the later CNN receives one fixed RGB assignment.
+Because the descriptor applies the same histogram construction to each channel, permuting the RGB assignment only permutes three feature blocks, and standardization followed by a linear or radial-basis SVM is invariant to that permutation apart from numerical effects. Each triplet therefore needs one assignment rather than six for the SVM experiment. The argument does not extend to every image model, and the CNN receives one fixed assignment.
 
 Segments are drawn in acquisition order. A later segment can overwrite an earlier colour at a crossing, and the image has no separate layer for repeated visits to the same position. It preserves spatially located signal variation, not the complete sample sequence. Calling the result pseudodynamic reflects that distinction.

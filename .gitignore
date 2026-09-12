@@ -1,0 +1,10 @@
+# Local pdflatex build artifacts (Overleaf compiles from source)
+main.aux
+main.bbl
+main.blg
+main.log
+main.out
+main.pdf
+gallery.aux
+gallery.log
+gallery.pdf

@@ -15,12 +15,25 @@
 \usepackage{url}
 \usepackage{SCITEPRESS}
 \graphicspath{{figures/}}
+% Float placement: the default fractions push wide floats to the end of the
+% document, leaving sparse trailing pages. These values let more float area
+% share a page with text and suppress float-only pages.
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\renewcommand{\dbltopfraction}{0.92}
+\renewcommand{\dblfloatpagefraction}{0.85}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\setcounter{dbltopnumber}{3}
 \newcommand{\SAZ}{\ensuremath{S A Z}}
 \newcommand{\PAZ}{\ensuremath{P A Z}}
 \newif\ifanonymous
 \anonymoustrue
 \begin{document}
-\title{Encoding Pen Dynamics in Handwriting Images: An Incremental Study of Parkinson's Disease Classification}
+\title{Pseudodynamic Minimaps: Encoding Pen Dynamics in Handwriting Images for Parkinson's Disease Classification}
 \ifanonymous
 \author{\authorname{Anonymous Authors}\affiliation{Anonymous Institution}}
 \else
@@ -28,8 +41,8 @@
 \affiliation{\sup{1}Departamento de Inform\'atica, Universidade Estadual de Maring\'a, Brazil}
 \affiliation{\sup{2}Universidad Rey Juan Carlos, Spain}}
 \fi
-\keywords{Handwriting, Pseudodynamic Images, Local Phase Quantization, Parkinson's Disease, Explainable AI.}
-\abstract{We introduce a new formulation of pseudodynamic handwriting minimap signatures that maps normalized pen signals onto contact-only trajectories. Using 597 PaHaW recordings from 75 participants, we progress from static traces to isolated colour signals and RGB combinations, then examine texture descriptors, learned features and task fusion. An initial eight-task comparison identifies task-dependent gains for speed, altitude and azimuth. A subsequent evaluation selects encodings and classifier parameters entirely within training, while spatial controls test the association between signals and trace positions. Neither analysis establishes an overall dynamic advantage after multiplicity correction. On three tasks fixed from prior work, training-selected encoding with Local Phase Quantization and SVM reaches participant-level macro F1 of 0.6449, compared with 0.6143 for static images, 0.6279 for kinematic/pressure features and 0.6021 for frozen ResNet18 transfer features. The numerical advantage remains uncertain. Reducing eight tasks to three helps some pipelines but not others. Grad-CAM analysis of the earlier scratch-trained CNN concentrates on writing but agrees poorly with occlusion. The study contributes an explicit encoding technique and a controlled account of how its performance depends on task selection, retained signal information and the learning procedure.}
+\keywords{Pseudodynamic Minimaps, Handwriting, Time-Series Imaging, Local Phase Quantization, Parkinson's Disease.}
+\abstract{A digitizing tablet records pen speed, pressure and inclination alongside the trajectory it traces. We introduce \emph{pseudodynamic minimaps}, a formulation that renders these signals as colour along a contact-only trajectory, combining within-recording percentile normalization with circular azimuth centring so that a task execution becomes one compact image. Using 597 PaHaW recordings from 75 participants, we evaluate the construction incrementally: static traces, isolated colour signals, and all four three-signal RGB combinations, under a fixed Local Phase Quantization descriptor, SVM search and participant-separated partitions. We then move encoding selection inside training, add spatial controls that displace signals along each stroke, and compare against kinematic/pressure features and frozen ResNet18 transfer features on three tasks fixed from prior work. Training-selected minimaps reach the highest observed participant-level macro F1, 0.6449, against 0.6143 for static images, 0.6279 for kinematics and 0.6021 for transfer features. The gains are task-dependent: reducing eight tasks to three helps two pipelines and lowers two others. No paired contrast survives multiplicity correction. The study therefore contributes an explicit encoding technique and a controlled account of what its performance depends on, rather than a demonstrated advantage.}
 \onecolumn\maketitle\normalsize\setcounter{footnote}{0}\vfill
 \input{sections/01_introduction}
 \input{sections/02_encoding}
@@ -37,7 +50,6 @@
 \input{sections/04_representation_results}
 \input{sections/05_classifiers_fusion}
 \input{sections/05b_competitive}
-\input{sections/06_xai}
 \input{sections/07_discussion}
 \bibliographystyle{apalike}
 {\small\bibliography{refs}}

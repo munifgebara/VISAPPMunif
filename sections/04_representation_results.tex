@@ -19,14 +19,8 @@ Standardization and SVM fitting occur inside each training partition. The search
 The static reconstruction reaches a task-mean macro F1 of 0.5643. Its best task is repeated \textit{les} (T4), with 0.6502 and a participant-bootstrap interval of [0.5582, 0.7351]. The spiral reaches 0.5915 and T5 reaches 0.5038. All eight tasks remain in the subsequent encoding comparison.
 
 \subsection{Isolated Signals and RGB Combinations}
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{encoding_effects.pdf}
-\caption{Encoding comparison with SVM. Left: unweighted mean of task-specific macro F1 over eight tasks and five repetitions. Right: paired differences from static with conditional 95\% participant-bootstrap intervals. The complete family of 36 pairwise comparisons supports no difference after Holm adjustment.}
-\label{fig:encoding-effects}
-\end{figure*}
 \noindent
-Figure~\ref{fig:encoding-effects} orders the encodings by Equation~\ref{eq:taskmetric}. Altitude gives the highest task mean among the isolated signals at 0.5718, followed by azimuth at 0.5688. Speed alone reaches 0.5625 and pressure 0.5568, both below the static mean of 0.5643.
+Ordering the encodings by Equation~\ref{eq:taskmetric}, altitude gives the highest task mean among the isolated signals at 0.5718, followed by azimuth at 0.5688. Speed alone reaches 0.5625 and pressure 0.5568, both below the static mean of 0.5643.
 
 
 
@@ -43,19 +37,13 @@ Its per-task changes explain the smaller average gain: the spiral improves by 0.
 \noindent
 The ranking above evaluates fixed encodings. We next evaluate the procedure that chooses an encoding, retaining the outer participant partitions while introducing three inner folds common across tasks. Within each outer training set, each task and encoding receives the same 21-candidate SVM search. We choose one global encoding by the unweighted mean of its eight selected task scores. Ties follow the declared order, with static first when eligible. We evaluate a fixed-static policy, selection among all nine encodings, and selection restricted to the eight dynamic encodings.
 
-For participant fusion in this stage, a further internal layer compares the three rules from Section~\ref{sec:fusion}. Each of three intermediate training sets repeats encoding and SVM selection in its own three folds before predicting the intermediate validation participants. These predictions choose the fusion rule; the encoding and task models are then selected anew on the full outer training set. Sigmoid calibration uses training-only folds with a single final estimator (\texttt{ensemble=False}); reliability remains $\max(F_{\mathrm{inner}}-0.5,0.01)$. All choices are saved before outer-test evaluation.
+For participant fusion in this stage, a further internal layer chooses among the three rules of Section~\ref{sec:fusion}: each of three intermediate training sets repeats encoding and SVM selection in its own three folds, predicts the intermediate validation participants, and those predictions select the rule. The encoding and task models are then selected anew on the full outer training set. Sigmoid calibration uses training-only folds with a single final estimator. All choices are saved before outer-test evaluation.
 
 The re-evaluated static task mean is 0.5620. Selection among nine encodings gives 0.5618, and dynamic-only selection gives 0.5643. Their paired differences from static are $-$0.0002 [$-$0.0192, 0.0190] and 0.0023 [$-$0.0172, 0.0221]. These are results of adaptive procedures, not new estimates for a fixed $SAZ$ encoding. The altered inner folds and calibration also prevent attributing every difference from the initial stage solely to correcting encoding selection.
 
 The chosen encoding varies substantially. In the dynamic-only policy, azimuth is selected in five of the 25 outer training sets and $SAZ$ in four; no encoding predominates. All-nine selection chooses static once. These overlapping training sets describe selection stability, not 25 independent cohorts. Internally selected fusion yields macro F1 0.6171 for static, 0.5991 for all-nine selection and 0.6017 for dynamic-only selection. Neither contrast against static survives its two-comparison Holm family.
 
 \subsection{Controls of the Signal--Position Association}
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\textwidth]{spatial_controls_examples.png}
-\caption{Within-stroke controls illustrated with $SAZ$. The first two participants in a fixed identifier-based example order contribute T1 and T4; the seed is 20260909. Each row shares geometry, line width and display crop. Circular shifts and joint permutations change signal assignment within each pen-down stroke while preserving its multiset of joint signal vectors. The examples were not selected by classifier performance.}
-\label{fig:spatial-controls}
-\end{figure*}
 \noindent
 Adding colour changes both signal content and image texture. We test its spatial association using two controls: a nonzero circular shift by 25--75\% of the segment count within each pen-down stroke, and an unrestricted joint permutation within that stroke. Channels move together, preserving their joint vectors and cross-channel relationships. Single-segment strokes remain unchanged. No values move across pen lifts.
 
