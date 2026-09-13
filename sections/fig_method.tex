@@ -1,0 +1,74 @@
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\footnotesize,
+  stage/.style={draw=black!40, rounded corners=2pt, fill=#1, align=left, inner sep=4pt, minimum height=3.1cm, anchor=north west},
+  exper/.style={draw=black!40, rounded corners=2pt, fill=#1, align=left, inner sep=4pt, text width=5.35cm, minimum height=2.55cm, anchor=north west},
+  arr/.style={-{Stealth[length=2mm]}, thick, black!55},
+]
+\coordinate (bus) at (0,-3.5);
+\coordinate (row2) at (0,-3.9);
+
+\node[stage=blue!4, text width=3.6cm] (data) at (0,0)
+  {\textbf{PaHaW recordings}\\[2pt]
+   75 participants, 8 tasks,\\597 recordings\\[3pt]
+   per sample: position, time, pen contact, pressure, altitude and azimuth};
+
+\node[stage=orange!7, text width=4.0cm, right=5mm of data.north east, anchor=north west] (render)
+  {\textbf{Pseudodynamic minimap}\\[2pt]
+   \textbullet\ trace drawn only where the pen touches the tablet\\
+   \textbullet\ each signal normalized within its own recording\\
+   \textbullet\ azimuth centred on its circular mean\\
+   \textbullet\ up to three signals mapped to RGB};
+
+\node[stage=orange!7, text width=3.9cm, right=5mm of render.north east, anchor=north west] (enc)
+  {\textbf{Nine encodings} (Table~\ref{tab:encoding})\\[3pt]
+   \begin{tabular}{@{}c@{\hspace{8pt}}c@{}}
+   \includegraphics[height=1.2cm]{method_static.png} & \includegraphics[height=1.2cm]{method_saz.png}\\
+   \scriptsize 1: static trace & \scriptsize 8: $SAZ$
+   \end{tabular}\\[2pt]
+   2--5: one signal; 6--9: RGB triplets};
+
+\node[stage=blue!4, text width=3.7cm, right=5mm of enc.north east, anchor=north west] (eval)
+  {\textbf{Evaluation}\\[2pt]
+   $5\times5$ participant-separated cross-validation with 3 inner folds\\[3pt]
+   recording-level macro F1\\[1pt]
+   participant-level macro F1 (majority vote over tasks)};
+
+\node[exper=green!6] (e1) at (data.north west |- row2)
+  {\textbf{Experiment 1} \hfill Sec.~\ref{sec:descriptor}--\ref{sec:classifiers}\\[2pt]
+   all eight tasks\\[2pt]
+   \textbullet\ each encoding described by LPQ texture and classified by SVM\\
+   \textbullet\ leading encoding ($SAZ$): SVM compared with logistic regression, random forest and a CNN trained from scratch};
+
+\node[exper=green!6, right=5mm of e1.north east, anchor=north west] (e2)
+  {\textbf{Experiment 2} \hfill Sec.~\ref{sec:nested-followup}--\ref{sec:controls}\\[2pt]
+   all eight tasks\\[2pt]
+   \textbullet\ encoding, SVM and fusion rule chosen with training participants only\\
+   \textbullet\ spatial controls: signals circularly shifted or permuted within each stroke};
+
+\node[exper=green!6, right=5mm of e2.north east, anchor=north west] (e3)
+  {\textbf{Experiment 3} \hfill Sec.~\ref{sec:competitive}\\[2pt]
+   tasks T2--T4 (all eight as secondary)\\[2pt]
+   \textbullet\ static trace + LPQ + SVM\\
+   \textbullet\ minimaps + LPQ + SVM\\
+   \textbullet\ minimaps + ResNet18 features\\
+   \textbullet\ kinematic/pressure attributes + SVM};
+
+\draw[arr] ([yshift=-1.55cm]data.north east) -- ([yshift=-1.55cm]render.north west);
+\draw[arr] ([yshift=-1.55cm]render.north east) -- ([yshift=-1.55cm]enc.north west);
+\draw[arr] ([yshift=-1.55cm]enc.north east) -- ([yshift=-1.55cm]eval.north west);
+
+\draw[thick, black!55] (eval.south) -- (eval.south |- bus);
+\draw[thick, black!55] (e1.north |- bus) -- (eval.south |- bus);
+\foreach \e in {e1,e2,e3} \draw[arr] (\e.north |- bus) -- (\e.north);
+
+\draw[arr, dashed, black!45] (data.north) -- ++(0,0.45)
+  -| ([xshift=5mm,yshift=-2.05cm]e3.north east)
+  node[pos=0.25, above, font=\scriptsize, text=black!70] {pen signals used directly, without an image}
+  -- ([yshift=-2.05cm]e3.north east);
+\end{tikzpicture}}
+\caption{Overview of the method. Each PaHaW recording is rendered as a pseudodynamic minimap in one of nine encodings, and every experiment uses the same participant-separated cross-validation. Experiment~1 compares encodings and classifiers, Experiment~2 chooses the encoding with training participants only and tests whether the position of the signals along the stroke matters, and Experiment~3 compares minimaps with the static trace and with kinematic/pressure attributes computed directly from the pen signals (dashed arrow). Thumbnails show the spiral of one healthy participant as rendered.}
+\label{fig:method}
+\end{figure*}

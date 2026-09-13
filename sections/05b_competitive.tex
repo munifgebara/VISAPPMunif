@@ -1,74 +1,72 @@
-\section{\uppercase{Competitive Baselines}}
+\section{\uppercase{Kinematic and Pretrained-Feature Comparisons}}
 \label{sec:competitive}
 
 \noindent
-Experiment~3 compares the selected minimaps with methods that use the original movement signals and pretrained visual features. It uses a task set drawn from related work, which also shortens the handwriting protocol, and keeps all eight tasks as a secondary comparison.
+Experiment~3 asks whether rendering the pen dynamics as an image is worthwhile, by comparing the selected minimaps with two alternatives that each set aside one part of the proposal. The kinematic/pressure SVM represents the conventional use of the same pen signals on PaHaW \cite{Drotar2016}: it summarizes speed, acceleration, jerk and pressure as numerical attributes, without an image. The ResNet18 pipeline keeps the minimap images but replaces the handcrafted texture descriptor with pretrained convolutional features. Both are reimplemented under the same participant partitions and task voting as the minimaps, so the comparison concerns how the pen signals are represented rather than differences in evaluation protocol. The experiment uses a task set drawn from related work, which also shortens the handwriting protocol, and keeps all eight tasks as a secondary comparison.
 
 \subsection{Task Set and Evaluation Protocol}
 \noindent
-The primary set comprises repeated \textit{l}, \textit{le} and \textit{les} (T2--T4), the tasks examined in the reference thesis~\cite{Casademunt2023}. We fix this set before fitting the models, and combining its three tasks by voting is our adaptation. Four methods are evaluated: static LPQ with SVM, LPQ with selection among the nine encodings, a kinematic/pressure SVM, and a frozen ResNet18 with a trained linear classification head.
+The primary set comprises repeated \textit{l}, \textit{le} and \textit{les} (T2--T4), the tasks examined in the reference thesis~\cite{Casademunt2023}. We fix this set before fitting the models, and combining its three tasks by voting is our adaptation. Four pipelines are evaluated: the static trace with LPQ and SVM, minimaps with LPQ and SVM, minimaps with frozen ResNet18 features and a trained linear head, and kinematic/pressure attributes with SVM. Both minimap pipelines choose among the nine encodings of Table~\ref{tab:encoding}, including the static trace.
 
-The methods share the 25 outer participant partitions and three common inner folds. For each task and eligible encoding, mean inner-fold macro F1 selects the classifier parameters, and the two image methods that allow encoding selection choose one encoding for the task set by averaging these scores across its tasks, with ties resolved in favour of the static trace. Each method makes its own choices using only outer-training participants; standardization is fitted within the training partition, and selected models are refitted on the complete outer-training set. The three SVM methods retain the same 21-candidate linear/RBF search.
+The pipelines share the 25 outer participant partitions and three common inner folds. For each task and eligible encoding, mean inner-fold macro F1 selects the classifier parameters, and each minimap pipeline chooses one encoding for the task set by averaging these scores across its tasks, with ties resolved in favour of the static trace. Every choice uses only outer-training participants; standardization is fitted within the training partition, and selected models are refitted on the complete outer-training set. The three SVM pipelines retain the same 21-candidate linear/RBF search.
 
-The primary endpoint is participant-level macro F1 from majority voting over T2--T4 (Section~\ref{sec:fusion}), with no calibration, learned weights or rule selection. Recording-level macro F1 over the three tasks is secondary. Holm adjustment covers the six method pairs separately at each endpoint, and the four within-method contrasts between three-task and eight-task voting form another family.
+The primary endpoint is participant-level macro F1 from majority voting over T2--T4 (Section~\ref{sec:fusion}), with no calibration, learned weights or rule selection. Recording-level macro F1 over the three tasks is secondary. Holm adjustment covers the six pipeline pairs separately at each endpoint, and the four within-pipeline contrasts between three-task and eight-task voting form another family.
 
-\subsection{Kinematics and Pressure}
+\subsection{Kinematic and Pressure Attributes}
 \noindent
-The signal baseline retains quantities removed by image fitting and per-record colour normalization. Its 83 fixed attributes, motivated by earlier kinematic and pressure measurements on PaHaW~\cite{Drotar2016}, comprise 11 acquisition times, contact fractions, stroke counts, path lengths and contact dimensions; 24 contact and in-air stroke duration and length summaries; 36 contact and in-air speed, acceleration and jerk summaries; and 12 contact pressure and absolute pressure-rate summaries. Each distribution contributes its mean, population standard deviation, median, 5th and 95th percentiles, and interquartile range. This is an independently specified descriptor, with no supervised feature screening.
+The kinematic baseline describes each recording with 83 numbers computed directly from the pen signals, in native tablet units and without an image. Eleven are global: the acquisition time and its contact, in-air and transition parts, the fraction of time in contact, the numbers of contact and in-air strokes, their path lengths, and the width and height of the written area. The other 72 summarize twelve distributions: stroke duration, stroke length, speed, acceleration and jerk, each for contact and for in-air movement, together with contact pressure and its rate of change. Each distribution contributes its mean, standard deviation, median, 5th and 95th percentiles and interquartile range. The attribute families follow earlier kinematic and pressure studies on PaHaW \cite{Drotar2016}, but the descriptor is specified independently and fixed before fitting, without selecting attributes by their relation to the labels.
 
-Coordinates and pressure remain in native tablet units; timestamp differences are divided by 1,000 to obtain seconds. Velocity vectors are secants at interval midpoints. Successive vector differences over midpoint time differences yield acceleration and jerk, whose magnitudes are summarized. Derivatives never cross pen lifts or invalid intervals. No smoothing is applied, so quantization can influence higher derivatives.
+Speed, acceleration and jerk are finite differences of pen position over the recorded timestamps, converted from milliseconds to seconds, with no smoothing and never across a pen lift. A label-free audit excluded 255 of the 1,364,022 intervals, those with a negative time step or a jump longer than 60s, none of them during contact; pauses of up to 60s are kept. When a recording has no in-air movement, or too few samples for a derivative, the corresponding summaries are set to zero, so every recording keeps all 83 attributes.
 
-A pre-fit audit excluded 255 of 1,364,022 intervals: 253 negative increments and two positive jumps exceeding 60s. None occurred within contact. Positive intervals up to 60s are retained, including 145 gaps of 1--26.61s; their velocities describe average movement across the gap. Acquisition time sums valid intervals, dividing each state-transition interval equally between contact and air. Stroke lengths and derivatives exclude transitions. Six zeros represent an absent distribution, recorded separately in diagnostics: 56 recordings lack in-air distributions and 57 lack an in-air jerk distribution. These conventions preserve every recording while making incomplete temporal information explicit.
-
-\subsection{Transfer from a Pretrained CNN}
+\subsection{Pretrained Features from the Minimaps}
 \noindent
 ResNet18~\cite{He2016} supplies 512 features from its global average-pooling layer using the fixed torchvision \texttt{IMAGENET1K\_V1} weights. Images undergo the same foreground crop and square white padding as LPQ, followed by bilinear resizing to $224\times224$ and fixed ImageNet channel normalization. The backbone remains in evaluation mode, with convolutional weights and batch-normalization statistics frozen. There is no augmentation or end-to-end fine-tuning.
 
-A class-balanced, $L_2$-regularized logistic head is fitted to standardized features. Its inner search evaluates seven values, $C\in\{10^{-4},10^{-3},10^{-2},10^{-1},1,10,100\}$, and selects among the same nine image encodings as LPQ. The comparison therefore concerns complete learning procedures with different feature families and search budgets.
+A class-balanced, $L_2$-regularized logistic head is fitted to standardized features. Its inner search evaluates seven values, $C\in\{10^{-4},10^{-3},10^{-2},10^{-1},1,10,100\}$, and selects among the same nine encodings as the LPQ pipeline. The comparison therefore concerns complete learning procedures with different feature families and search budgets.
 
 \subsection{Comparison on the Three Fixed Tasks}
 \begin{table*}[t]
 \centering\small
-\caption{Experiment~3 on T2--T4, fixed before fitting. Recording-level and participant-level macro F1 are distinct endpoints; the interval is the 95\% participant-bootstrap interval for participant-level macro F1, and each value averages five repetitions. Enc.~\# is the encoding of Table~\ref{tab:encoding} chosen most often across the 25 outer training sets; the full counts are 1$\times$2, 3$\times$4, 4$\times$1, 6$\times$4, 7$\times$4, 8$\times$2 and 9$\times$8 for selected LPQ, and 1$\times$1, 2$\times$4, 3$\times$1, 4$\times$3, 5$\times$2 and 7$\times$14 for ResNet18. Bold marks the highest value in each column.}
+\caption{Experiment~3 on T2--T4, fixed before fitting. Recording-level and participant-level macro F1 are distinct endpoints; the interval is the 95\% participant-bootstrap interval for participant-level macro F1, and each value averages five repetitions. Both minimap pipelines choose the encoding with training participants only; Enc.~\# is the encoding of Table~\ref{tab:encoding} chosen most often across the 25 outer training sets, with full counts 1$\times$2, 3$\times$4, 4$\times$1, 6$\times$4, 7$\times$4, 8$\times$2 and 9$\times$8 with LPQ, and 1$\times$1, 2$\times$4, 3$\times$1, 4$\times$3, 5$\times$2 and 7$\times$14 with ResNet18. Bold marks the highest value in each column.}
 \label{tab:competitive}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lcrrrr@{}}
 \toprule
-Method & Enc.~\# & Recording-level F1 & Participant-level F1 & 95\% CI & Accuracy (\%)\\
+Pipeline & Enc.~\# & Recording-level F1 & Participant-level F1 & 95\% CI & Accuracy (\%)\\
 \midrule
-Static LPQ + SVM & 1 & 0.5815 & 0.6143 & [0.5194, 0.7049] & 61.60\\
-Training-selected LPQ + SVM & 9 (8/25) & 0.5773 & \textbf{0.6449} & [0.5502, 0.7340] & \textbf{64.80}\\
-Kinematic/pressure SVM & -- & \textbf{0.6074} & 0.6279 & [0.5409, 0.7106] & 62.93\\
-ResNet18 transfer + linear head & 7 (14/25) & 0.5710 & 0.6021 & [0.5136, 0.6873] & 60.27\\
+Static trace + LPQ + SVM & 1 & 0.5815 & 0.6143 & [0.5194, 0.7049] & 61.60\\
+Minimaps + LPQ + SVM & 9 (8/25) & 0.5773 & \textbf{0.6449} & [0.5502, 0.7340] & \textbf{64.80}\\
+Kinematic/pressure + SVM & -- & \textbf{0.6074} & 0.6279 & [0.5409, 0.7106] & 62.93\\
+Minimaps + ResNet18 features & 7 (14/25) & 0.5710 & 0.6021 & [0.5136, 0.6873] & 60.27\\
 \bottomrule
 \end{tabular}
 \end{table*}
 \noindent
-The training-selected minimap pipeline gives the best participant-level decisions of the four methods (Table~\ref{tab:competitive}). It has the highest macro F1 (0.6449), accuracy (64.80\%), balanced accuracy (0.6472), PD sensitivity (0.5892) and H specificity (0.7053). Its margin over static images is 0.0307 [$-$0.0107, 0.0748]: encoding the dynamics adds three points of macro F1 with the same descriptor and classifier, although a cohort of 75 participants cannot resolve margins of this size. Selection chose a dynamic encoding in 23 of the 25 training sets, most often $PAZ$ (9), whereas ResNet18 favoured $SPZ$ (7).
+Minimaps with LPQ and SVM give the best participant-level decisions of the four pipelines (Table~\ref{tab:competitive}). They have the highest macro F1 (0.6449), accuracy (64.80\%), balanced accuracy (0.6472), PD sensitivity (0.5892) and H specificity (0.7053). Their margin over the static trace is 0.0307 [$-$0.0107, 0.0748]: encoding the dynamics adds three points of macro F1 with the same descriptor and classifier, although a cohort of 75 participants cannot resolve margins of this size. Training-only selection chose a dynamic encoding in 23 of the 25 training sets with LPQ, most often $PAZ$ (9), and in 24 of 25 with ResNet18, most often $SPZ$ (7).
 
-The kinematic descriptor leads the recording-level endpoint (0.6074) and the vote-fraction AUC (0.6691 against 0.6139), so the two pipelines are strongest on different endpoints. An average of per-task scores does not capture how errors coincide across tasks, which is what the participant-level vote rewards.
+The kinematic attributes lead the recording-level endpoint (0.6074) and the vote-fraction AUC (0.6691 against 0.6139), so the two pipelines are strongest on different endpoints. An average of per-task scores does not capture how errors coincide across tasks, which is what the participant-level vote rewards.
 
 \subsection{Effect of the Task Subset}
 \noindent
-With all eight tasks, majority voting reaches participant-level macro F1 of 0.6330 for static LPQ, 0.6166 for selected LPQ, 0.5941 for kinematics and 0.6225 for ResNet18 features. Experiment~3 always votes, whereas Experiment~2 chose the rule within training, so the participant-level scores of the two experiments are not directly comparable.
+With all eight tasks, majority voting reaches participant-level macro F1 of 0.6330 for the static trace with LPQ, 0.6166 for minimaps with LPQ, 0.5941 for kinematic attributes and 0.6225 for minimaps with ResNet18. Experiment~3 always votes, whereas Experiment~2 chose the rule within training, so the participant-level scores of the two experiments are not directly comparable.
 
-The shorter protocol suits the minimap pipeline. Moving from eight tasks to T2--T4 raises its participant-level macro F1 by 0.0283 [$-$0.0358, 0.0950] and that of the kinematic descriptor by 0.0338, while static LPQ changes by $-$0.0188 and ResNet18 features by $-$0.0204. Recording-level means over three and eight tasks describe different task populations and are not compared directly.
+The shorter protocol suits the minimap LPQ pipeline. Moving from eight tasks to T2--T4 raises its participant-level macro F1 by 0.0283 [$-$0.0358, 0.0950] and that of the kinematic attributes by 0.0338, while the static trace changes by $-$0.0188 and minimaps with ResNet18 by $-$0.0204. Recording-level means over three and eight tasks describe different task populations and are not compared directly.
 
 \begin{table*}[t]
 \centering\footnotesize
-\caption{Recording-level macro F1 per task for the four methods of Experiment~3 evaluated on all eight tasks, averaged over five repetitions. Bold marks the highest value for each task and for the mean.}
+\caption{Recording-level macro F1 per task for the four pipelines of Experiment~3 evaluated on all eight tasks, averaged over five repetitions. Bold marks the highest value for each task and for the mean.}
 \label{tab:per-task}
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}lrrrrrrrrr@{}}
 \toprule
-Method & T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & Mean\\
+Pipeline & T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & Mean\\
 \midrule
-Static LPQ + SVM & 0.5846 & 0.5505 & 0.5860 & 0.6079 & 0.5588 & 0.5232 & 0.5226 & 0.5620 & 0.5620\\
-Training-selected LPQ + SVM & \textbf{0.6327} & 0.5407 & 0.5614 & 0.6042 & 0.5340 & 0.5362 & 0.5077 & 0.5772 & 0.5618\\
-Kinematic/pressure SVM & 0.5074 & \textbf{0.6381} & \textbf{0.6662} & 0.5177 & 0.5062 & 0.5491 & 0.4773 & \textbf{0.6788} & 0.5676\\
-ResNet18 transfer + linear head & 0.5984 & 0.5345 & 0.5457 & \textbf{0.6246} & \textbf{0.5772} & \textbf{0.5917} & \textbf{0.5888} & 0.5892 & \textbf{0.5813}\\
+Static trace + LPQ + SVM & 0.5846 & 0.5505 & 0.5860 & 0.6079 & 0.5588 & 0.5232 & 0.5226 & 0.5620 & 0.5620\\
+Minimaps + LPQ + SVM & \textbf{0.6327} & 0.5407 & 0.5614 & 0.6042 & 0.5340 & 0.5362 & 0.5077 & 0.5772 & 0.5618\\
+Kinematic/pressure + SVM & 0.5074 & \textbf{0.6381} & \textbf{0.6662} & 0.5177 & 0.5062 & 0.5491 & 0.4773 & \textbf{0.6788} & 0.5676\\
+Minimaps + ResNet18 features & 0.5984 & 0.5345 & 0.5457 & \textbf{0.6246} & \textbf{0.5772} & \textbf{0.5917} & \textbf{0.5888} & 0.5892 & \textbf{0.5813}\\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-The eight tasks also show that the methods are complementary (Table~\ref{tab:per-task}). Selected minimaps give the highest recording-level macro F1 on the spiral, 0.6327 against 0.5846 for static LPQ, 0.5984 for ResNet18 and 0.5074 for kinematics, whereas kinematics lead T2, T3 and T8 and ResNet18 features lead T4--T7. Across all eight tasks, ResNet18 has the highest recording-level mean (0.5813, against 0.5618 for selected LPQ), which makes pretrained CNN features a competitive alternative classifier for the same minimaps.
+The eight tasks also show that the pipelines are complementary (Table~\ref{tab:per-task}). Minimaps with LPQ give the highest recording-level macro F1 on the spiral, 0.6327 against 0.5846 for the static trace, 0.5984 with ResNet18 and 0.5074 for kinematic attributes, whereas kinematic attributes lead T2, T3 and T8 and minimaps with ResNet18 lead T4--T7. Minimaps with ResNet18 also have the highest recording-level mean over the eight tasks (0.5813, against 0.5618 with LPQ), so pretrained CNN features are a competitive alternative extractor for the same images. No ResNet18 policy restricted to the static trace was evaluated, so this advantage cannot be attributed to the dynamics alone.
