@@ -1,20 +1,20 @@
-\section{\uppercase{Competitive Baselines on a Fixed Task Subset}}
+\section{\uppercase{Competitive Baselines}}
 \label{sec:competitive}
 
 \noindent
-The preceding comparisons examine image texture and a CNN trained from scratch. We now broaden the reference methods to include the original movement signals and pretrained visual features. A task set drawn from related work allows us to examine these alternatives under a shorter handwriting protocol, while retaining all eight tasks as a secondary comparison.
+Experiment~3 compares the selected minimaps with methods that use the original movement signals and pretrained visual features. It uses a task set drawn from related work, which also shortens the handwriting protocol, and keeps all eight tasks as a secondary comparison.
 
 \subsection{Task Set and Evaluation Protocol}
 \noindent
-The primary set comprises repeated \textit{l}, \textit{le} and \textit{les} (T2--T4), the tasks reported in the reference thesis~\cite{Casademunt2023}. We fix this set before fitting the new models. Combining its three tasks by voting is our adaptation; the thesis does not report this ensemble. We evaluate four methods: static LPQ with SVM, LPQ with internal selection among nine encodings, a kinematic/pressure SVM, and a frozen ResNet18 with a trained linear classification head. All eight tasks form a separately specified secondary evaluation.
+The primary set comprises repeated \textit{l}, \textit{le} and \textit{les} (T2--T4), the tasks examined in the reference thesis~\cite{Casademunt2023}. We fix this set before fitting the models, and combining its three tasks by voting is our adaptation. Four methods are evaluated: static LPQ with SVM, LPQ with selection among the nine encodings, a kinematic/pressure SVM, and a frozen ResNet18 with a trained linear classification head.
 
-The methods share the original 25 outer participant partitions and three common inner participant folds. For each task and eligible encoding, mean inner-fold macro F1 selects the classifier parameters. The two image methods that allow encoding selection choose one encoding for the task set by averaging these selected inner scores across its tasks. Candidate order resolves ties, with static first among encodings. Each method makes its own choices using only outer-training participants. Feature standardization is fitted within the corresponding training partition; selected models are then refitted on the complete outer-training set. The three SVM methods retain the same 21-candidate linear/RBF search.
+The methods share the 25 outer participant partitions and three common inner folds. For each task and eligible encoding, mean inner-fold macro F1 selects the classifier parameters, and the two image methods that allow encoding selection choose one encoding for the task set by averaging these scores across its tasks, with ties resolved in favour of the static trace. Each method makes its own choices using only outer-training participants; standardization is fitted within the training partition, and selected models are refitted on the complete outer-training set. The three SVM methods retain the same 21-candidate linear/RBF search.
 
-Our primary endpoint is participant-level macro F1 from the fixed majority vote of Section~\ref{sec:fusion} over T2--T4, with no calibration, learned weights or rule selection. Task-mean macro F1 is secondary. Means over three and eight tasks describe different task populations, so they cannot by themselves establish a benefit from reducing the task set. The paired fusion comparison evaluates the same 75 participants instead, although changing the task set can also change the internally selected encoding. Bootstrap intervals and paired prediction swaps follow Section~\ref{sec:protocol}. Holm adjustment covers the six method pairs separately at each endpoint, and the four within-method contrasts between three-task and eight-task fusion form another family.
+The primary endpoint is participant-level macro F1 from majority voting over T2--T4 (Section~\ref{sec:fusion}), with no calibration, learned weights or rule selection. Recording-level macro F1 over the three tasks is secondary. Holm adjustment covers the six method pairs separately at each endpoint, and the four within-method contrasts between three-task and eight-task voting form another family.
 
 \subsection{Kinematics and Pressure}
 \noindent
-The signal baseline retains quantities removed by image fitting and per-record colour normalization. Its 83 fixed attributes, motivated by earlier kinematic and pressure measurements on PaHaW~\cite{Drotar2016}, comprise 11 acquisition times, contact fractions, stroke counts, path lengths and contact dimensions; 24 contact and in-air stroke duration and length summaries; 36 contact and in-air speed, acceleration and jerk summaries; and 12 contact pressure and absolute pressure-rate summaries. Each distribution contributes its mean, population standard deviation, median, 5th and 95th percentiles, and interquartile range. This is an independently specified descriptor, with no supervised feature screening or claim to reproduce their exact pipeline.
+The signal baseline retains quantities removed by image fitting and per-record colour normalization. Its 83 fixed attributes, motivated by earlier kinematic and pressure measurements on PaHaW~\cite{Drotar2016}, comprise 11 acquisition times, contact fractions, stroke counts, path lengths and contact dimensions; 24 contact and in-air stroke duration and length summaries; 36 contact and in-air speed, acceleration and jerk summaries; and 12 contact pressure and absolute pressure-rate summaries. Each distribution contributes its mean, population standard deviation, median, 5th and 95th percentiles, and interquartile range. This is an independently specified descriptor, with no supervised feature screening.
 
 Coordinates and pressure remain in native tablet units; timestamp differences are divided by 1,000 to obtain seconds. Velocity vectors are secants at interval midpoints. Successive vector differences over midpoint time differences yield acceleration and jerk, whose magnitudes are summarized. Derivatives never cross pen lifts or invalid intervals. No smoothing is applied, so quantization can influence higher derivatives.
 
@@ -24,36 +24,51 @@ A pre-fit audit excluded 255 of 1,364,022 intervals: 253 negative increments and
 \noindent
 ResNet18~\cite{He2016} supplies 512 features from its global average-pooling layer using the fixed torchvision \texttt{IMAGENET1K\_V1} weights. Images undergo the same foreground crop and square white padding as LPQ, followed by bilinear resizing to $224\times224$ and fixed ImageNet channel normalization. The backbone remains in evaluation mode, with convolutional weights and batch-normalization statistics frozen. There is no augmentation or end-to-end fine-tuning.
 
-A class-balanced, $L_2$-regularized logistic head is fitted to standardized features. Its inner search evaluates seven values, $C\in\{10^{-4},10^{-3},10^{-2},10^{-1},1,10,100\}$, and selects among the same nine image encodings as LPQ. This comparison therefore concerns complete learning procedures with different feature families and search budgets. It evaluates fixed-feature CNN transfer on PaHaW, without attributing any difference solely to architecture.
+A class-balanced, $L_2$-regularized logistic head is fitted to standardized features. Its inner search evaluates seven values, $C\in\{10^{-4},10^{-3},10^{-2},10^{-1},1,10,100\}$, and selects among the same nine image encodings as LPQ. The comparison therefore concerns complete learning procedures with different feature families and search budgets.
 
 \subsection{Comparison on the Three Fixed Tasks}
 \begin{table*}[t]
 \centering\small
-\caption{New competitive comparison on T2/T3/T4, fixed before fitting. Task mean and participant fusion are distinct endpoints. Intervals are conditional 95\% participant-bootstrap intervals for fusion macro F1. Each number averages five repetitions after pooling outer folds. None of the six primary method contrasts survives Holm correction.}
+\caption{Experiment~3 on T2--T4, fixed before fitting. Recording-level and participant-level macro F1 are distinct endpoints; the interval is the 95\% participant-bootstrap interval for participant-level macro F1, and each value averages five repetitions. Enc.~\# is the encoding of Table~\ref{tab:encoding} chosen most often across the 25 outer training sets; the full counts are 1$\times$2, 3$\times$4, 4$\times$1, 6$\times$4, 7$\times$4, 8$\times$2 and 9$\times$8 for selected LPQ, and 1$\times$1, 2$\times$4, 3$\times$1, 4$\times$3, 5$\times$2 and 7$\times$14 for ResNet18. Bold marks the highest value in each column.}
 \label{tab:competitive}
-\begin{tabular}{@{}lrrrr@{}}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcrrrr@{}}
 \toprule
-Method & Task macro F1 & Fusion macro F1 & Fusion 95\% CI & Fusion acc. (\%)\\
+Method & Enc.~\# & Recording-level F1 & Participant-level F1 & 95\% CI & Accuracy (\%)\\
 \midrule
-Static LPQ + SVM & 0.5815 & 0.6143 & [0.5194, 0.7049] & 61.60\\
-Training-selected LPQ + SVM & 0.5773 & 0.6449 & [0.5502, 0.7340] & 64.80\\
-Kinematic/pressure SVM & 0.6074 & 0.6279 & [0.5409, 0.7106] & 62.93\\
-ResNet18 transfer + linear head & 0.5710 & 0.6021 & [0.5136, 0.6873] & 60.27\\
+Static LPQ + SVM & 1 & 0.5815 & 0.6143 & [0.5194, 0.7049] & 61.60\\
+Training-selected LPQ + SVM & 9 (8/25) & 0.5773 & \textbf{0.6449} & [0.5502, 0.7340] & \textbf{64.80}\\
+Kinematic/pressure SVM & -- & \textbf{0.6074} & 0.6279 & [0.5409, 0.7106] & 62.93\\
+ResNet18 transfer + linear head & 7 (14/25) & 0.5710 & 0.6021 & [0.5136, 0.6873] & 60.27\\
 \bottomrule
 \end{tabular}
 \end{table*}
 \noindent
-Training-selected LPQ+SVM has the highest observed participant macro F1, 0.6449 (Table~\ref{tab:competitive}). Its difference from static LPQ is 0.0307, with interval [$-$0.0107, 0.0748], unadjusted $p=0.1815$ and adjusted $p=1.0000$. Its differences from the kinematic and transfer pipelines are also uncertain. Failing to separate the four methods is not evidence that they are equivalent.
+The training-selected minimap pipeline gives the best participant-level decisions of the four methods (Table~\ref{tab:competitive}). It has the highest macro F1 (0.6449), accuracy (64.80\%), balanced accuracy (0.6472), PD sensitivity (0.5892) and H specificity (0.7053). Its margin over static images is 0.0307 [$-$0.0107, 0.0748]: encoding the dynamics adds three points of macro F1 with the same descriptor and classifier, although a cohort of 75 participants cannot resolve margins of this size. Selection chose a dynamic encoding in 23 of the 25 training sets, most often $PAZ$ (9), whereas ResNet18 favoured $SPZ$ (7).
 
-The selected-encoding SVM has PD sensitivity 0.5892 and H specificity 0.7053. Thus its macro F1 does not imply equally strong performance in both classes. Its vote-fraction AUC is 0.6139, whereas the kinematic model reaches 0.6691 despite a lower thresholded macro F1. Macro F1 evaluates the fixed voting decision; AUC evaluates ranking by the coarse vote fractions.
-
-Kinematics have the highest individual-task mean, 0.6074, although LPQ-selected fusion is numerically higher. An average task score does not encode the coincidence of errors across tasks. We report the two endpoints separately and do not test their numerical difference as an improvement.
-
+The kinematic descriptor leads the recording-level endpoint (0.6074) and the vote-fraction AUC (0.6691 against 0.6139), so the two pipelines are strongest on different endpoints. An average of per-task scores does not capture how errors coincide across tasks, which is what the participant-level vote rewards.
 
 \subsection{Effect of the Task Subset}
 \noindent
-With all eight tasks, fixed majority fusion reaches macro F1 0.6330 for static LPQ, 0.6166 for selected LPQ, 0.5941 for kinematics and 0.6225 for transfer features. These values use a fixed vote rather than the internally selected fusion rule of Section~\ref{sec:nested-followup}; their differences across sections do not represent contradictory estimates of the same procedure.
+With all eight tasks, majority voting reaches participant-level macro F1 of 0.6330 for static LPQ, 0.6166 for selected LPQ, 0.5941 for kinematics and 0.6225 for ResNet18 features. Experiment~3 always votes, whereas Experiment~2 chose the rule within training, so the participant-level scores of the two experiments are not directly comparable.
 
-Moving to three tasks changes participant macro F1 by $-$0.0188 for static LPQ, +0.0283 for selected LPQ, +0.0338 for kinematics and $-$0.0204 for transfer features. Every interval includes zero; for selected LPQ it is [$-$0.0358, 0.0950]. The shorter set is therefore a plausible option for further study, with a numerical gain for two pipelines and losses for two others; its general advantage is unproven.
+The shorter protocol suits the minimap pipeline. Moving from eight tasks to T2--T4 raises its participant-level macro F1 by 0.0283 [$-$0.0358, 0.0950] and that of the kinematic descriptor by 0.0338, while static LPQ changes by $-$0.0188 and ResNet18 features by $-$0.0204. Recording-level means over three and eight tasks describe different task populations and are not compared directly.
 
-The transfer method has the highest eight-task mean at 0.5813, compared with 0.5618 for training-selected LPQ. Their difference is 0.0195 [$-$0.0152, 0.0543]. This limits the earlier conclusion about the small scratch-trained CNN: it does not justify a general ranking of texture descriptors above pretrained CNN features.
+\begin{table*}[t]
+\centering\footnotesize
+\caption{Recording-level macro F1 per task for the four methods of Experiment~3 evaluated on all eight tasks, averaged over five repetitions. Bold marks the highest value for each task and for the mean.}
+\label{tab:per-task}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}lrrrrrrrrr@{}}
+\toprule
+Method & T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8 & Mean\\
+\midrule
+Static LPQ + SVM & 0.5846 & 0.5505 & 0.5860 & 0.6079 & 0.5588 & 0.5232 & 0.5226 & 0.5620 & 0.5620\\
+Training-selected LPQ + SVM & \textbf{0.6327} & 0.5407 & 0.5614 & 0.6042 & 0.5340 & 0.5362 & 0.5077 & 0.5772 & 0.5618\\
+Kinematic/pressure SVM & 0.5074 & \textbf{0.6381} & \textbf{0.6662} & 0.5177 & 0.5062 & 0.5491 & 0.4773 & \textbf{0.6788} & 0.5676\\
+ResNet18 transfer + linear head & 0.5984 & 0.5345 & 0.5457 & \textbf{0.6246} & \textbf{0.5772} & \textbf{0.5917} & \textbf{0.5888} & 0.5892 & \textbf{0.5813}\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The eight tasks also show that the methods are complementary (Table~\ref{tab:per-task}). Selected minimaps give the highest recording-level macro F1 on the spiral, 0.6327 against 0.5846 for static LPQ, 0.5984 for ResNet18 and 0.5074 for kinematics, whereas kinematics lead T2, T3 and T8 and ResNet18 features lead T4--T7. Across all eight tasks, ResNet18 has the highest recording-level mean (0.5813, against 0.5618 for selected LPQ), which makes pretrained CNN features a competitive alternative classifier for the same minimaps.

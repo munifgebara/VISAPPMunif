@@ -2,11 +2,31 @@
 \label{sec:protocol}
 
 \noindent
-Each recording produces nine alternative images, all derived from the same participant. We compare encodings on common participant partitions and define separate endpoints for individual tasks and decisions combined across tasks.
+The evaluation is organized as three experiments that share the same participant partitions. Experiment~1 (Sections~\ref{sec:descriptor}--\ref{sec:classifiers}) compares the nine encodings of Table~\ref{tab:encoding} under a fixed descriptor and classifier. Experiment~2 (Sections~\ref{sec:nested-followup} and~\ref{sec:controls}) selects the encoding using training participants only and tests controls that displace the signals along each stroke. Experiment~3 (Section~\ref{sec:competitive}) compares the selected minimaps with kinematic and pretrained-CNN baselines on three tasks fixed from prior work.
 
-\subsection{Participants and Tasks}
+\subsection{The PaHaW Dataset}
+\label{sec:dataset}
 \noindent
-PaHaW provides eight tasks recorded with a Wacom Intuos 4M tablet \cite{Drotar2016}. We calculate speed from the recorded timestamps rather than an assumed sampling interval. Our local inventory contains 597 recordings from 75 participants: 37 with PD and 38 controls. Table~\ref{tab:tasks} specifies the task set. Three spiral recordings are absent from the local corpus; the other tasks have one recording for every participant. We retain all available records and do not interpret missing files as quality exclusions.
+PaHaW was acquired with the First Department of Neurology at St.~Anne's University Hospital in Brno and includes 37 PD patients (19 men) and 38 healthy participants (20 men) \cite{Drotar2016}. All participants were native Czech speakers who wrote with their dominant right hand, and the patients were recorded under L-DOPA medication. They wrote with an inking pen on an empty paper template laid over a Wacom Intuos 4M tablet, which gave normal visual feedback, while a pre-filled template showed each task; neither the number of repetitions nor the writing height was imposed. The tablet sampled the pen at 100 samples per second during on-surface and in-air movement, recording position, pressure and pen status, and the released recordings also contain altitude and azimuth. The dataset has since been used to study which handwritten elements carry Parkinsonian alterations \cite{Casademunt2024}.
+
+\begin{figure}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{@{}cc@{}}
+\includegraphics[width=0.47\columnwidth]{tasks/T1.png} & \includegraphics[width=0.47\columnwidth]{tasks/T2.png}\\
+T1 Spiral & T2 \textit{l}\\[3pt]
+\includegraphics[width=0.47\columnwidth]{tasks/T3.png} & \includegraphics[width=0.47\columnwidth]{tasks/T4.png}\\
+T3 \textit{le} & T4 \textit{les}\\[3pt]
+\includegraphics[width=0.47\columnwidth]{tasks/T5.png} & \includegraphics[width=0.47\columnwidth]{tasks/T6.png}\\
+T5 \textit{lektorka} & T6 \textit{porovnat}\\[3pt]
+\includegraphics[width=0.47\columnwidth]{tasks/T7.png} & \includegraphics[width=0.47\columnwidth]{tasks/T8.png}\\
+T7 \textit{nepopadnout} & T8 Sentence\\
+\end{tabular}
+\caption{The eight PaHaW tasks written by one healthy participant, shown as static traces in writing orientation. Each recording is scaled separately, so absolute writing size is not preserved.}
+\label{fig:tasks}
+\end{figure}
+
+The eight tasks progress from drawing to writing (Table~\ref{tab:tasks} and Figure~\ref{fig:tasks}). T1 is an Archimedean spiral drawn from the inside out. T2--T4 repeat the cursive letter \textit{l}, the bigram \textit{le} and the trigram \textit{les}. T5--T7 repeat the Czech words \textit{lektorka}, \textit{porovnat} and \textit{nepopadnout}, which can be written without lifting the pen, and T8 is the sentence \textit{Tramvaj dnes u\v{z} nepojede}, which adds in-air transitions between words \cite{Drotar2016}. Our local copy contains 597 recordings from the 75 participants: three spiral recordings are absent, and every other task has one recording per participant. We retain all available records and do not interpret missing files as quality exclusions.
 
 \begin{table}[t]
 \centering\small
@@ -28,47 +48,36 @@ T8 & \textit{Tramvaj dnes u\v{z} nepojede.} & 75\\
 \end{tabular}
 \end{table}
 
-An input audit checked file counts, sample counts, finite values and timestamp increments. Five files declare a sample count different from the rows present, and the renderer uses the rows available. Of the 253 negative timestamp increments, none falls inside a contact segment: all 1,065,788 segments with contact at both endpoints increase in time, so Equation~\ref{eq:speed} requires no interpolation. No normalization range was degenerate. The kinematic baseline additionally uses in-air intervals and states its timestamp rules in Section~\ref{sec:competitive}.
+An input audit checked file counts, sample counts, finite values and timestamp increments. Five files declare a sample count different from the rows present, and the renderer uses the rows available. We calculate speed from the recorded timestamps rather than an assumed sampling interval. Of the 253 negative timestamp increments, none falls inside a contact segment: all 1,065,788 segments with contact at both endpoints increase in time, so Equation~\ref{eq:speed} requires no interpolation. No normalization range was degenerate.
 
-The participant is the independent observational unit; tasks and alternative renderings do not enlarge the cohort. Mean age is 69.32 years in PD and 62.42 in H. Age and clinical fields are excluded from classifier inputs, but handwriting may still carry this confounding.
+The participant is the independent observational unit; tasks and alternative renderings do not enlarge the cohort. Mean age is 69.32 years in PD and 62.42 in H. Age and clinical fields are excluded from classifier inputs, but handwriting may still reflect this difference.
 
 \subsection{A Common Partition for Every Task}
 \noindent
-We construct stratified folds from one row per participant, then propagate the assignments to every task and rendering. Five repetitions of five outer folds produce a test prediction for every available record in each repetition. All tasks from a participant are in the same outer fold. The spiral task uses the participants for whom a record exists.
+We construct stratified folds from one row per participant, then propagate the assignments to every task and rendering. Five repetitions of five outer folds produce a test prediction for every available record in each repetition, and all tasks from a participant fall in the same outer fold.
 
-Within each outer training partition, three participant-separated inner folds choose the classical model hyperparameters. Feature standardization is fitted on the corresponding training portion, never on its validation or test participants. The selected model is refitted on all outer training participants and evaluated once on the outer test set. The rendering is independent per record, so it has no parameters learned from the other records before splitting.
+Within each outer training partition, three participant-separated inner folds choose the model hyperparameters. Feature standardization is fitted on the corresponding training portion, never on its validation or test participants. The selected model is refitted on all outer training participants and evaluated once on the outer test set. Rendering is independent per record, so it learns nothing from other records before splitting.
 
-In the initial eight-task evaluation, each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions. These are repeated predictions of 597 records from 75 participants. Every later stage reuses the saved outer assignments. The follow-up stages use three inner folds common across tasks, intersected with available recordings.
+In Experiment~1, each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions, which are repeated predictions of 597 records from 75 participants. Experiment~1 chooses its leading encoding from these outer-test scores for the classifier comparison, so Experiments~2 and~3 repeat the encoding choice with training participants only, using three inner folds common across tasks.
 
-The initial highest-ranked encoding was selected from outer scores for the first classifier comparison and XAI analysis. That stage protects hyperparameter fitting but not representation choice. Sections~\ref{sec:nested-followup} and~\ref{sec:competitive} subsequently evaluate encoding selection within training. They estimate different learning procedures and retain the limitation that earlier exploration used the same cohort.
-
-\subsection{Metrics and Paired Comparisons}
+\subsection{Metrics and Statistical Analysis}
 \noindent
 Macro F1 gives equal weight to the two diagnosis classes:
 \begin{equation}
  F_{\mathrm{macro}}=\frac{F_{1,\mathrm{H}}+F_{1,\mathrm{PD}}}{2}.
 \end{equation}
-For each task and repetition, we concatenate the five outer-test folds and compute the metric once. We then average the five resulting scores. For the initial representation and classifier rankings, the endpoint is the unweighted mean across all eight tasks:
+Each recording receives its own prediction. For each task and repetition we pool the five outer-test folds and compute this \emph{recording-level} macro F1 once, then average the five repetitions. Averaging over the eight tasks gives the recording-level endpoint used to rank encodings,
 \begin{equation}
- \overline F_{\mathrm{tasks}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r}.
+ \overline F_{\mathrm{rec}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r},
  \label{eq:taskmetric}
 \end{equation}
-We also retain accuracy, balanced accuracy, PD sensitivity, H specificity, positive-class F1 and ROC AUC.
+and Experiment~3 uses the corresponding mean over T2--T4. The \emph{participant-level} endpoint combines the tasks into one decision per participant (Section~\ref{sec:fusion}). We also report accuracy, balanced accuracy, PD sensitivity, H specificity and ROC AUC.
+
+We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants; each draw keeps all of a participant's tasks and repeated predictions, and a paired contrast applies the same draw to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 swap patterns. Both procedures keep the fitted models fixed, so they describe uncertainty in these predictions without the variability of retraining.
+
+Holm adjustment is applied within declared families. In Experiment~1 these are the 36 encoding pairs, the per-task contrasts of single signals and of triplets against static (32 each), the six classifier pairs at each endpoint, the three fusion-rule pairs and eight per-task CNN--SVM contrasts; Experiments~2 and~3 declare their own families. With 75 participants, the advantage of the LPQ models over the scratch-trained CNN (Section~\ref{sec:classifiers}) is the difference that survives its family. We therefore report effect sizes with their 95\% intervals throughout and give adjusted $p$ values where they are informative.
 
 \subsection{One Decision per Participant}
 \label{sec:fusion}
 \noindent
-Late fusion combines the available task predictions into a single decision per participant. Because all tasks share the participant folds, every model contributing to a held-out person's decision was fitted without that person. We consider three rules: the mean calibrated PD probability, a reliability-weighted mean with weight $\max(F_{\mathrm{inner}}-0.5,0.01)$ derived from inner-validation macro F1, and majority voting. If $\mathcal{T}_j$ is the set of tasks available for participant $j$, its vote fraction in repetition $r$ is
-\begin{equation}
- s_{j,r}=\frac{1}{|\mathcal{T}_j|}\sum_{t\in\mathcal{T}_j}\widehat y_{j,t,r},
- \qquad \widehat y_{j,r}=\mathbf{1}[s_{j,r}\geq0.5].
-\end{equation}
-Tied votes are assigned to PD by this fixed threshold, and a missing spiral is omitted from that participant's denominator. We compute the participant-level metric separately for each repetition and average the five scores, without averaging probabilities across repetitions. On the initial fixed-encoding SVM the three rules reach macro F1 0.6341, 0.6447 and 0.6488, and no pairwise contrast survives its Holm family. We therefore fix majority voting in advance wherever a single rule is required, and never select a task subset from outer-test performance.
-
-We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants. A draw preserves all available tasks and repeated predictions for each selected person. For a paired contrast, the same draw is applied to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 participant-wise swap patterns. It tests the difference between fixed sets of predictions, not a shuffled-label learning pipeline.
-
-For the initial analyses, Holm adjustment covers 36 encoding pairs; two separate 32-contrast task families for isolated signals and triplets against static; six classifier pairs at each endpoint; three SVM fusion-rule pairs; and eight task-specific CNN--SVM contrasts. Each follow-up section defines its additional families. Correction is within each declared family, not across all decisions in the broader research history. The intervals are pointwise, not simultaneous.
-
-Both resampling procedures leave models fixed. Intervals and tests describe conditional uncertainty in these predictions, without the full variability of retraining or selection.
-
-One outcome of these corrections can be stated once. Apart from the contrasts between the LPQ models and the scratch-trained CNN in Section~\ref{sec:classifiers}, no comparison reported in this paper survives its declared Holm family. We therefore give effect sizes with their unadjusted intervals throughout, and report an adjusted $p$ only where its value carries information, instead of restating the outcome of the correction at every comparison.
+Each task model predicts every held-out participant, and three rules combine these predictions into one decision per participant. \emph{Probability averaging} takes the mean of the calibrated PD probabilities across tasks. \emph{Weighted averaging} does the same but gives more weight to tasks whose models scored higher on validation participants drawn from the training set. \emph{Majority voting} assigns the class predicted by most tasks, with ties assigned to PD. A missing spiral recording is left out of that participant's decision, and because every task shares the participant folds, no model contributing to a participant's decision was trained on that participant. The metric is computed for each repetition and averaged over the five. In Experiment~1 the three rules gave similar macro F1 (0.6341, 0.6447 and 0.6488); Experiment~2 chooses the rule within training, and Experiment~3 fixes majority voting before fitting.

@@ -10,7 +10,7 @@ Let a recording contain samples
 \begin{equation}
  q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i),
 \end{equation}
-where $s_i$ indicates surface contact, $z_i$ is azimuth, $a_i$ is altitude and $p_i$ is pressure. The stored PaHaW columns place $y$ before $x$; the renderer restores their planar order.
+where $s_i$ indicates surface contact, $z_i$ is azimuth, $a_i$ is altitude and $p_i$ is pressure. The stored PaHaW columns place $y$ before $x$; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figure~\ref{fig:tasks} shows the tasks in writing orientation.
 
 The static image uses only position and the contact indicator. A segment between samples $i$ and $i+1$ is drawn if both samples are on the surface:
 \begin{equation}
@@ -25,12 +25,17 @@ The image retains form and stroke discontinuities, but fitting every record to i
 \subsection{Adding One Signal}
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{progressive_encoding.pdf}
-\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one control and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from static geometry to speed alone and two RGB triplets. The trajectory is unchanged; colour describes within-recording variation.}
+\setlength{\unitlength}{\textwidth}
+\begin{picture}(1,0.444)
+\put(0.025,0){\includegraphics[width=0.975\textwidth,trim=12bp 0 0 0,clip]{progressive_encoding.pdf}}
+\put(0.010,0.316){\makebox(0,0){\rotatebox{90}{\small Healthy example}}}
+\put(0.010,0.105){\makebox(0,0){\rotatebox{90}{\small PD example}}}
+\end{picture}
+\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; colour describes within-recording variation.}
 \label{fig:progressive}
 \end{figure*}
 \noindent
-Four measurements are candidates for colour: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone, always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
+Four measurements are candidates for colour: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
 
 For a surface segment, speed is calculated directly from the consecutive coordinates and timestamps:
 \begin{equation}
@@ -57,22 +62,36 @@ Each record is normalized independently, without a cohort-wide reference distrib
 
 \subsection{Combining Signals in RGB}
 \noindent
-We assign one scalar signal to each RGB channel and evaluate all four subsets of size three. Table~\ref{tab:encoding} gives the assignments, and Figure~\ref{fig:progressive} illustrates the progression. All combinations use the same geometry, background and rendering settings as the static and isolated-signal images.
+We assign one scalar signal to each RGB channel and evaluate all four subsets of size three (encodings 6--9). Table~\ref{tab:encoding} numbers the nine encodings used throughout the paper, and Figure~\ref{fig:progressive} illustrates the progression. All combinations use the same geometry, background and rendering settings as the static and single-signal images.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\textwidth]{rgb_semantics.pdf}
+\caption{The three channels of an $SAZ$ minimap (encoding~8), shown individually in grayscale and combined as RGB. Darker grey marks a lower channel value. Red stores log-speed, green altitude and blue circularly centred azimuth, each normalized within the recording.}
+\label{fig:rgb}
+\end{figure*}
+
+Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spiral, speed is lowest near the centre and rises along the outer turns, while altitude and azimuth vary over different portions of the trajectory; the RGB image places all three variations on the same stroke.
 
 \begin{table}[t]
 \centering\small
-\caption{Incremental colour encodings. A dash denotes a constant channel value of 30. $S$: speed; $P$: pressure; $A$: altitude; $Z$: azimuth.}
+\caption{The nine encodings, numbered as used throughout the paper. A dash denotes a constant channel value of 30. $S$: speed; $P$: pressure; $A$: altitude; $Z$: azimuth.}
 \label{tab:encoding}
-\begin{tabular}{lccc}
+\begin{tabular}{clccc}
 \toprule
-Encoding & Red & Green & Blue\\
+\# & Encoding & Red & Green & Blue\\
 \midrule
-Static & -- & -- & --\\
-One signal & $S$, $P$, $A$ or $Z$ & -- & --\\
-$SPA$ & $S$ & $P$ & $A$\\
-$SPZ$ & $S$ & $P$ & $Z$\\
-$SAZ$ & $S$ & $A$ & $Z$\\
-$PAZ$ & $P$ & $A$ & $Z$\\
+1 & Static & -- & -- & --\\
+\midrule
+2 & $S$ & $S$ & -- & --\\
+3 & $P$ & $P$ & -- & --\\
+4 & $A$ & $A$ & -- & --\\
+5 & $Z$ & $Z$ & -- & --\\
+\midrule
+6 & $SPA$ & $S$ & $P$ & $A$\\
+7 & $SPZ$ & $S$ & $P$ & $Z$\\
+8 & $SAZ$ & $S$ & $A$ & $Z$\\
+9 & $PAZ$ & $P$ & $A$ & $Z$\\
 \bottomrule
 \end{tabular}
 \end{table}
