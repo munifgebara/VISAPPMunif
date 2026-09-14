@@ -2,21 +2,21 @@
 \label{sec:encoding}
 
 \noindent
-To vary the information encoded in each minimap, we first reconstruct the visible trace. We then map individual pen signals to colour and combine them without changing the trajectory or rendering geometry.
+To vary the information encoded in each minimap, we first reconstruct the visible trace. We then map individual pen signals to color and combine them without changing the trajectory or rendering geometry.
 
 \subsection{The Visible Trace}
 \noindent
-Let $q_i, i=1,2,..., N$ a handwriting task recording containing $N$ samples or points:
+Let $q_i$, $i=1,\dots,N$, be the samples or points of a handwriting task recording:
 \begin{equation}
  q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i),
 \end{equation}
-where: $x_i$ and $x_i$ represent respective spatial coordinates at time $i$, $s_i$ indicates surface contact (i.e., "on-surface" or "in-air") , $z_i$ is the azimuth, $a_i$ represent the altitude and $p_i$ is pressure on the pen. The stored PaHaW columns place $y$ before $x$ coordinates; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figure~\ref{fig:tasks} shows the tasks in writing orientation.
+where $x_i$ and $y_i$ are the spatial coordinates of sample $i$, $t_i$ is its timestamp, $s_i$ indicates surface contact (i.e., ``on-surface'' or ``in-air''), $z_i$ is the azimuth, $a_i$ represents the altitude and $p_i$ is the pen pressure. The stored PaHaW columns place $y$ before $x$ coordinates; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figures~\ref{fig:tasks} and~\ref{fig:controls-examples} show the writing in its natural orientation.
 
 The static image uses only position and the contact indicator. A segment between samples $i$ and $i+1$ is drawn if both samples are on the surface:
 \begin{equation}
  \mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}.
 \end{equation}
-This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box that is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the colour experiments.
+This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box that is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
 
 The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding information about absolute micrographia.
 
@@ -29,11 +29,11 @@ The image retains form and stroke discontinuities, but fitting every record to i
 \put(0.010,0.322){\makebox(0,0){\rotatebox{90}{\small Healthy example}}}
 \put(0.010,0.105){\makebox(0,0){\rotatebox{90}{\small PD example}}}
 \end{picture}
-\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; colour describes within-recording variation.}
+\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; color describes within-recording variation.}
 \label{fig:progressive}
 \end{figure*}
 \noindent
-Four measurements are candidates for colour: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
+Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
 
 For a surface segment, speed is calculated directly from the consecutive coordinates and timestamps:
 \begin{equation}
@@ -52,11 +52,11 @@ Each transformed signal is scaled within the recording being rendered. Let $q_{.
 with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer channel value
 \begin{equation}
  c_i=\operatorname{round}(30+190u_i).
- \label{eq:colour}
+ \label{eq:color}
 \end{equation}
 The white background stays outside the semantic range. Antialiasing introduces intermediate intensities at boundaries, as in the static reconstruction.
 
-Each record is normalized independently, without a cohort-wide reference distribution or class labels. Colour therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centering also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
+Each record is normalized independently, without a cohort-wide reference distribution or class labels. Color therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centering also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
 
 \subsection{Combining Signals in RGB}
 \noindent
@@ -96,4 +96,4 @@ Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spir
 
 Because the descriptor applies the same histogram construction to each channel, permuting the RGB assignment only permutes three feature blocks, and standardization followed by a linear or radial-basis SVM is invariant to that permutation apart from numerical effects. Each triplet therefore needs one assignment rather than six for the SVM experiment. The argument does not extend to every image model, and the CNN receives one fixed assignment.
 
-Segments are drawn in acquisition order. A later segment can overwrite an earlier colour at a crossing, and the image has no separate layer for repeated visits to the same position. It preserves spatially located signal variation, not the complete sample sequence. Calling the result pseudodynamic reflects that distinction.
+Segments are drawn in acquisition order. A later segment can overwrite an earlier color at a crossing, and the image has no separate layer for repeated visits to the same position. It preserves spatially located signal variation, not the complete sample sequence. Calling the result pseudodynamic reflects that distinction.
