@@ -1,4 +1,4 @@
-\section{\uppercase{Building the Representation}}
+\section{\uppercase{Building the Minimap Representation}}
 \label{sec:encoding}
 
 \noindent
@@ -6,19 +6,17 @@ To vary the information encoded in each minimap, we first reconstruct the visibl
 
 \subsection{The Visible Trace}
 \noindent
-Let a recording contain samples
+Let $q_i, i=1,2,..., N$ a handwriting task recording containing $N$ samples or points:
 \begin{equation}
  q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i),
 \end{equation}
-where $s_i$ indicates surface contact, $z_i$ is azimuth, $a_i$ is altitude and $p_i$ is pressure. The stored PaHaW columns place $y$ before $x$; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figure~\ref{fig:tasks} shows the tasks in writing orientation.
+where: $x_i$ and $x_i$ represent respective spatial coordinates at time $i$, $s_i$ indicates surface contact (i.e., "on-surface" or "in-air") , $z_i$ is the azimuth, $a_i$ represent the altitude and $p_i$ is pressure on the pen. The stored PaHaW columns place $y$ before $x$ coordinates; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figure~\ref{fig:tasks} shows the tasks in writing orientation.
 
 The static image uses only position and the contact indicator. A segment between samples $i$ and $i+1$ is drawn if both samples are on the surface:
 \begin{equation}
  \mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}.
 \end{equation}
-This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box, so an in-air excursion cannot change the scale of the visible writing.
-
-The bounding box is centred on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the colour experiments.
+This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box that is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the colour experiments.
 
 The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding information about absolute micrographia.
 
@@ -44,7 +42,7 @@ For a surface segment, speed is calculated directly from the consecutive coordin
 \end{equation}
 We use $\log(1+v_i)$ in the tablet's native coordinate and time units. This compresses large values before the intensity mapping. Pressure and altitude use the arithmetic mean of the two endpoint measurements.
 
-Azimuth requires a circular reference. We convert the recorded tenths of a degree to radians and compute the mean direction over contact samples. Each angle is centred on that direction and wrapped into $[-\pi,\pi]$ before the endpoint average is taken. This reduces the effect of an arbitrary zero-degree boundary. It is a circular centring operation, not temporal unwrapping, and it does not remove every possible branch-cut artefact.
+Azimuth requires a circular reference. We convert the recorded tenths of a degree to radians and compute the mean direction over contact samples. Each angle is centered on that direction and wrapped into $[-\pi,\pi]$ before the endpoint average is taken. This reduces the effect of an arbitrary zero-degree boundary. It is a circular centering operation, not temporal unwrapping, and it does not remove every possible branch-cut artifact.
 
 Each transformed signal is scaled within the recording being rendered. Let $q_{.05}$ and $q_{.95}$ be its fifth and ninety-fifth percentiles over surface segments. The normalized value is
 \begin{equation}
@@ -58,7 +56,7 @@ with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer ch
 \end{equation}
 The white background stays outside the semantic range. Antialiasing introduces intermediate intensities at boundaries, as in the static reconstruction.
 
-Each record is normalized independently, without a cohort-wide reference distribution or class labels. Colour therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centring also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
+Each record is normalized independently, without a cohort-wide reference distribution or class labels. Colour therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centering also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
 
 \subsection{Combining Signals in RGB}
 \noindent
@@ -67,11 +65,11 @@ We assign one scalar signal to each RGB channel and evaluate all four subsets of
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{rgb_semantics.pdf}
-\caption{The three channels of an $SAZ$ minimap (encoding~8), shown individually in grayscale and combined as RGB. Darker grey marks a lower channel value. Red stores log-speed, green altitude and blue circularly centred azimuth, each normalized within the recording.}
+\caption{The three channels of an $SAZ$ minimap (encoding~8), shown individually in grayscale and combined as RGB. Darker gray marks a lower channel value. Red stores log-speed, green altitude and blue circularly centered azimuth, each normalized within the recording.}
 \label{fig:rgb}
 \end{figure*}
 
-Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spiral, speed is lowest near the centre and rises along the outer turns, while altitude and azimuth vary over different portions of the trajectory; the RGB image places all three variations on the same stroke.
+Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spiral, speed is lowest near the center and rises along the outer turns, while altitude and azimuth vary over different portions of the trajectory; the RGB image places all three variations on the same stroke.
 
 \begin{table}[t]
 \centering\small

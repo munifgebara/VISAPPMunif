@@ -2,7 +2,7 @@
 \label{sec:competitive}
 
 \noindent
-Experiment~3 asks whether rendering the pen dynamics as an image is worthwhile, by comparing the selected minimaps with two alternatives that each set aside one part of the proposal. The kinematic/pressure SVM represents the conventional use of the same pen signals on PaHaW \cite{Drotar2016}: it summarizes speed, acceleration, jerk and pressure as numerical attributes, without an image. The ResNet18 pipeline keeps the minimap images but replaces the handcrafted texture descriptor with pretrained convolutional features. Both are reimplemented under the same participant partitions and task voting as the minimaps, so the comparison concerns how the pen signals are represented rather than differences in evaluation protocol. The experiment uses a task set drawn from related work, which also shortens the handwriting protocol, and keeps all eight tasks as a secondary comparison.
+Experiment~3 asks whether rendering the pen dynamics as an image is worthwhile, by comparing the selected minimaps with two alternatives that each set aside one part of the proposal. The kinematic/pressure SVM represents the conventional use of the same pen signals on PaHaW \cite{Drotar2016}: it summarizes speed, acceleration, jerk and pressure as numerical attributes, without an image. The ResNet18 pipeline keeps the minimap images but replaces the handcrafted texture descriptor with pretrained convolutional features. Both are re-implemented under the same participant partitions and task voting as the minimaps, so the comparison concerns how the pen signals are represented rather than differences in evaluation protocol. The experiment uses a task set drawn from related work, which also shortens the handwriting protocol, and keeps all eight tasks as a secondary comparison.
 
 \subsection{Task Set and Evaluation Protocol}
 \noindent
@@ -14,13 +14,13 @@ The primary endpoint is participant-level macro F1 from majority voting over T2-
 
 \subsection{Kinematic and Pressure Attributes}
 \noindent
-The kinematic baseline describes each recording with 83 numbers computed directly from the pen signals, in native tablet units and without an image. Eleven are global: the acquisition time and its contact, in-air and transition parts, the fraction of time in contact, the numbers of contact and in-air strokes, their path lengths, and the width and height of the written area. The other 72 summarize twelve distributions: stroke duration, stroke length, speed, acceleration and jerk, each for contact and for in-air movement, together with contact pressure and its rate of change. Each distribution contributes its mean, standard deviation, median, 5th and 95th percentiles and interquartile range. The attribute families follow earlier kinematic and pressure studies on PaHaW \cite{Drotar2016}, but the descriptor is specified independently and fixed before fitting, without selecting attributes by their relation to the labels.
+The kinematic baseline describes each recording with 83 numbers computed directly from the pen signals, in native tablet units and without an image. Eleven are global: the acquisition time and its contact, in-air and transition parts, the fraction of time in contact, the numbers of contact and in-air strokes, their path lengths, and the width and height of the written area. The other 72 summarize twelve distributions: stroke duration, stroke length, speed, acceleration and jerk, each for contact and for in-air movement, together with contact pressure and its rate of change. Each distribution contributes its mean, standard deviation, median, 5th and 95th percentiles and inter-quartile range. The attribute families follow earlier kinematic and pressure studies on PaHaW \cite{Drotar2016}, but the descriptor is specified independently and fixed before fitting, without selecting attributes by their relation to the labels.
 
 Speed, acceleration and jerk are finite differences of pen position over the recorded timestamps, converted from milliseconds to seconds, with no smoothing and never across a pen lift. A label-free audit excluded 255 of the 1,364,022 intervals, those with a negative time step or a jump longer than 60s, none of them during contact; pauses of up to 60s are kept. When a recording has no in-air movement, or too few samples for a derivative, the corresponding summaries are set to zero, so every recording keeps all 83 attributes.
 
 \subsection{Pretrained Features from the Minimaps}
 \noindent
-ResNet18~\cite{He2016} supplies 512 features from its global average-pooling layer using the fixed torchvision \texttt{IMAGENET1K\_V1} weights. Images undergo the same foreground crop and square white padding as LPQ, followed by bilinear resizing to $224\times224$ and fixed ImageNet channel normalization. The backbone remains in evaluation mode, with convolutional weights and batch-normalization statistics frozen. There is no augmentation or end-to-end fine-tuning.
+ResNet18~\cite{He2016} supplies 512 features from its global average-pooling layer using the fixed TorchVision \texttt{IMAGENET1K\_V1} weights. Images undergo the same foreground crop and square white padding as LPQ, followed by bilinear resizing to $224\times224$ and fixed ImageNet channel normalization. The backbone remains in evaluation mode, with convolutional weights and batch-normalization statistics frozen. There is no augmentation or end-to-end fine-tuning.
 
 A class-balanced, $L_2$-regularized logistic head is fitted to standardized features. Its inner search evaluates seven values, $C\in\{10^{-4},10^{-3},10^{-2},10^{-1},1,10,100\}$, and selects among the same nine encodings as the LPQ pipeline. The comparison therefore concerns complete learning procedures with different feature families and search budgets.
 
@@ -54,7 +54,7 @@ The shorter protocol suits the minimap LPQ pipeline. Moving from eight tasks to 
 
 \begin{table*}[t]
 \centering\footnotesize
-\caption{Recording-level macro F1 per task for the four pipelines of Experiment~3 evaluated on all eight tasks, averaged over five repetitions. Bold marks the highest value for each task and for the mean.}
+\caption{Recording-level macro F1 per task for the four pipelines of Experiment~3 evaluated on all eight PaHaW tasks, averaged over five repetitions. Bold marks the highest value for each task and for the mean.}
 \label{tab:per-task}
 \setlength{\tabcolsep}{5pt}
 \begin{tabular}{@{}lrrrrrrrrr@{}}
