@@ -16,9 +16,9 @@ The static image uses only position and the contact indicator. A segment between
 \begin{equation}
  \mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}.
 \end{equation}
-This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box that is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
+This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box, which is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
 
-The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding information about absolute micrographia.
+The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding the absolute size information relevant to micrographia.
 
 \subsection{Adding One Signal}
 \begin{figure*}[t]
@@ -54,7 +54,7 @@ with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer ch
  c_i=\operatorname{round}(30+190u_i).
  \label{eq:color}
 \end{equation}
-The white background stays outside the semantic range. Antialiasing introduces intermediate intensities at boundaries, as in the static reconstruction.
+The white background stays outside the semantic range. Anti-aliasing introduces intermediate intensities at boundaries, as in the static reconstruction.
 
 Each record is normalized independently, without a cohort-wide reference distribution or class labels. Color therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centering also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
 

@@ -2,9 +2,9 @@
 \label{sec:introduction}
 \input{sections/fig_method}
 \noindent
-When writing in an online environment, a digitizing tablet records the pen trajectory together with its speed, pressure and inclination. Encoding these measurements as color adds information about how a pen trace was produced while keeping its recognizable shape, so that standard image descriptors and classifiers can use the dynamics directly.
+During online handwriting acquisition, a digitizing tablet records the pen trajectory together with its speed, pressure and inclination. Encoding these measurements as color adds information about how a pen trace was produced while keeping its recognizable shape, so that standard image descriptors and classifiers can use the dynamics directly.
 
-We aim to distinguish between Parkinson's disease (PD) and healthy participants (H) using PaHaW, a public annotated dataset containing online handwriting and drawing tasks from 75 participants \cite{Drotar2016}. Handwriting exposes aspects of fine motor behavior, and the relation between pen motion and diagnosis depends on the task performed, device used and participant characteristics \cite{Impedovo2019}.
+We aim to distinguish participants with Parkinson's disease (PD) from healthy participants (H) using PaHaW, a public annotated dataset containing online handwriting and drawing tasks from 75 participants \cite{Drotar2016}. Handwriting exposes aspects of fine motor behavior, and the relation between pen motion and diagnosis depends on the task performed, device used and participant characteristics \cite{Impedovo2019}.
 
 We propose \emph{pseudodynamic minimaps}, a new image representation corresponding to online handwriting task executions. In this representation, the planar coordinates determine the spatial location of each point in the image, while color encodes the dynamic writing information embedded in the strokes (e.g., handwriting pressure). The term minimap follows work that renders source code compactly as a visual signature \cite{Gebara2025}.
 
