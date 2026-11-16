@@ -8,7 +8,7 @@ To vary the information encoded in each minimap, we first reconstruct the visibl
 \noindent
 Let $q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i)$, $i=1,\dots,N$, be the samples of a handwriting task recording, where $x_i$ and $y_i$ are the spatial coordinates of sample $i$, $t_i$ is its timestamp, $s_i$ indicates surface contact, $z_i$ is the azimuth, $a_i$ the altitude and $p_i$ the pen pressure.
 
-The static image uses only position and the contact indicator: a segment between samples $i$ and $i+1$ is drawn if both are on the surface, that is, if $i\in\mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}$. This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next, and neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine the bounding box, which is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness, rendered at three times the target resolution and reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
+The static image uses only position and the contact indicator: a segment between samples $i$ and $i+1$ is drawn if both are on the surface, that is, if $i\in\mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}$. This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next, and neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine the bounding box, which is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness, rendered at three times the target resolution and reduced with Lanczos filtering. These settings remain fixed throughout.
 
 The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size: geometrically similar samples of different sizes produce the same image, discarding the absolute size information relevant to micrographia.
 
@@ -25,7 +25,7 @@ The image retains form and stroke discontinuities, but fitting every record to i
 \label{fig:progressive}
 \end{figure*}
 \noindent
-Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30, which avoids changing the channel assignment while screening the signals.
+Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30, so the channel assignment does not change while the signals are screened.
 
 For a surface segment, speed is calculated directly from the consecutive coordinates and timestamps:
 \begin{equation}

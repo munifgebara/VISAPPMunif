@@ -15,12 +15,12 @@ Standardization and support vector machine fitting \cite{Cortes1995} occur insid
 
 \subsection{Single Signals and RGB Combinations}
 \label{sec:classifiers}
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
-\includegraphics[width=0.58\textwidth]{encoding_heatmap.pdf}
+\includegraphics[width=\columnwidth]{encoding_heatmap.pdf}
 \caption{Recording-level macro F1 of Experiment~1 for every encoding and task, averaged over five repetitions. Rows follow Table~\ref{tab:encoding}. Color helps most on the spiral (T1), and the best encoding differs between tasks.}
 \label{fig:heatmap}
-\end{figure*}
+\end{figure}
 \noindent
 Experiment~1 starts from the static trace (encoding~1), which reaches a recording-level macro F1 of 0.5643 over the eight tasks. Altitude and azimuth are the most informative single signals, at 0.5718 and 0.5688, while speed reaches 0.5625 and pressure 0.5568. Combining three signals gives the best encodings: $SAZ$ (8) reaches 0.5752 and $PAZ$ (9) 0.5746, ahead of $SPA$ (6) at 0.5697 and $SPZ$ (7) at 0.5574. The near tie between $SAZ$ and $PAZ$ suggests that speed and pressure are largely interchangeable alongside the two pen angles, and the paired gain of $SAZ$ over the static trace is +0.0109 [$-$0.0146, 0.0370].
 

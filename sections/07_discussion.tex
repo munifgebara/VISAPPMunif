@@ -6,7 +6,7 @@ The three experiments indicate that the classifiers use the pen dynamics encoded
 
 The gains depend on the task (Figure~\ref{fig:heatmap}). One encoding chosen for all eight tasks averages gains on the spiral, T6 and T8 with losses on T2, T3, T5 and T7, which keeps its eight-task mean close to the static trace, whereas on the homogeneous letter patterns of T2--T4 the selected encoding gives the best participant-level decisions. Choosing encodings per task, rather than one for the whole protocol, is a direct way to exploit this dependence.
 
-The pipelines are also strong on different tasks: minimaps with LPQ lead the spiral, kinematic attributes lead T2, T3 and the sentence, and minimaps with ResNet18 lead T4--T7 and the eight-task mean. The representation therefore works with both a handcrafted texture descriptor and pretrained convolutional features, and the complementarity between the image and kinematic pipelines, each strongest on a different endpoint, motivates combining them.
+The pipelines are also strong on different endpoints rather than uniformly: minimaps with LPQ give the best participant-level decisions, while the kinematic attributes lead the recording-level mean and the vote-fraction AUC. The representation works with both a handcrafted texture descriptor and pretrained convolutional features, and this complementarity between the image and kinematic pipelines motivates combining them.
 
 \section{\uppercase{Conclusion}}
 \label{sec:conclusion}
