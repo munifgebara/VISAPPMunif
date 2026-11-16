@@ -4,9 +4,9 @@
 \noindent
 The three experiments indicate that the classifiers use the pen dynamics encoded in the minimaps. Training-only selection chose a dynamic encoding in 24 of 25 training sets in Experiment~2 even though ties favored the static trace, and displacing the signals within strokes lowered recording-level macro F1, most under joint permutation, so the position of each value along the trajectory matters and not only the colors present.
 
-The gains depend on the task (Figure~\ref{fig:heatmap}). One encoding chosen for all eight tasks averages gains on the spiral, T6 and T8 with losses on T2, T3, T5 and T7, which keeps its eight-task mean close to the static trace, whereas on the homogeneous letter patterns of T2--T4 it gives the best participant-level decisions. Choosing encodings per task is the direct way to exploit this dependence.
+The gains depend on the task (Figure~\ref{fig:heatmap}). One encoding chosen for all eight tasks averages gains on the spiral, T6 and T8 with losses on T2, T3, T5 and T7, which keeps its eight-task mean close to the static trace, whereas on the homogeneous letter patterns of T2--T4 it gives the best participant-level decisions.
 
-The pipelines are also strong on different endpoints rather than uniformly: minimaps with LPQ give the best participant-level decisions, while the kinematic attributes lead the recording-level mean and the vote-fraction AUC. The representation works with both a handcrafted texture descriptor and pretrained convolutional features, and this complementarity between the image and kinematic pipelines motivates combining them.
+The pipelines are strong on different endpoints rather than uniformly: minimaps with LPQ give the best participant-level decisions, while the kinematic attributes lead the recording-level mean and the vote-fraction AUC, which motivates combining them.
 
 These effects are small, and their size is not established. The margin of the minimap pipeline over the static trace on T2--T4 is 0.0307 [$-$0.0107, 0.0748], an interval that includes zero; no contrast between encodings in Experiment~1 survives multiplicity correction; and the one effect whose interval excludes zero, the joint-permutation control, reaches adjusted $p=0.1848$ within its family. A cohort of 75 participants cannot resolve differences of this order.
 
