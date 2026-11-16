@@ -7,77 +7,17 @@ The evaluation is organized as three experiments that share the same participant
 \subsection{The PaHaW Dataset}
 \label{sec:dataset}
 \noindent
-PaHaW was acquired with the First Department of Neurology at St.~Anne's University Hospital in Brno and includes 37 PD patients (19 men) and 38 healthy participants (20 men) \cite{Drotar2016}. All participants were native Czech speakers who wrote with their dominant right hand, and the patients were recorded under L-DOPA medication. They wrote with an inking pen on an empty paper template laid over a Wacom Intuos 4M tablet, which gave normal visual feedback, while a predefined template showed each task; neither the number of repetitions nor the writing height was imposed. The tablet recorded position, pressure and pen status during on-surface and in-air movement, at a reported rate of 100 samples per second, and the released recordings also contain altitude and azimuth. The dataset has since been used to study which handwritten elements carry Parkinsonian alterations \cite{Casademunt2024}.
+PaHaW includes 37 PD patients (19 men) and 38 healthy participants (20 men), all native Czech speakers writing with their dominant right hand, with the patients recorded under L-DOPA medication \cite{Drotar2016}. They wrote with an inking pen on an empty paper template laid over a Wacom Intuos 4M tablet, which recorded position, pressure and pen status during on-surface and in-air movement at 100 samples per second; the released recordings also contain altitude and azimuth. The dataset has since been used to study which handwritten elements carry Parkinsonian alterations \cite{Casademunt2024}.
 
-\begin{figure}[t]
-\centering\footnotesize
-\setlength{\tabcolsep}{2pt}
-\begin{tabular}{@{}cc@{}}
-\includegraphics[width=0.47\columnwidth]{tasks/T1.png} & \includegraphics[width=0.47\columnwidth]{tasks/T2.png}\\
-T1 Spiral & T2 \textit{l}\\[3pt]
-\includegraphics[width=0.47\columnwidth]{tasks/T3.png} & \includegraphics[width=0.47\columnwidth]{tasks/T4.png}\\
-T3 \textit{le} & T4 \textit{les}\\[3pt]
-\includegraphics[width=0.47\columnwidth]{tasks/T5.png} & \includegraphics[width=0.47\columnwidth]{tasks/T6.png}\\
-T5 \textit{lektorka} & T6 \textit{porovnat}\\[3pt]
-\includegraphics[width=0.47\columnwidth]{tasks/T7.png} & \includegraphics[width=0.47\columnwidth]{tasks/T8.png}\\
-T7 \textit{nepopadnout} & T8 Sentence\\
-\end{tabular}
-\caption{The eight PaHaW tasks written by one healthy participant, shown as static traces in writing orientation. Each recording is scaled separately, so absolute writing size is not preserved.}
-\label{fig:tasks}
-\end{figure}
-
-The eight tasks progress from drawing to writing (Table~\ref{tab:tasks} and Figure~\ref{fig:tasks}). T1 is an Archimedean spiral drawn from the inside out. T2--T4 repeat the cursive letter \textit{l}, the bigram \textit{le} and the trigram \textit{les}. T5--T7 repeat the Czech words \textit{lektorka}, \textit{porovnat} and \textit{nepopadnout}, which can be written without lifting the pen, and T8 is the sentence \textit{Tramvaj dnes u\v{z} nepojede}, which adds in-air transitions between words \cite{Drotar2016}. Our local copy contains 597 recordings from the 75 participants: three spiral recordings are absent, and every other task has one recording per participant. We retain all available records and do not interpret missing files as quality exclusions.
-
-\begin{table}[t]
-\centering\small
-\caption{Task inventory. T1 contains 36 PD and 36 H records; each other task contains 37 PD and 38 H records.}
-\label{tab:tasks}
-\begin{tabular}{clr}
-\toprule
-ID & Task & Records\\
-\midrule
-T1 & Archimedean spiral & 72\\
-T2 & Repeated \textit{l} & 75\\
-T3 & Repeated \textit{le} & 75\\
-T4 & Repeated \textit{les} & 75\\
-T5 & Repeated \textit{lektorka} & 75\\
-T6 & Repeated \textit{porovnat} & 75\\
-T7 & Repeated \textit{nepopadnout} & 75\\
-T8 & \textit{Tramvaj dnes u\v{z} nepojede.} & 75\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-An input audit checked file counts, sample counts, finite values and timestamp increments. Five files declare a sample count different from the rows present, and the renderer uses the rows available. We calculate speed from the recorded timestamps rather than an assumed sampling interval. Of the 253 negative timestamp increments, none falls inside a contact segment: all 1,065,788 segments with contact at both endpoints increase in time, so Equation~\ref{eq:speed} requires no interpolation. No normalization range was degenerate.
+The eight tasks progress from drawing to writing. T1 is an Archimedean spiral drawn from the inside out; T2--T4 repeat the cursive letter \textit{l}, the bigram \textit{le} and the trigram \textit{les}; T5--T7 repeat the Czech words \textit{lektorka}, \textit{porovnat} and \textit{nepopadnout}, which can be written without lifting the pen; and T8 is the sentence \textit{Tramvaj dnes u\v{z} nepojede}, which adds in-air transitions between words \cite{Drotar2016}. Our local copy contains 597 recordings: the spiral has 72 (36 PD, 36 H) because three are absent, and every other task has one recording per participant (37 PD, 38 H). We calculate speed from the recorded timestamps rather than an assumed sampling interval; every negative timestamp increment falls outside a contact segment, so Equation~\ref{eq:speed} requires no interpolation.
 
 The participant is the independent observational unit; tasks and alternative renderings do not enlarge the cohort. Mean age is 69.32 years in PD and 62.42 in H. Age and clinical fields are excluded from classifier inputs, but handwriting may still reflect this difference.
 
-\subsection{A Common Partition for Every Task}
-\noindent
-We construct stratified folds from one row per participant, then propagate the assignments to every task and rendering. Five repetitions of five outer folds produce a test prediction for every available record in each repetition, and all tasks from a participant fall in the same outer fold.
-
-Within each outer training partition, three participant-separated inner folds choose the model hyperparameters. Feature standardization is fitted on the corresponding training portion, never on its validation or test participants. The selected model is refitted on all outer training participants and evaluated once on the outer test set. Rendering is independent per record, so it learns nothing from other records before splitting.
-
-In Experiment~1, each fixed encoding and classifier yields 200 outer models and 2,985 outer-test predictions, which are repeated predictions of 597 records from 75 participants. Experiment~1 chooses its leading encoding from these outer-test scores for the classifier comparison, so Experiments~2 and~3 repeat the encoding choice with training participants only, using three inner folds common across tasks.
-
-\subsection{Metrics and Statistical Analysis}
-\noindent
-Macro F1 gives equal weight to the two diagnosis classes:
-\begin{equation}
- F_{\mathrm{macro}}=\frac{F_{1,\mathrm{H}}+F_{1,\mathrm{PD}}}{2}.
-\end{equation}
-Each recording receives its own prediction. For each task and repetition we pool the five outer-test folds and compute this \emph{recording-level} macro F1 once, then average the five repetitions. Averaging over the eight tasks gives the recording-level endpoint used to rank encodings,
-\begin{equation}
- \overline F_{\mathrm{rec}}=\frac{1}{8\cdot5}\sum_{t=1}^{8}\sum_{r=1}^{5}F_{t,r},
- \label{eq:taskmetric}
-\end{equation}
-and Experiment~3 uses the corresponding mean over T2--T4. The \emph{participant-level} endpoint combines the tasks into one decision per participant (Section~\ref{sec:fusion}). We also report accuracy, balanced accuracy, PD sensitivity, H specificity and ROC AUC.
-
-We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants; each draw keeps all of a participant's tasks and repeated predictions, and a paired contrast applies the same draw to both methods. The randomization test exchanges method predictions per participant, jointly across tasks and repetitions, using 10,000 swap patterns. Both procedures keep the fitted models fixed, so they describe uncertainty in these predictions without the variability of retraining.
-
-Holm adjustment \cite{Holm1979} is applied within declared families. In Experiment~1 these are the 36 encoding pairs, the per-task contrasts of single signals and of triplets against static (32 each), the six classifier pairs at each endpoint, the three fusion-rule pairs and eight per-task CNN--SVM contrasts; Experiments~2 and~3 declare their own families. With 75 participants, the advantage of the LPQ models over the scratch-trained CNN (Section~\ref{sec:classifiers}) is the difference that survives its family. We therefore report effect sizes with their 95\% intervals throughout and give adjusted $p$ values where they are informative.
-
-\subsection{One Decision per Participant}
+\subsection{Partitions, Metrics and Fusion}
 \label{sec:fusion}
 \noindent
-Each task model predicts every held-out participant, and three rules combine these predictions into one decision per participant. \emph{Probability averaging} takes the mean of the calibrated PD probabilities across tasks. \emph{Weighted averaging} does the same but gives more weight to tasks whose models scored higher on validation participants drawn from the training set. \emph{Majority voting} assigns the class predicted by most tasks, with ties assigned to PD. A missing spiral recording is left out of that participant's decision, and because every task shares the participant folds, no model contributing to a participant's decision was trained on that participant. The metric is computed for each repetition and averaged over the five. In Experiment~1 the three rules gave similar macro F1 (0.6341, 0.6447 and 0.6488); Experiment~2 chooses the rule within training, and Experiment~3 fixes majority voting before fitting.
+We construct stratified folds from one row per participant and propagate the assignments to every task and rendering, so that all tasks from a participant fall in the same outer fold. Five repetitions of five outer folds produce a test prediction for every available record in each repetition. Within each outer training partition, three participant-separated inner folds choose the model hyperparameters; standardization is fitted on the corresponding training portion, never on its validation or test participants, and the selected model is refitted on all outer training participants and evaluated once on the outer test set. Rendering is independent per record, so it learns nothing from other records before splitting. Experiment~1 chooses its leading encoding from these outer-test scores for the classifier comparison, so Experiments~2 and~3 repeat the encoding choice with training participants only.
+
+Macro F1, the unweighted mean of the two per-class F1 scores, gives equal weight to the two diagnoses. For each task and repetition we pool the five outer-test folds and compute this \emph{recording-level} macro F1 once, then average the five repetitions; the unweighted mean over the eight tasks is the endpoint used to rank encodings, and Experiment~3 uses the corresponding mean over T2--T4. The \emph{participant-level} endpoint combines the tasks into one decision per participant by one of three rules: probability averaging over the calibrated PD probabilities, weighted averaging, which favors tasks whose models scored higher on validation participants, and majority voting, with ties assigned to PD. A missing spiral recording is left out of that participant's decision, and because every task shares the participant folds, no model contributing to a participant's decision was trained on that participant. In Experiment~1 the three rules gave similar macro F1 (0.6341, 0.6447 and 0.6488); Experiment~2 chooses the rule within training, and Experiment~3 fixes majority voting before fitting. We also report accuracy, balanced accuracy, PD sensitivity, H specificity and ROC AUC.
+
+We calculate 95\% percentile confidence intervals from 10,000 diagnosis-stratified bootstrap draws of participants, each draw keeping all of a participant's tasks and repeated predictions and a paired contrast applying the same draw to both methods, and the randomization test exchanges method predictions per participant with 10,000 swap patterns, both with the fitted models held fixed. Holm adjustment \cite{Holm1979} is applied within families declared separately for each experiment, and with 75 participants only one difference survives its family (Section~\ref{sec:descriptor}), so we report effect sizes with their 95\% intervals throughout.

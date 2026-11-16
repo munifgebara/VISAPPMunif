@@ -6,70 +6,44 @@ To vary the information encoded in each minimap, we first reconstruct the visibl
 
 \subsection{The Visible Trace}
 \noindent
-Let $q_i$, $i=1,\dots,N$, be the samples or points of a handwriting task recording:
-\begin{equation}
- q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i),
-\end{equation}
-where $x_i$ and $y_i$ are the spatial coordinates of sample $i$, $t_i$ is its timestamp, $s_i$ indicates surface contact (i.e., ``on-surface'' or ``in-air''), $z_i$ is the azimuth, $a_i$ represents the altitude and $p_i$ is the pen pressure. The stored PaHaW columns place $y$ before $x$ coordinates; the renderer restores their planar order. Image rows follow the tablet's vertical coordinate without inversion, so every minimap is a vertically mirrored view of the writing; the transformation is identical for all records and both classes, and Figures~\ref{fig:tasks} and~\ref{fig:controls-examples} show the writing in its natural orientation.
+Let $q_i=(x_i,y_i,t_i,s_i,z_i,a_i,p_i)$, $i=1,\dots,N$, be the samples of a handwriting task recording, where $x_i$ and $y_i$ are the spatial coordinates of sample $i$, $t_i$ is its timestamp, $s_i$ indicates surface contact, $z_i$ is the azimuth, $a_i$ the altitude and $p_i$ the pen pressure.
 
-The static image uses only position and the contact indicator. A segment between samples $i$ and $i+1$ is drawn if both samples are on the surface:
-\begin{equation}
- \mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}.
-\end{equation}
-This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next. Neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine its bounding box, which is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness. Rendering takes place at three times the target resolution and is reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
+The static image uses only position and the contact indicator: a segment between samples $i$ and $i+1$ is drawn if both are on the surface, that is, if $i\in\mathcal{S}=\{i:s_i=1\ \mathrm{and}\ s_{i+1}=1\}$. This preserves pen lifts as gaps instead of joining the end of one stroke to the beginning of the next, and neither the in-air trajectory nor the duration of a lift appears in the image. Contact points alone determine the bounding box, which is centered on a $512\times512$ white canvas with a 20-pixel margin, using one scale factor for both axes. Segments are drawn in RGB $(30,30,30)$ with constant 4-pixel thickness, rendered at three times the target resolution and reduced with Lanczos filtering. These settings remain fixed throughout the color experiments.
 
-The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size. Geometrically similar samples of different sizes can produce the same image, discarding the absolute size information relevant to micrographia.
+The image retains form and stroke discontinuities, but fitting every record to its own canvas removes absolute size: geometrically similar samples of different sizes produce the same image, discarding the absolute size information relevant to micrographia.
 
 \subsection{Adding One Signal}
 \begin{figure*}[t]
 \centering
 \setlength{\unitlength}{\textwidth}
-\begin{picture}(1,0.444)
-\put(0.025,0){\includegraphics[width=0.975\textwidth]{progressive_encoding_nolabels.png}}
-\put(0.010,0.322){\makebox(0,0){\rotatebox{90}{\small Healthy example}}}
-\put(0.010,0.105){\makebox(0,0){\rotatebox{90}{\small PD example}}}
+\begin{picture}(1,0.40)
+\put(0.06,0){\includegraphics[width=0.88\textwidth]{progressive_encoding_nolabels.png}}
+\put(0.030,0.290){\makebox(0,0){\rotatebox{90}{\small Healthy example}}}
+\put(0.030,0.095){\makebox(0,0){\rotatebox{90}{\small PD example}}}
 \end{picture}
-\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule without reference to prediction quality. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; color describes within-recording variation.}
+\caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; color describes within-recording variation.}
 \label{fig:progressive}
 \end{figure*}
 \noindent
-Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30. This avoids changing the channel assignment while screening the signals.
+Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30, which avoids changing the channel assignment while screening the signals.
 
 For a surface segment, speed is calculated directly from the consecutive coordinates and timestamps:
 \begin{equation}
  v_i=\frac{\sqrt{(x_{i+1}-x_i)^2+(y_{i+1}-y_i)^2}}{t_{i+1}-t_i}.
  \label{eq:speed}
 \end{equation}
-We use $\log(1+v_i)$ in the tablet's native coordinate and time units. This compresses large values before the intensity mapping. Pressure and altitude use the arithmetic mean of the two endpoint measurements.
+We use $\log(1+v_i)$ in the tablet's native coordinate and time units, which compresses large values before the intensity mapping; pressure and altitude use the arithmetic mean of the two endpoint measurements. Azimuth requires a circular reference: we convert the recorded tenths of a degree to radians, compute the mean direction over contact samples, and center each angle on that direction, wrapping it into $[-\pi,\pi]$ before the endpoint average is taken. This reduces the effect of an arbitrary zero-degree boundary; it is a circular centering operation, not temporal unwrapping.
 
-Azimuth requires a circular reference. We convert the recorded tenths of a degree to radians and compute the mean direction over contact samples. Each angle is centered on that direction and wrapped into $[-\pi,\pi]$ before the endpoint average is taken. This reduces the effect of an arbitrary zero-degree boundary. It is a circular centering operation, not temporal unwrapping, and it does not remove every possible branch-cut artifact.
-
-Each transformed signal is scaled within the recording being rendered. Let $q_{.05}$ and $q_{.95}$ be its fifth and ninety-fifth percentiles over surface segments. The normalized value is
+Each transformed signal $f_i$ is scaled within the recording being rendered. Let $q_{.05}$ and $q_{.95}$ be its fifth and ninety-fifth percentiles over surface segments. The channel value is
 \begin{equation}
- u_i=\operatorname{clip}\left(\frac{f_i-q_{.05}}{q_{.95}-q_{.05}},0,1\right),
- \label{eq:normalization}
-\end{equation}
-with $u_i=0.5$ if the percentile range is degenerate. We map it to an integer channel value
-\begin{equation}
- c_i=\operatorname{round}(30+190u_i).
+ c_i=\operatorname{round}\!\left(30+190\operatorname{clip}\!\left(\frac{f_i-q_{.05}}{q_{.95}-q_{.05}},0,1\right)\right),
  \label{eq:color}
 \end{equation}
-The white background stays outside the semantic range. Anti-aliasing introduces intermediate intensities at boundaries, as in the static reconstruction.
-
-Each record is normalized independently, without a cohort-wide reference distribution or class labels. Color therefore describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure. Circular centering also removes absolute pen orientation. These quantities remain available to methods that use the physical measurements directly.
+with the clipped term set to $0.5$ if the percentile range is degenerate. The white background stays outside the semantic range. Each record is normalized independently, without a cohort-wide reference distribution or class labels, so color describes relative variation within a recording: the same red value in two images need not represent the same absolute speed or pressure, and circular centering likewise removes absolute pen orientation.
 
 \subsection{Combining Signals in RGB}
 \noindent
-We assign one scalar signal to each RGB channel and evaluate all four subsets of size three (encodings 6--9). Table~\ref{tab:encoding} numbers the nine encodings used throughout the paper, and Figure~\ref{fig:progressive} illustrates the progression. All combinations use the same geometry, background and rendering settings as the static and single-signal images.
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.9\textwidth]{rgb_semantics.pdf}
-\caption{The three channels of an $SAZ$ minimap (encoding~8), shown individually in grayscale and combined as RGB. Darker gray marks a lower channel value. Red stores log-speed, green altitude and blue circularly centered azimuth, each normalized within the recording.}
-\label{fig:rgb}
-\end{figure*}
-
-Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spiral, speed is lowest near the center and rises along the outer turns, while altitude and azimuth vary over different portions of the trajectory; the RGB image places all three variations on the same stroke.
+We assign one scalar signal to each RGB channel and evaluate all four subsets of size three (encodings 6--9). Table~\ref{tab:encoding} numbers the nine encodings used throughout the paper, and Figure~\ref{fig:progressive} illustrates the progression; all combinations use the same geometry, background and rendering settings as the static and single-signal images. In an $SAZ$ spiral, speed is lowest near the center and rises along the outer turns, while altitude and azimuth vary over different portions of the trajectory, so the RGB image places all three variations on the same stroke.
 
 \begin{table}[t]
 \centering\small
@@ -94,6 +68,4 @@ Figure~\ref{fig:rgb} decomposes an $SAZ$ minimap into its channels. In this spir
 \end{tabular}
 \end{table}
 
-Because the descriptor applies the same histogram construction to each channel, permuting the RGB assignment only permutes three feature blocks, and standardization followed by a linear or radial-basis SVM is invariant to that permutation apart from numerical effects. Each triplet therefore needs one assignment rather than six for the SVM experiment. The argument does not extend to every image model, and the CNN receives one fixed assignment.
-
-Segments are drawn in acquisition order. A later segment can overwrite an earlier color at a crossing, and the image has no separate layer for repeated visits to the same position. It preserves spatially located signal variation, not the complete sample sequence. Calling the result pseudodynamic reflects that distinction.
+Because the descriptor applies the same histogram construction to each channel, permuting the RGB assignment only permutes three feature blocks, to which the SVM is invariant apart from numerical effects, so each triplet needs one assignment rather than six. Segments are drawn in acquisition order, so a later segment can overwrite an earlier color at a crossing: the image preserves spatially located signal variation, not the complete sample sequence, and calling the result pseudodynamic reflects that distinction.
