@@ -13,17 +13,17 @@ The static image uses only position and the contact indicator: a segment between
 Fitting every record to its own canvas removes absolute size: geometrically similar samples of different sizes produce the same image.
 
 \subsection{Adding One Signal}
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
-\setlength{\unitlength}{\textwidth}
-\begin{picture}(1,0.364)
-\put(0.10,0){\includegraphics[width=0.80\textwidth]{progressive_encoding_nolabels.png}}
-\put(0.065,0.264){\makebox(0,0){\rotatebox{90}{\small Healthy example}}}
-\put(0.065,0.086){\makebox(0,0){\rotatebox{90}{\small PD example}}}
+\setlength{\unitlength}{\columnwidth}
+\begin{picture}(1,0.401)
+\put(0.12,0){\includegraphics[width=0.88\columnwidth]{progressive_encoding_nolabels.png}}
+\put(0.065,0.301){\makebox(0,0){\rotatebox{90}{\footnotesize Healthy}}}
+\put(0.065,0.100){\makebox(0,0){\rotatebox{90}{\footnotesize PD}}}
 \end{picture}
 \caption{Building a pseudodynamic minimap from the same spiral trace. Rows show one healthy and one PD example, selected by a fixed identifier rule. Columns move from the static trace (encoding~1 in Table~\ref{tab:encoding}) to speed alone (2) and two RGB triplets, $SAZ$ (8) and $PAZ$ (9). The trajectory is unchanged; color describes within-recording variation.}
 \label{fig:progressive}
-\end{figure*}
+\end{figure}
 \noindent
 Four measurements are candidates for color: speed ($S$), pressure ($P$), altitude ($A$) and azimuth ($Z$). Altitude describes pen inclination relative to the surface, while azimuth describes its orientation in the tablet plane. We first encode each signal alone (encodings 2--5 in Table~\ref{tab:encoding}), always in the red channel, with green and blue fixed at 30.
 
