@@ -4,7 +4,7 @@
 \noindent
 The three experiments indicate that the classifiers use the pen dynamics encoded in the minimaps. Training-only selection chose a dynamic encoding in 24 of 25 training sets in Experiment~2 even though ties favored the static trace, and displacing the signals within strokes lowered recording-level macro F1, most under joint permutation, so the position of each value along the trajectory matters and not only the colors present.
 
-The gains depend on the task (Figure~\ref{fig:heatmap}). One encoding chosen for all eight tasks averages gains on the spiral, T6 and T8 with losses on T2, T3, T5 and T7, which keeps its eight-task mean close to the static trace, whereas on the homogeneous letter patterns of T2--T4 it gives the best participant-level decisions.
+The gains depend on the task (Table~\ref{tab:heatmap}). One encoding chosen for all eight tasks averages gains on the spiral, T6 and T8 with losses on T2, T3, T5 and T7, which keeps its eight-task mean close to the static trace, whereas on the homogeneous letter patterns of T2--T4 it gives the best participant-level decisions.
 
 The pipelines are strong on different endpoints rather than uniformly: minimaps with LPQ give the best participant-level decisions, while the kinematic attributes lead the recording-level mean and the vote-fraction AUC, which motivates combining them.
 

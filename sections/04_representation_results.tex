@@ -14,16 +14,33 @@ Standardization and support vector machine fitting \cite{Cortes1995} occur insid
 
 \subsection{Single Signals and RGB Combinations}
 \label{sec:classifiers}
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{encoding_heatmap.pdf}
-\caption{Recording-level macro F1 of Experiment~1 for every encoding and task, averaged over five repetitions. Rows follow Table~\ref{tab:encoding}. Color helps most on the spiral (T1), and the best encoding differs between tasks.}
-\label{fig:heatmap}
-\end{figure}
+\begin{table}[t]
+\centering\small
+\caption{Recording-level macro F1 of Experiment~1 for every encoding and task, averaged over five repetitions. Rows follow Table~\ref{tab:encoding} and leading zeros are omitted. Bold marks the best encoding for each task. Encoding the dynamics helps most on the spiral (T1), and the best encoding differs between tasks.}
+\label{tab:heatmap}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+Encoding & T1 & T2 & T3 & T4 & T5 & T6 & T7 & T8\\
+\midrule
+Static & .591 & .568 & .587 & .650 & .504 & .547 & .511 & .556\\
+\midrule
+$S$ & .615 & .542 & .573 & .599 & .483 & .568 & .544 & .576\\
+$P$ & .599 & .563 & .593 & .638 & .512 & .527 & .497 & .525\\
+$A$ & .629 & .534 & \textbf{.594} & \textbf{.655} & .506 & .573 & .530 & .554\\
+$Z$ & .580 & .567 & .559 & .607 & .499 & \textbf{.612} & \textbf{.562} & .564\\
+\midrule
+$SPA$ & \textbf{.685} & .570 & .544 & .639 & .497 & .558 & .488 & \textbf{.577}\\
+$SPZ$ & .641 & .579 & .561 & .631 & .457 & .557 & .474 & .560\\
+$SAZ$ & .672 & .506 & .580 & .638 & .473 & .600 & .556 & .576\\
+$PAZ$ & .619 & \textbf{.589} & .577 & .631 & \textbf{.528} & .573 & .521 & .559\\
+\bottomrule
+\end{tabular}
+\end{table}
 \noindent
 Experiment~1 starts from the static trace (encoding~1), which reaches a recording-level macro F1 of 0.5643 over the eight tasks. Altitude and azimuth are the most informative single signals, at 0.5718 and 0.5688, while speed reaches 0.5625 and pressure 0.5568. Combining three signals gives the best encodings: $SAZ$ (8) reaches 0.5752 and $PAZ$ (9) 0.5746, ahead of $SPA$ (6) at 0.5697 and $SPZ$ (7) at 0.5574, and the paired gain of $SAZ$ over the static trace is +0.0109 [$-$0.0146, 0.0370].
 
-These averages hide a strong dependence on the task (Figure~\ref{fig:heatmap}). Every encoding except azimuth alone raises the spiral above the static trace, where $SAZ$ adds 0.0802 and $SPA$ reaches 0.685 against 0.591; azimuth lifts T6 from 0.547 to 0.612; $SAZ$ lowers T2 by 0.0612; and T5 remains difficult for every encoding. Because $SAZ$ was chosen as the leading encoding from outer-test scores, Experiment~2 repeats the choice with training participants only.
+These averages hide a strong dependence on the task (Table~\ref{tab:heatmap}). Every encoding except azimuth alone raises the spiral above the static trace, where $SAZ$ adds 0.0802 and $SPA$ reaches 0.685 against 0.591; azimuth lifts T6 from 0.547 to 0.612; $SAZ$ lowers T2 by 0.0612; and T5 remains difficult for every encoding. Because $SAZ$ was chosen as the leading encoding from outer-test scores, Experiment~2 repeats the choice with training participants only.
 
 \subsection{Choosing the Encoding Within Training}
 \label{sec:nested-followup}
